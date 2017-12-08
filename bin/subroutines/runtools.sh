@@ -103,7 +103,7 @@ echo "--parp Filter artificial chromosome chrPARP out before visualisation"
 echo "--stringent enforces additional stringency - forces all reported subfragments to be unique"
 echo "--stranded To replicate the strand-specific (i.e. wrong) duplicate filter of CB3a/CC3 and CB4a/CC4"
 echo "--umi Run contains UMI indices - alter the duplicate filter accordingly : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this"
-echo "--wobble_bin_width Wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base."
+echo "--wobble Wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base."
 
 
 runDir=$( pwd )

@@ -107,7 +107,7 @@ use Pod::Usage;
  -CCversion	CS3 or CS4 or CS5 (will the reads be duplicate filtered CC3 or CC4 or CC5 style ? )
  -stranded	To replicate the strand-specific (i.e. wrong) duplicate filter of CB3a/CC3 and CB4a/CC4
  -umi       	Run contains UMI indices - alter the duplicate filter accordingly : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this
- -wobble_bin_width 1    Wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
+ -wobble 1    Wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
 
  
 =head1 AUTHOR
