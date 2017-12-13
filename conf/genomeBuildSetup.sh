@@ -106,9 +106,6 @@ BOWTIE1[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP"
 
 # When adding new genomes : remember to update the "supportedGenomes" list above as well !
 
-# To add NEW genomes (in addition to above) to the list - modify also the subroutine
-# setBOWTIEgenomeSizes() in the main script CCseqBasic4.sh
-
 # #############################################################################
 # WHOLE GENOME FASTA FILES
 # #############################################################################
@@ -176,10 +173,6 @@ UCSC[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP_sizes.txt"
 # The pipeline checks that at least one index file exists, before proceeding with the analysis
 
 # When adding new genomes : remember to update the "supportedGenomes" list above (top of this file) as well !
-
-# To add NEW genomes (in addition to above) to the list - modify also the subroutine
-# setUCSCgenomeSizes() in the /bin/genomeSetters.sh script
-
 
 
 # #############################################################################
