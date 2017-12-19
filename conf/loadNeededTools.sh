@@ -108,19 +108,17 @@ echo
 # Note !!!!!
 # - the script does not check already existing conflicting programs within $PATH (which may contain executable with same names as these)
 
-export PATH=$PATH:/package/samtools/1.1/bin/samtools
-export PATH=$PATH:/package/bowtie/1.1.2/bin/bowtie
-
-export PATH=$PATH:/package/bedtools/2.17.0/bin/bedtools
-export PATH=$PATH:/package/ucsctools/1.0/bin
-export PATH=$PATH:/package/flash/1.2.8/bin/flash
-export PATH=$PATH:/package/fastqc/0.10.1/bin/fastqc
-export PATH=$PATH:/package/trim_galore/0.3.1/bin/trim_galore
-export PATH=$PATH:/package/cutadapt/1.2.1/bin/cutadapt
-export PATH=$PATH:/package/perl/5.18.1/bin/perl
-
-export PATH=$PATH:/package/blat/35/bin/blat
-export PATH=$PATH:/package/python/2.7.5/bin/python
+export PATH=$PATH:/package/samtools/1.1/bin
+export PATH=$PATH:/package/bowtie/1.1.2/bin
+export PATH=$PATH:/package/bowtie2/2.1.0/bin
+export PATH=$PATH:/package/bedtools/2.17.0/bin
+export PATH=$PATH:/package/flash/1.2.8/bin
+export PATH=$PATH:/package/fastqc/0.10.1/bin
+export PATH=$PATH:/package/trim_galore/0.3.1/bin
+export PATH=$PATH:/package/cutadapt/1.2.1/bin
+export PATH=$PATH:/package/perl/5.18.1/bin
+export PATH=$PATH:/package/blat/35/bin
+export PATH=$PATH:/package/python/2.7.5/bin
 
 # See notes of SUPPORTED VERSIONS above !
 
@@ -137,6 +135,12 @@ echo "Tools should already be available in PATH - not loading anything .."
 echo
 
 fi
+
+# #########################################
+
+# UCSCtools are taken from install directory, in any case :
+
+export PATH=$PATH:/${confFolder}/ucsctools
 
 }
 
