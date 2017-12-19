@@ -65,9 +65,6 @@ module load bowtie/1.1.2
 module load bedtools/2.17.0
 # Supports bedtools versions 2.1* . Does not support bedtools versions 2.2*
 
-module load ucsctools/1.0
-# Supports ucsctools versions 1.* . Not known if supports also ucsctools versions 2.* (most probably not)
-
 module load flash/1.2.8
 # Not known if would support other flash versions. Most probably will support.
 
