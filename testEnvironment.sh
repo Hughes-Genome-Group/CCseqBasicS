@@ -252,6 +252,15 @@ scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 # ls ${mainScriptFolder}/hindIIIcutReads4.pl
 # scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
+echo "UCSC downloaded tools for visualisation (downloaded 06May2014 from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/ ) :"
+echo
+ls ${confFolder}/ucsctools/bedToBigBed
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${confFolder}/ucsctools/wigToBigWig
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+echo
+sleep 3
+
 echo
 sleep 3
 echo "Helper subroutines :"
@@ -363,6 +372,9 @@ echo '    |   `-- hg18.bed hg19.bed mm10.bed mm9.bed'
 echo '    |-- genomeBuildSetup.sh'
 echo '    |-- loadNeededTools.sh'
 echo '    |-- serverAddressAndPublicDiskSetup.sh'
+echo '    |-- ucsctools'
+echo '    |   |-- wigToBigWig '
+echo '    |   `-- bedToBigBed'
 echo '    `-- UCSCgenomeSizes'
 echo '        |-- danRer10/7.chrom.sizes dm3.chrom.sizes galGal4.chrom.sizes'
 echo '        `-- hg18/19/38.chrom.sizes mm10/9.chrom.sizes'

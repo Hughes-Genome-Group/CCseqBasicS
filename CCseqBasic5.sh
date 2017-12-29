@@ -620,7 +620,10 @@ testedFile="F1_beforeCCanalyser_${Sample}_${CCversion}/READ2.fastq"
 doTempFileTesting
 
 # Save oligo file full path (to not to lose the file when we cd into the folder, if we used relative paths ! )
-OligoFile=$( fp ${OligoFile} )
+TEMPdoWeStartWithSlash=$(($( echo ${OligoFile} | awk '{print substr($1,1,1)}' | grep -c '/' )))
+if [ "${TEMPdoWeStartWithSlash}" -eq 0 ]
+ OligoFile=$(pwd)"/"${OligoFile}
+fi
 
 testedFile="${OligoFile}"
 doInputFileTesting
@@ -945,7 +948,7 @@ dpnGenomeName=$( echo "${GenomeFasta}" | sed 's/.*\///' | sed 's/\..*//' )
 # output file :
 # ${GenomeFasta}_dpnII_coordinates.txt
 
-fullPathDpnGenome=$( fp "genome_${REenzyme}_coordinates.txt" )
+fullPathDpnGenome=$(pwd)"/genome_dpnII_coordinates.txt"
 
 cd ..
 
