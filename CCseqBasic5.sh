@@ -622,6 +622,7 @@ doTempFileTesting
 # Save oligo file full path (to not to lose the file when we cd into the folder, if we used relative paths ! )
 TEMPdoWeStartWithSlash=$(($( echo ${OligoFile} | awk '{print substr($1,1,1)}' | grep -c '/' )))
 if [ "${TEMPdoWeStartWithSlash}" -eq 0 ]
+then
  OligoFile=$(pwd)"/"${OligoFile}
 fi
 
