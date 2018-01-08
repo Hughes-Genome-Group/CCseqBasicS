@@ -399,7 +399,7 @@ fi
 
 echo "blat -stepSize=${stepSize} -minScore=${minScore} -minIdentity=${minIdentity} -maxIntron=${maxIntron} -tileSize=${tileSize} -repMatch=${repMatch} -oneOff=${oneOff} ${GenomeFasta} ${file} ${basename}_blat.psl"
 echo -n " -stepSize=${stepSize} -minScore=${minScore} -minIdentity=${minIdentity} -maxIntron=${maxIntron} -tileSize=${tileSize} -repMatch=${repMatch} -oneOff=${oneOff}" > blatParams.txt
-blatparams=$( fp blatParams.txt )
+blatparams=$(pwd)"/blatParams.txt"
 
 # These will be listed in the parameters file :
 
