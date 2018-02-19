@@ -1039,7 +1039,7 @@ genomesFile http://$public_url/$sample\_$version\_genomes.txt
 email $email";
 
 print TRACKHUBB "genome $genome
-trackDb http://sara.molbiol.ox.ac.uk$public_folder/$sample\_$version\_tracks.txt";
+trackDb http://$public_url/$sample\_$version\_tracks.txt";
 
 
 print REPORTFH "\nThe track hub can be found at:
