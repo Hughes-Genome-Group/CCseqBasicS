@@ -221,7 +221,7 @@ scriptFilesMissing=0
 echo
 echo "Master script and its tester script :"
 echo
-ls ${PipeTopPath}/CCseqBasic4.sh
+ls ${PipeTopPath}/CCseqBasic5.sh
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${PipeTopPath}/testEnvironment.sh 
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
@@ -336,14 +336,14 @@ then
 echo
 echo "###########################################"
 echo
-echo "ERROR !   The scripts CCseqBasic4.sh is dependent on, are not found in their correct relative paths !"
+echo "ERROR !   The scripts CCseqBasic5.sh is dependent on, are not found in their correct relative paths !"
 echo "          Maybe your tar archive was corrupted, or you meddled with the folder structure after unpacking ?"
 echo
 echo "###########################################"
 echo
 echo "This is what you SHOULD see if you run 'tree' command in your CCseqBasic folder :"
 echo
-echo ' |-- CCseqBasic4.sh'
+echo ' |-- CCseqBasic5.sh'
 echo ' |-- testEnvironment.sh'
 echo ' |'
 echo ' `-- bin'
