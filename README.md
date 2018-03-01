@@ -11,14 +11,3 @@ External users : http://userweb.molbiol.ox.ac.uk/public/telenius/CCseqBasicManua
 
 Intra-WIMM users : http://userweb.molbiol.ox.ac.uk/public/telenius/captureManual/PipeSite.html
 
-Distributed under GPL3 - 
-
-## **EXCEPT THE conf/ucsctools FOLDER**,
-
-which contains "ancient" versions of ucsctools scripts 
-(kent/src/utils , from https://github.com/ENCODE-DCC/kentUtils/tree/master/src/utils. 
-
-## **THESE SCRIPTS NEED A SPECIAL LICENSE IF USED IN NON-ACADEMIC RESEARCH.**
-
-More details here : https://genome.ucsc.edu/license/
-
