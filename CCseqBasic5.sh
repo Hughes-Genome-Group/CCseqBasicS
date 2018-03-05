@@ -1444,7 +1444,7 @@ generateCombinedDataHub
 # Cleaning up after ourselves ..
 
 cleanUpRunFolder
-makeSymbolicLinks
+# makeSymbolicLinks
 
 # Data hub address (print to stdout) ..
 updateHub_part3final
