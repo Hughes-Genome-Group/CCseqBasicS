@@ -57,7 +57,7 @@ supportedGenomes[11]="mm9PARP"
 # 1) bowtie1 indices
 # 2) UCSC genome sizes
 # 3) genome digest files for dpnII and nlaIII (optional - but makes runs faster).
-#     These can be produced with the CCseqBasic4.sh pipeline during a regular run, with flag --saveGenomeDigest
+#     These can be produced with the CCseqBasic5.sh pipeline during a regular run, with flag --saveGenomeDigest
 # 4) List of blacklisted regions (optional, but recommended)
 
 # Fill these below !
@@ -105,6 +105,49 @@ BOWTIE1[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP"
 # The pipeline checks that at least one index file exists, before proceeding with the analysis.
 
 # When adding new genomes : remember to update the "supportedGenomes" list above as well !
+
+# #############################################################################
+# BOWTIE 2 INDICES
+# #############################################################################
+
+# These are the bowtie2 indices, built with an UCSC genome fasta (not ENSEMBLE coordinates)
+# These need to correspond to the UCSC chromosome sizes files (below)
+
+# You can build these indices with 'bowtie-build' tool of the bowtie2 package :
+# http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#the-bowtie2-build-indexer
+
+# These can be symbolic links to the central copies of the indices.
+# By default these are 
+
+BOWTIE2[0]="/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/Bowtie2Index/genome"
+
+# ls -lht /databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/Bowtie2Index
+# -rw-rw-r-- 1 manager staff 2.6G Mar 16  2012 genome.fa
+# -rw-rw-r-- 1 manager staff 611M Apr 10  2012 genome.2.bt2
+# -rw-rw-r-- 1 manager staff 611M Apr 10  2012 genome.4.bt2
+# -rw-rw-r-- 1 manager staff 818M Apr 10  2012 genome.rev.1.bt2
+# -rw-rw-r-- 1 manager staff 611M Apr 10  2012 genome.rev.2.bt2
+# -rw-rw-r-- 1 manager staff 818M Apr 10  2012 genome.1.bt2
+# -rw-rw-r-- 1 manager staff 5.8K Apr 10  2012 genome.3.bt2
+
+BOWTIE2[1]="/databank/igenomes/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome"
+BOWTIE2[2]="/databank/igenomes/Homo_sapiens/UCSC/hg18/Sequence/Bowtie2Index/genome"
+BOWTIE2[3]="/databank/igenomes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome"
+BOWTIE2[4]="/databank/igenomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome"
+BOWTIE2[5]="/databank/igenomes/Danio_rerio/UCSC/danRer7/Sequence/Bowtie2Index/genome"
+BOWTIE2[6]="/databank/igenomes/Danio_rerio/UCSC/danRer10/Sequence/Bowtie2Index/genome"
+BOWTIE2[7]="/databank/igenomes/Gallus_gallus/UCSC/galGal4/Sequence/Bowtie2Index/genome"
+BOWTIE2[8]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm3/Sequence/Bowtie2Index/genome"
+BOWTIE2[9]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm6/Sequence/Bowtie2Index/genome"
+BOWTIE2[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly/bowtie2-indexes/mm10_BALB-cJ"
+BOWTIE2[11]="NOT_SUPPORTED_needsToBeAddedToConfigFile"
+
+# The indices in the BOWTIE2 array refer to genome names in supportedGenomes array (top of page).
+
+# Not all of them need to exist : only the ones you will be using.
+# The pipeline checks that at least one index file exists, before proceeding with the analysis.
+
+# When adding new genomes : remember to update the "supportedGenomes" list above (top of this file) as well !
 
 # #############################################################################
 # WHOLE GENOME FASTA FILES

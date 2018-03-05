@@ -1,23 +1,24 @@
 #!/bin/bash
 
 ##########################################################################
-# Copyright 2016, Jelena Telenius (jelena.telenius@imm.ox.ac.uk)         #
+# Copyright 2017, Jelena Telenius (jelena.telenius@imm.ox.ac.uk)         #
 #                                                                        #
-# This file is part of CCseqBasic .                                      #
+# This file is part of CCseqBasic5 .                                     #
 #                                                                        #
-# CCseqBasic is free software: you can redistribute it and/or modify     #
+# CCseqBasic5 is free software: you can redistribute it and/or modify    #
 # it under the terms of the GNU General Public License as published by   #
 # the Free Software Foundation, either version 3 of the License, or      #
 # (at your option) any later version.                                    #
 #                                                                        #
-# CCseqBasic is distributed in the hope that it will be useful,          #
+# CCseqBasic5 is distributed in the hope that it will be useful,         #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of         #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
 # GNU General Public License for more details.                           #
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
-# along with CCseqBasic.  If not, see <http://www.gnu.org/licenses/>.    #
+# along with CCseqBasic5.  If not, see <http://www.gnu.org/licenses/>.   #
 ##########################################################################
+
 
 function finish {
 echo
@@ -287,6 +288,8 @@ ls ${mainScriptFolder}/intersectappend.pl
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${mainScriptFolder}/fastq_scores_bowtie1.pl
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${mainScriptFolder}/fastq_scores_bowtie2.pl
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 echo
 sleep 3
@@ -349,7 +352,7 @@ echo ' |'
 echo ' `-- bin'
 echo '     |-- runscripts'
 echo '     |   |-- QC_and_Trimming.sh analyseMappedReads.pl '
-echo '     |   |-- fastq_scores_bowtie1.pl intersectappend.pl'
+echo '     |   |-- fastq_scores_bowtie1.pl fastq_scores_bowtie2.pl intersectappend.pl'
 echo '     |   |-- dpnIIcutGenome4.pl dpnIIcutReads4.pl nlaIIIcutGenome4.pl nlaIIIcutReads4.pl'
 # echo '     |   |   hindIIIcutGenome4.pl hindIIIcutReads4.pl'
 echo '     |   |-- filterArtifactMappers'
@@ -363,7 +366,7 @@ echo '     |   |-- testers_and_loggers.sh parameterSetters.sh usageAndVersion.sh
 echo '     |   `-- validateSetup'
 echo '     |       `-- g.txt l.txt s.txt'
 echo '     `-- perlHelpers'
-echo '         |-- data2gff.pl fastq_scores_bowtie1.pl reverse_seq.pl '
+echo '         |-- data2gff.pl fastq_scores_bowtie1/2.pl reverse_seq.pl '
 echo '         `-- sam2fastq.pl trim1base3prime.pl windowingScript.pl'
 echo ''
 echo '`-- conf'
@@ -533,6 +536,29 @@ sleep 2
 
 ##########################################################################
 echo
+echo "Bowtie 2 indices : "
+echo
+echo -e "GENOME\tBOWTIE 2 index"
+for g in $( seq 0 $((${#supportedGenomes[@]}-1)) ); do    
+
+ echo -en "${supportedGenomes[$g]}\t${BOWTIE2[$g]}"
+
+TEMPcount=$(($( ls -1 ${BOWTIE2[$g]}* | grep -c "" )))
+
+if [ "${TEMPcount}" -eq 0 ]; then
+    echo -e "\tINDICES DO NOT EXIST in the given location !!"
+    exitCode=$(( ${exitCode} +1 ))
+ else
+    echo ""
+ fi
+ 
+done
+
+echo
+sleep 2
+
+##########################################################################
+echo
 echo "UCSC genome size files : "
 echo
 for g in $( seq 0 $((${#supportedGenomes[@]}-1)) ); do
@@ -613,6 +639,15 @@ echo "Bowtie 1 .."
 echo
 bowtie --version | head -n 5
 bowtie --version >> /dev/null
+exitCode=$(( ${exitCode} + $? ))
+echo
+
+sleep 2
+
+echo "Bowtie 2 .."
+echo
+bowtie2 --version | head -n 5
+bowtie2 --version >> /dev/null
 exitCode=$(( ${exitCode} + $? ))
 echo
 

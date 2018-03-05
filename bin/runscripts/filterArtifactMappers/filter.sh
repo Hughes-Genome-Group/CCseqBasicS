@@ -46,6 +46,7 @@ outputToRunfolder=0
 outputfolder="UNDEFINED"
 
 extend=20000
+onlyCis=0
 
 pipelinecall=0
 
@@ -358,7 +359,7 @@ echo
 echo 
 
 
-OPTS=`getopt -o p: --long parameterfile:,noploidyfilter,pipelinecall,extend:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,reuseBLAT: -- "$@"`
+OPTS=`getopt -o p: --long parameterfile:,noploidyfilter,pipelinecall,extend:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,reuseBLAT:,onlyCis: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -379,6 +380,7 @@ while true ; do
         --maxIntron) maxIntron=$2 ; shift 2;;
         --oneOff) oneOff=$2 ; shift 2;;
         --reuseBLAT) reuseBLATpath=$2 ; shift 2;;
+        --onlyCis) onlyCis=$2; shift 2;;
         
         --) shift; break;;
     esac
@@ -475,6 +477,7 @@ echo "recoordinatefile ${recoordinatefile}" >> parameters_norm.log
 echo "dataprefixFLASHED ${dataprefixFLASHED}" >> parameters_norm.log
 echo "dataprefixNONFLASHED ${dataprefixNONFLASHED}" >> parameters_norm.log
 
+echo "onlyCis ${onlyCis}" >> parameters_norm.log
 echo "reuseBLATpath ${reuseBLATpath} " >> parameters_norm.log
 echo "CaptureFilterPath ${CaptureFilterPath}" >> parameters_norm.log
 echo "GenomeFasta ${GenomeFasta}" >> parameters_norm.log
@@ -527,12 +530,12 @@ printToLogFile
 printThis="Running blat filter generation for each oligo.."
 printToLogFile
 
-echo "${CaptureFilterPath}/1_blat.sh -o ${oligofile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath}"
-echo "${CaptureFilterPath}/1_blat.sh -o ${oligofile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath}"  >> "/dev/stderr"
+echo "${CaptureFilterPath}/1_blat.sh -o ${oligofile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}"
+echo "${CaptureFilterPath}/1_blat.sh -o ${oligofile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}"  >> "/dev/stderr"
 
 cp ${CaptureFilterPath}/1_blat.sh .
 chmod u=rwx 1_blat.sh
-./1_blat.sh -o ${oligofile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath}
+./1_blat.sh -o ${oligofile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}
 rm -f 1_blat.sh
 
 # Here (or to the above script) we need to add --globin functionality

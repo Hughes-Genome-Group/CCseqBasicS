@@ -104,6 +104,9 @@ ADA32="no"
 # trimgalore default
 QMIN=20
 
+# bowtie default
+BOWTIE=1
+
 # flash defaults
 flashOverlap=10
 flashErrorTolerance=0.25
@@ -111,14 +114,21 @@ flashErrorTolerance=0.25
 saveDpnGenome=0
 
 ucscBuild=""
-otherBowtieParameters=""
-bowtieMismatchBehavior=""
+otherBowtie1Parameters=""
+otherBowtie2Parameters=""
+bowtie1MismatchBehavior=""
+bowtie2MismatchBehavior=""
 
 otherParameters=""
 PublicPath="UNDETERMINED"
 
 ploidyFilter=""
 extend=20000
+
+sonicationSize=300
+
+# If we have many oligos, the stuff can be eased up by analysing only in cis.
+onlyCis=0
 
 # Blat flags
 stepSize=5 # Jon default - James used blat default, which is "tileSize", in this case thus 11 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
@@ -249,6 +259,7 @@ echo "Calling in the conf/config.sh script and its default setup .."
 CaptureDigestPath="NOT_IN_USE"
 supportedGenomes=()
 BOWTIE1=()
+BOWTIE2=()
 UCSC=()
 BLACKLIST=()
 genomesWhichHaveBlacklist=()
@@ -299,7 +310,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,strandSpecificDuplicates,UMI,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth: -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,strandSpecificDuplicates,onlyCis,UMI,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,sonicationSize: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -324,8 +335,11 @@ while true ; do
         --nla) REenzyme="nlaIII" ; shift;;
         --onlyCCanalyser) ONLY_CC_ANALYSER=1 ; shift;;
         --onlyHub) ONLY_HUB=1 ; shift;;
+        --onlyCis) onlyCis=1;otherParameters="$otherParameters --onlycis"; shift;;
         --R1) Read1=$2 ; shift 2;;
         --R2) Read2=$2 ; shift 2;;
+        --bowtie1) BOWTIE=1 ; shift;;
+        --bowtie2) BOWTIE=2 ; shift;;
         --chunkmb) BOWTIEMEMORY=$2 ; shift 2;;
         --saveGenomeDigest) saveDpnGenome=1 ; shift;;
         --dontSaveGenomeDigest) saveDpnGenome=0 ; shift;;
@@ -338,6 +352,7 @@ while true ; do
         --ada3read2) ADA32=$2 ; shift 2;;
         --extend) extend=$2 ; shift 2;;
         --noPloidyFilter) ploidyFilter="--noploidyfilter " ; shift;;
+        --sonicationSize) sonicationSize=$2 ; shift 2;;
         --strandSpecificDuplicates) otherParameters="$otherParameters --stranded"; strandSpecificDuplicates=1 ; shift;;
         --dump) otherParameters="$otherParameters --dump" ; shift;;
         --snp) otherParameters="$otherParameters --snp" ; shift;;
@@ -351,9 +366,9 @@ while true ; do
         --flashMismatch) flashErrorTolerance="$2" ; shift 2;;
         --trim3) otherBowtieParameters="${otherBowtieParameters} --trim3 $2 " ; shift 2;;
         --trim5) otherBowtieParameters="${otherBowtieParameters} --trim5 $2 " ; shift 2;;
-        --seedmms) bowtieMismatchBehavior="${bowtieMismatchBehavior} --seedmms $2 " ; shift 2;;
-        --seedlen) bowtieMismatchBehavior="${bowtieMismatchBehavior} --seedlen $2 " ; shift 2;;
-        --maqerr) bowtieMismatchBehavior="${bowtieMismatchBehavior} --maqerr $2 " ; shift 2;;
+        --seedmms) bowtie1MismatchBehavior="${bowtie1MismatchBehavior} --seedmms $2 " ; ${bowtie2MismatchBehavior}="${bowtie2MismatchBehavior} -N $2 "  ; shift 2;;
+        --seedlen) bowtie1MismatchBehavior="${bowtie1MismatchBehavior} --seedlen $2 " ; ${bowtie2MismatchBehavior}="${bowtie2MismatchBehavior} -L $2 " ; shift 2;;
+        --maqerr) bowtie1MismatchBehavior="${bowtie1MismatchBehavior} --maqerr $2 " ; shift 2;;
         --stepSize) stepSize=$2 ; shift 2;;
         --tileSize) tileSize==$2 ; shift 2;;
         --minScore) minScore=$2 ; shift 2;;
@@ -521,6 +536,8 @@ echo "maxIntron ${maxIntron}" >> parameters_capc.log
 echo "oneOff ${oneOff}" >> parameters_capc.log
 echo "extend ${extend}"  >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
+echo "sonicationSize ${sonicationSize}"  >> parameters_capc.log
+echo "------------------------------" >> parameters_capc.log
 echo "ploidyFilter ${ploidyFilter}"  >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
 echo "WINDOW ${WINDOW}" >> parameters_capc.log
@@ -647,17 +664,17 @@ printToLogFile
     bowtieQuals=""
     LineCount=$(($( grep -c "" READ1.fastq )/4))
     if [ "${LineCount}" -gt 100000 ] ; then
-        bowtieQuals=$( perl ${RunScriptsPath}/fastq_scores_bowtie1.pl -i READ1.fastq -r 90000 )
+        bowtieQuals=$( perl ${RunScriptsPath}/fastq_scores_bowtie${BOWTIE}.pl -i READ1.fastq -r 90000 )
     else
         rounds=$((${LineCount}-10))
-        bowtieQuals=$( perl ${RunScriptsPath}/fastq_scores_bowtie1.pl -i READ1.fastq -r ${rounds} )
+        bowtieQuals=$( perl ${RunScriptsPath}/fastq_scores_bowtie${BOWTIE}.pl -i READ1.fastq -r ${rounds} )
     fi
     
     echo "Flash, Trim_galore and Bowtie will be ran in quality score scheme : ${bowtieQuals}"
 
     # The location of "zero" for the filtering/trimming programs cutadapt, trim_galore, flash    
     intQuals=""
-    if [ "${bowtieQuals}" == "--phred33-quals" ] ; then
+    if [ "${bowtieQuals}" == "--phred33-quals" ] || [ "${bowtieQuals}" == "--phred33" ]; then
         intQuals="33"
     else
         # Both solexa and illumina phred64 have their "zero point" in 64
@@ -812,43 +829,135 @@ printToLogFile
 
 echo "Beginning bowtie run (outputting run command after completion) .."
 setMparameter
-bowtie -p 1 --chunkmb "${BOWTIEMEMORY}" ${otherBowtieParameters} ${bowtieQuals} ${mParameter} --best --strata --sam "${BowtieGenome}" FLASHED_REdig.fastq > FLASHED_REdig.sam
+
+if [ "${BOWTIE}" -eq 2 ] ; then
+bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U FLASHED_REdig.fastq > FLASHED_REdig.sam
+echo "bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U FLASHED_REdig.fastq"
+else
+bowtie -p 1 --chunkmb "${BOWTIEMEMORY}" ${otherBowtie1Parameters} ${bowtieQuals} ${mParameter} --best --strata --sam "${BowtieGenome}" FLASHED_REdig.fastq > FLASHED_REdig_unfiltered.sam
+fi
+
 #bowtie -p 1 -m 2 --best --strata --sam --chunkmb 256 ${bowtieQuals} "${BowtieGenome}" Combined_reads_REdig.fastq Combined_reads_REdig.sam
 
-testedFile="FLASHED_REdig.sam"
+testedFile="FLASHED_REdig_unfiltered.sam"
 doTempFileTesting
 
 doQuotaTesting
 
-samtools view -SH FLASHED_REdig.sam | grep bowtie
+samtools view -SH FLASHED_REdig_unfiltered.sam | grep bowtie
 
+echo
+echo "Read count - in bowtie output sam file : "
+echo
+flashstatus="FLASHED"
+echo ${flashstatus}_REdig_unfiltered.sam
+cat  ${flashstatus}_REdig_unfiltered.sam | grep -cv '^@'
+echo
 
+printThis="Sam to bam transform .."
+printToLogFile
+
+flashstatus="FLASHED"
+rm -f ${flashstatus}FLASHED_REdig.fastq
+echo "samtools view -hb ${flashstatus}_REdig_unfiltered.sam > ${flashstatus}_REdig_unfiltered.bam"
+samtools view -hb ${flashstatus}_REdig_unfiltered.sam > ${flashstatus}_REdig_unfiltered.bam
+ls -lht ${flashstatus}_REdig_unfiltered.bam
+rm -f ${flashstatus}_REdig_unfiltered.sam
 
 printThis="Non-flashed reads Bowtie .."
 printToLogFile
 
 echo "Beginning bowtie run (outputting run command after completion) .."
 setMparameter
-bowtie -p 1 --chunkmb "${BOWTIEMEMORY}" ${otherBowtieParameters} ${bowtieQuals} ${mParameter} --best --strata --sam "${BowtieGenome}" NONFLASHED_REdig.fastq > NONFLASHED_REdig.sam
+if [ "${BOWTIE}" -eq 2 ] ; then
+bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U NONFLASHED_REdig.fastq > NONFLASHED_REdig.sam
+echo "bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U NONFLASHED_REdig.fastq"
+else
+bowtie -p 1 --chunkmb "${BOWTIEMEMORY}" ${otherBowtie1Parameters} ${bowtieQuals} ${mParameter} --best --strata --sam "${BowtieGenome}" NONFLASHED_REdig.fastq > NONFLASHED_REdig_unfiltered.sam
+fi
 #bowtie -p 1 -m 2 --best --strata --sam --chunkmb 256 ${bowtieQuals} "${BowtieGenome}" Combined_reads_REdig.fastq Combined_reads_REdig.sam
 
-testedFile="NONFLASHED_REdig.sam"
+testedFile="NONFLASHED_REdig_unfiltered.sam"
 doTempFileTesting
 
 doQuotaTesting
 
-samtools view -SH NONFLASHED_REdig.sam | grep bowtie
+samtools view -SH NONFLASHED_REdig_unfiltered.sam | grep bowtie
+
+echo
+echo "Read count - in bowtie output sam file : "
+echo
+flashstatus="NONFLASHED"
+echo ${flashstatus}_REdig_unfiltered.sam
+cat  ${flashstatus}_REdig_unfiltered.sam | grep -cv '^@'
+echo
+
+printThis="Sam to bam transform .."
+printToLogFile
+
+flashstatus="NONFLASHED"
+rm -f ${flashstatus}FLASHED_REdig.fastq
+echo "samtools view -hb ${flashstatus}_REdig_unfiltered.sam > ${flashstatus}_REdig_unfiltered.bam"
+samtools view -hb ${flashstatus}_REdig_unfiltered.sam > ${flashstatus}_REdig_unfiltered.bam
+ls -lht ${flashstatus}_REdig_unfiltered.bam
+rm -f ${flashstatus}_REdig_unfiltered.sam
+
+TEMPweAreHere=$(pwd)
+cd ..
+
+# RE enzyme digestion (if needed .. )
+
+dpnGenomeName=""
+fullPathDpnGenome=""
+generateReDigest
+
+cd ${TEMPweAreHere}
+
+# RE enzyme genome blacklist generation (regions farther than sonication lenght from the cut site)
+
+fullPathDpnBlacklist=""
+generateReBlacklist
+
+# Filtering based on RE enzyme genome blacklist ..
+printThis="Filtering out reads which are farther away from cut sites than sonication size ${sonicationSize} .."
+printToLogFile
+
+flashstatus="FLASHED"
+echo "bedtools intersect -v -abam ${flashstatus}_REdig_unfiltered.bam -b ${fullPathDpnBlacklist} > ${flashstatus}_REdig.bam"
+bedtools intersect -v -abam ${flashstatus}_REdig_unfiltered.bam -b ${fullPathDpnBlacklist} > ${flashstatus}_REdig.bam
+echo "samtools view -h ${flashstatus}_REdig.bam > ${flashstatus}_REdig.sam"
+samtools view -h ${flashstatus}_REdig.bam > ${flashstatus}_REdig.sam
+ls -lht ${flashstatus}_REdig.sam
+rm -f ${flashstatus}_REdig.bam
+
+flashstatus="NONFLASHED"
+echo "bedtools intersect -v -abam ${flashstatus}_REdig_unfiltered.bam -b ${fullPathDpnBlacklist} > ${flashstatus}_REdig.bam"
+bedtools intersect -v -abam ${flashstatus}_REdig_unfiltered.bam -b ${fullPathDpnBlacklist} > ${flashstatus}_REdig.bam
+echo "samtools view -h ${flashstatus}_REdig.bam > ${flashstatus}_REdig.sam"
+samtools view -h ${flashstatus}_REdig.bam > ${flashstatus}_REdig.sam
+ls -lht ${flashstatus}_REdig.sam
+rm -f ${flashstatus}_REdig.bam
 
 # Cleaning up after ourselves ..
 
-printThis="Cleaning up the run folder.."
+printThis="Finishing up the F1 run folder.."
 printToLogFile
 
 #ls -lht Combined_reads_REdig.bam
 ls -lht FLASHED_REdig.sam
 ls -lht NONFLASHED_REdig.sam
-#rm -f  Combined_reads_REdig.fastq
-rm -f FLASHED_REdig.fastq NONFLASHED_REdig.fastq
+
+echo
+echo "Read counts - in sonication size filtered sam files : "
+echo
+flashstatus="FLASHED"
+echo ${flashstatus}_REdig.sam
+cat  ${flashstatus}_REdig.sam | grep -cv '^@'
+echo
+flashstatus="NONFLASHED"
+echo ${flashstatus}_REdig.sam
+cat  ${flashstatus}_REdig.sam | grep -cv '^@'
+echo
 
 else
 # This is the "ONLY_CC_ANALYSER" end fi - if testrun, skipped everything before this point :
@@ -899,42 +1008,24 @@ then
         exit 1
     fi
 fi
+
+TEMPweAreHere=$(pwd)
+cd ..
+    
+# RE enzyme digestion (if needed .. )
+
+dpnGenomeName=""
+fullPathDpnGenome=""
+generateReDigest
+
+# RE enzyme genome blacklist generation (regions farther than sonication lenght from the cut site)
+
+fullPathDpnBlacklist=""
+generateReBlacklist
+
+cd ${TEMPweAreHere}
     
 fi
-
-################################################################
-# Running whole genome fasta dpnII digestion..
-
-rm -f genome_${REenzyme}_coordinates.txt
-
-if [ -s ${CaptureDigestPath}/${GENOME}.txt ] 
-then
-    
-ln -s ${CaptureDigestPath}/${GENOME}.txt genome_${REenzyme}_coordinates.txt
-    
-else
-    
-    
-# Running the digestion ..
-# dpnIIcutGenome.pl
-# nlaIIIcutGenome.pl   
-
-printThis="Running whole genome fasta ${REenzyme} digestion.."
-printToLogFile
-
-printThis="perl ${RunScriptsPath}/${REenzyme}cutGenome4.pl ${GenomeFasta}"
-printToLogFile
-
-perl ${RunScriptsPath}/${REenzyme}cutGenome4.pl "${GenomeFasta}"
-
-testedFile="genome_${REenzyme}_coordinates.txt"
-doTempFileTesting
-
-doQuotaTesting
-
-fi
-
-ls -lht
 
 ################################################################
 # Store the pre-CCanalyser log files for metadata html
@@ -943,13 +1034,6 @@ printThis="Store the pre-CCanalyser log files for metadata html.."
 printToLogFile
 
 copyPreCCanalyserLogFilesToPublic
-
-
-dpnGenomeName=$( echo "${GenomeFasta}" | sed 's/.*\///' | sed 's/\..*//' )
-# output file :
-# ${GenomeFasta}_dpnII_coordinates.txt
-
-fullPathDpnGenome=$(pwd)"/genome_dpnII_coordinates.txt"
 
 cd ..
 
@@ -1140,8 +1224,8 @@ printToLogFile
 #        --pipelinecall) pipelinecall=1 ; shift 1;;
 #        --extend) extend=$2 ; shift 2;;
 
-echo "${CaptureFilterPath}/filter.sh -p parameters_for_filtering.log -s ${CaptureFilterPath} --pipelinecall ${ploidyFilter} --extend ${extend}"
-echo "${CaptureFilterPath}/filter.sh -p parameters_for_filtering.log -s ${CaptureFilterPath} --pipelinecall ${ploidyFilter} --extend ${extend}"  >> "/dev/stderr"
+echo "${CaptureFilterPath}/filter.sh -p parameters_for_filtering.log -s ${CaptureFilterPath} --pipelinecall ${ploidyFilter} --extend ${extend} "
+echo "${CaptureFilterPath}/filter.sh -p parameters_for_filtering.log -s ${CaptureFilterPath} --pipelinecall ${ploidyFilter} --extend ${extend} "  >> "/dev/stderr"
 
 #        --stepSize) stepSize=$2 ; shift 2;;
 #        --tileSize) tileSize==$2 ; shift 2;;
@@ -1154,13 +1238,15 @@ echo "--stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --t
 
 echo "--reuseBLAT ${reuseBLATpath}"
 echo "--reuseBLAT ${reuseBLATpath}" >> "/dev/stderr"
+echo "--onlyCis ${onlyCis}"
+echo "--onlyCis ${onlyCis}" >> "/dev/stderr"
 
 mkdir filteringLogFor_${sampleForCCanalyser}_${CCversion}
 mv parameters_for_filtering.log filteringLogFor_${sampleForCCanalyser}_${CCversion}/.
 cd filteringLogFor_${sampleForCCanalyser}_${CCversion}
 
 TEMPreturnvalue=0
-TEMPreturnvalue=$( ${CaptureFilterPath}/filter.sh --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall ${ploidyFilter} --extend ${extend} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log )
+TEMPreturnvalue=$( ${CaptureFilterPath}/filter.sh --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall ${ploidyFilter} --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log )
 cat filtering.log
 rm -f ${publicPathForCCanalyser}/filtering.log
 cp filtering.log ${publicPathForCCanalyser}/.
@@ -1358,7 +1444,7 @@ generateCombinedDataHub
 # Cleaning up after ourselves ..
 
 cleanUpRunFolder
-# makeSymbolicLinks
+makeSymbolicLinks
 
 # Data hub address (print to stdout) ..
 updateHub_part3final

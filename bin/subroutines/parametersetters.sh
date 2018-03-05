@@ -45,14 +45,16 @@ fi
 
 #----------------------------------------------
 
-if [ "${LOWERCASE_V}" != "" ] && [ "${bowtieMismatchBehavior}" != "" ];
+if [ "${LOWERCASE_V}" != "" ] && [ "${bowtie1MismatchBehavior}" != "" ];
 then
     printThis="Bowtie1 does not allow setting -v with any other mismatch-reporting altering parameters ( --seedmms --seedlen --maqerr ) \nUse only -v, or (any) combination of --seedmms --seedlen --maqerr\nEXITING"
     printToLogFile
   exit 1
 else
-    otherBowtieParameters="${otherBowtieParameters} ${bowtieMismatchBehavior} ${LOWERCASE_V}"
+    otherBowtie1Parameters="${otherBowtie1Parameters} ${bowtie1MismatchBehavior} ${LOWERCASE_V}"
 fi
+
+otherBowtie2Parameters="${otherBowtie2Parameters} ${bowtie2MismatchBehavior}"
 
 #----------------------------------------------
 #Setting the m and M parameters..

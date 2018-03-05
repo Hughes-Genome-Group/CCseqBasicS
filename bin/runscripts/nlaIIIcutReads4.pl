@@ -62,9 +62,9 @@ if ($f_counter==4)
 
 # codes for marking
 # :0 no CATG cut
-# :1 CATG in 5'
-# :2 CATG in 3'
-# :3 CATG in 3' and 5'
+# :1 CATG in LEFT
+# :2 CATG in RIGHT
+# :3 CATG in RIGHT and LEFT
         
 if ($hash{"seq"} =~ /CATG/)
         {
@@ -166,18 +166,18 @@ if ( $filetype eq "NONFLASHED" )
 {
 print "Here READ means either R1 or R2 part of any read - both are called read, and the combined entity does not exist, as flashing was not succesfull for these.\n";
 print "In detail, \n$fragment_counter fragments was found, and of these \n$printed_counter fragments were printed - as they were longer than the set threshold $min_length\n";
-print "Of the printed fragments :\n$gatc_3_counter fragments had 5' and 3' CATG,\n$gatc_1_counter fragments had only 5' CATG,\n$gatc_2_counter fragments had only 3' CATG site,\n$gatc_0_counter fragments had no CATG.\n";
+print "Of the printed fragments (in FASTQ coordinates):\n$gatc_3_counter fragments had LEFT and RIGHT CATG,\n$gatc_1_counter fragments had only LEFT CATG,\n$gatc_2_counter fragments had only RIGHT CATG site,\n$gatc_0_counter fragments had no CATG.\n";
 }
 else {
 print "In detail, \n$fragment_counter fragments was found, and of these \n$printed_counter fragments were printed - as they were longer than the set threshold $min_length , and the read contained at least one CATG\n";
-print "Of the printed fragments :\n$gatc_3_counter fragments had 5' and 3' CATG,\n$gatc_1_counter fragments had only 5' CATG,\n$gatc_2_counter fragments had only 3' CATG site.\n";
+print "Of the printed fragments (in FASTQ coordinates):\n$gatc_3_counter fragments had LEFT and RIGHT CATG,\n$gatc_1_counter fragments had only LEFT CATG,\n$gatc_2_counter fragments had only RIGHT CATG site.\n";
 print "$gatc_0_counter reads were longer htan the set treshold $min_length, but had no CATG and thus were discarded .\n";
 }
 
 
 # codes for marking (above)
 # :0 no CATG cut
-# :1 CATG in 5'
-# :2 CATG in 3'
-# :3 CATG in 3' and 5'
+# :1 CATG in LEFT
+# :2 CATG in RIGHT
+# :3 CATG in RIGHT and LEFT
 

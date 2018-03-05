@@ -19,6 +19,73 @@
 # along with CCseqBasic5.  If not, see <http://www.gnu.org/licenses/>.   #
 ##########################################################################
 
+################################################################
+# Running whole genome blacklist dpnII generation
+
+generateReBlacklist(){
+    
+printThis="Preparing 'too far from RE cut sites' blacklist file for ${REenzyme} cut genome) .."
+printToLogFile
+    
+rm -f genome_${REenzyme}_blacklist.bed
+
+# Plus/minus 300 bases to both directions
+cat ${fullPathDpnGenome} | sed 's/:/\t/' | sed 's/-/\t/' | awk '{if(($3-$2)>(2*'${sonicationSize}')){print "chr"$1"\t"$2+'${sonicationSize}'"\t"$3-'${sonicationSize}'}}' > genome_${REenzyme}_blacklist.bed
+
+testedFile="genome_${REenzyme}_blacklist.bed"
+doTempFileTesting
+
+doQuotaTesting
+
+fullPathDpnBlacklist=$(pwd)"/genome_${REenzyme}_blacklist.bed"
+
+
+}
+
+generateReDigest(){
+
+################################################################
+# Running whole genome fasta dpnII digestion..
+
+rm -f genome_${REenzyme}_coordinates.txt
+
+if [ -s ${CaptureDigestPath}/${GENOME}.txt ] 
+then
+    
+ln -s ${CaptureDigestPath}/${GENOME}.txt genome_${REenzyme}_coordinates.txt
+    
+else
+    
+    
+# Running the digestion ..
+# dpnIIcutGenome.pl
+# nlaIIIcutGenome.pl   
+
+printThis="Running whole genome fasta ${REenzyme} digestion.."
+printToLogFile
+
+printThis="perl ${RunScriptsPath}/${REenzyme}cutGenome4.pl ${GenomeFasta}"
+printToLogFile
+
+perl ${RunScriptsPath}/${REenzyme}cutGenome4.pl "${GenomeFasta}"
+
+testedFile="genome_${REenzyme}_coordinates.txt"
+doTempFileTesting
+
+doQuotaTesting
+
+fi
+
+ls -lht
+
+dpnGenomeName=$( echo "${GenomeFasta}" | sed 's/.*\///' | sed 's/\..*//' )
+# output file :
+# ${GenomeFasta}_dpnII_coordinates.txt
+
+fullPathDpnGenome=$(pwd)"/genome_dpnII_coordinates.txt"
+
+}
+
 runFlash(){
     
     echo

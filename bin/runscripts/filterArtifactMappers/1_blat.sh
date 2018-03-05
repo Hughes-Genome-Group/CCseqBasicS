@@ -48,11 +48,12 @@ genomefasta="UNDEFINED"
 recoordinatefile="UNDEFINED"
 ucscBuild="UNDEFINED"
 extend="20000"
+onlyCis=0
 
 # full path to parameter file
 blatparams="UNDEFINED"
 
-OPTS=`getopt -o o:,f:,r:,p:,u:,e: --long genomefasta:,oligofile:,refile:,pipepath:,ucscbuild:,extend:,blatparams:,reusefile: -- "$@"`
+OPTS=`getopt -o o:,f:,r:,p:,u:,e: --long genomefasta:,oligofile:,refile:,pipepath:,ucscbuild:,extend:,blatparams:,reusefile:,onlyCis: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -76,6 +77,7 @@ while true ; do
         --extend) extend=$2 ; shift 2;;
         --blatparams) blatparams=$2 ; shift 2;;
         --reusefile) PathForReuseBlatResults=$2 ; shift 2;;
+        --onlyCis) onlyCis=$2; shift 2;;
         --) shift; break;;
     esac
 done
@@ -169,11 +171,25 @@ fi
 
 if [ "${weRunBLAT}" -eq "1" ]
 then
+    
+    if [ "${onlyCis}" -eq "1" ]; then
+        TEMPchr=$( head -n 1 ${file} | sed 's/^>//' | sed 's/^C/c/' | sed 's/:.*//' )
+        echo "ONLY CIS BLAT : viewpoint ${basename} , Cis chromosome : ${TEMPchr}"
+        cat ${ucscBuild} | grep '^'${TEMPchr}'\s' | awk '{print $1"\t0\t"$2}' > TEMP.bed
+        bedtools getfasta -fi ${genomefasta} -bed TEMP.bed -fo TEMP.fa
+        sed -i 's/:.*//' TEMP.fa
+        rm -f TEMP.bed
+        echo "blat ${blatParams} TEMP.fa ${file} ${basename}_blat.psl"
+        echo "blat ${blatParams} TEMP.fa ${file} ${basename}_blat.psl" >> "/dev/stderr"
+        blat ${blatParams} TEMP.fa ${file} ${basename}_blat.psl
+        rm -f TEMP.fa
+        
+    else
+    echo "blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl"
+    echo "blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl" >> "/dev/stderr"
+    blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl
+    fi
 
-echo "blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl"
-echo "blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl" >> "/dev/stderr"
-
-blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl
 else
 
 echo "Found file ${PathForReuseBlatResults}/${basename}_blat.psl - skipping blat for that oligo, using the found file instead !"

@@ -63,9 +63,9 @@ if ($f_counter==4)
 
 # codes for marking
 # :0 no AAGCTT cut
-# :1 AAGCTT in 5'
-# :2 AAGCTT in 3'
-# :3 AAGCTT in 3' and 5'
+# :1 AAGCTT in LEFT
+# :2 AAGCTT in RIGHT
+# :3 AAGCTT in RIGHT and LEFT
         
 if ($hash{"seq"} =~ /AAGCTT/)
         {
@@ -178,18 +178,18 @@ if ( $filetype eq "NONFLASHED" )
 {
 print "Here READ means either R1 or R2 part of any read - both are called read, and the combined entity does not exist, as flashing was not succesfull for these.\n";
 print "In detail, \n$fragment_counter fragments was found, and of these \n$printed_counter fragments were printed - as they were longer than the set threshold $min_length\n";
-print "Of the printed fragments :\n$gatc_3_counter fragments had 5' and 3' AAGCTT,\n$gatc_1_counter fragments had only 5' AAGCTT,\n$gatc_2_counter fragments had only 3' AAGCTT site,\n$gatc_0_counter fragments had no AAGCTT.\n";
+print "Of the printed fragments (in FASTQ coordinates):\n$gatc_3_counter fragments had LEFT and RIGHT AAGCTT,\n$gatc_1_counter fragments had only LEFT AAGCTT,\n$gatc_2_counter fragments had only RIGHT AAGCTT site,\n$gatc_0_counter fragments had no AAGCTT.\n";
 }
 else {
 print "In detail, \n$fragment_counter fragments was found, and of these \n$printed_counter fragments were printed - as they were longer than the set threshold $min_length , and the read contained at least one AAGCTT\n";
-print "Of the printed fragments :\n$gatc_3_counter fragments had 5' and 3' AAGCTT,\n$gatc_1_counter fragments had only 5' AAGCTT,\n$gatc_2_counter fragments had only 3' AAGCTT site.\n";
+print "Of the printed fragments (in FASTQ coordinates):\n$gatc_3_counter fragments had LEFT and RIGHT AAGCTT,\n$gatc_1_counter fragments had only LEFT AAGCTT,\n$gatc_2_counter fragments had only RIGHT AAGCTT site.\n";
 print "$gatc_0_counter reads were longer htan the set treshold $min_length, but had no AAGCTT and thus were discarded .\n";
 }
 
 
 # codes for marking (above)
 # :0 no AAGCTT cut
-# :1 AAGCTT in 5'
-# :2 AAGCTT in 3'
-# :3 AAGCTT in 3' and 5'
+# :1 AAGCTT in LEFT
+# :2 AAGCTT in RIGHT
+# :3 AAGCTT in RIGHT and LEFT
 

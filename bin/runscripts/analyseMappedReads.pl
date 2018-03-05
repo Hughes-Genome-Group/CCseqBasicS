@@ -116,7 +116,8 @@ use Pod::Usage;
  Next release was by Jelena Telenius October 2015 (CC3),
  and further to new release (CC4) by Jelena Telenius March 2016
  and further to new release (CF5) by Jelena Telenius Nov 2017
- and further to this release (CS5) by Jelena Telenius Nov 2017
+ and further to new release (CS5) by Jelena Telenius Nov 2017
+ and further to this release (CB5) by Jelena Telenius Nov 2017
  
 
 =cut
@@ -155,7 +156,7 @@ my $duplfilter = 1;
 my $use_parp = 0; # whether this is parp run or not (parp artificial chromosome to be filtered before visualisation files)
 my $use_umi = 0; # whether this is UMI run or not, if yes, filter based on UMI indices : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this
 my $wobble_bin_width = 1 ; # wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
-
+my $only_cis = 0 ; # analysing only cis-reads (easing up the computational load for many-oligo samples which continue straight to PeakC which is essentially a cis program)
 
 # Code excecution start values :
 my $analysis_read;
@@ -213,6 +214,7 @@ print STDOUT "\n" ;
 	"snp"=>\ $use_snp,				# -snp		Force all capture points to contain a particular SNP
 	"parp"=>\ $use_parp,				# -parp		Run contains artificial chromosome PARP, which is to be removed before visualisation
 	"umi"=>\ $use_umi,				# -umi		Run contains UMI indices - alter the duplicate filter accordingly : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this
+	"onlycis"=>\ $only_cis, 			# -onlycis 	analysing only cis-reads (easing up the computational load for many-oligo samples which continue straight to PeakC which is essentially a cis program)
 	"wobble=i"=>\ $wobble_bin_width,		# -wobble	This is the wobble bin width. UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
 	"limit=i"=>\ $use_limit,			# -limit	Limit the analysis to the first n reads of the file
 	"stranded"=>\ $use_stranded,			# -stranded	To replicate the strand-specific (i.e. wrong) duplicate filter of CB3a/CC3 and CB4a/CC4
@@ -224,7 +226,7 @@ print STDOUT "\n" ;
 	'stringent'=>\$stringent,			# -stringent 	enforces additional stringency - forces all reported subfragments to be unique
 	"flashed=i"=>\ $flashed,			# -flashed	1 or 0 (are the reads in input sam combined via flash or not ? - run out.extended with 1 and out.not_combined with 0)
 	"duplfilter=i"=>\ $duplfilter,			# -duplfilter	1 or 0 (will the reads be duplicate diltered or not ? )
-	"CCversion=s"=>\ $version,			# -CCversion	CS3 or CS4 or CS5 (will the reads be duplicate filtered CC3 or CC4 or CS5 style ? )
+	"CCversion=s"=>\ $version,			# -CCversion	CS3 or CS4 or CS5 (will the reads be duplicate filtered CC3 or CC4 or CC5 style ? )
 );
 
 pod2usage(1) if $help;
@@ -268,6 +270,7 @@ print STDOUT "use_limit $use_limit\n";
 print STDOUT "genome $genome\n";
 print STDOUT "globin $globin \n"; 
 print STDOUT "stringent $stringent \n";
+print STDOUT "only_cis $only_cis \n";
 print STDOUT "use_umi $use_umi \n";
 print STDOUT "wobble_bin_width $wobble_bin_width \n";
 
@@ -591,12 +594,13 @@ while (my $line = <INFH>)  #loops through all the lines of the sam file
       if ($use_dump eq 1){print DUMPOUTPUT $line."\n"} #"$name\n$sequence\n+\n$qscore\n"};
     }
     
-    elsif ( $cigar =~/\d++\w++\d++/ )
-    {
-      $counters{"06e Fragments with CIGAR strings failing to parse (containing introns or indels) :"}++;
-      #push @{$data{$readname}{"coord array"}}, "cigarfail";
-      if ($use_dump eq 1){print DUMPOUTPUT $line."\n"} #"$name\n$sequence\n+\n$qscore\n"};     
-    }
+    # Now as bowtie2 is supported, this can be commented out ..
+    # elsif ( $cigar =~/\d++\w++\d++/ )
+    # {
+    #   $counters{"06e Fragments with CIGAR strings failing to parse (containing introns or indels) :"}++;
+    #   #push @{$data{$readname}{"coord array"}}, "cigarfail";
+    #   if ($use_dump eq 1){print DUMPOUTPUT $line."\n"} #"$name\n$sequence\n+\n$qscore\n"};     
+    # }
     
     #-----------------------------------------------------------------------------------------
     
@@ -639,8 +643,137 @@ while (my $line = <INFH>)  #loops through all the lines of the sam file
 	    
             $data{$readname}{$pe}{$readno}{"seqlength"} = $1;
             $data{$readname}{$pe}{$readno}{"readstart"} = $readstart;
-            $data{$readname}{$pe}{$readno}{"readend"} = $readstart+length($sequence)-1; #minus1 due to 1 based sam file input.
-	    $data{$readname}{$pe}{$readno}{"sequence"} = $sequence;
+	    
+  	    
+	    # Setting the read end - old way (without bowtie2 support)
+            # $data{$readname}{$pe}{$readno}{"readend"} = $readstart+length($sequence)-1; #minus1 due to 1 based sam file input.
+	    
+	    # Setting the read end - with bowtie2 support (full cigar parsing)
+	    
+	    # Here adding bowtie2 support :
+	    # https://samtools.github.io/hts-specs/SAMv1.pdf
+	    # Op 	BAM Description 			ConsumesQuery ConsumesReference
+	    # 
+	    # M 0 	alignment match (or mismatch) 		yes 		yes
+	    # I 1 	insertion to the reference 		yes 		no
+	    # D 2 	deletion from the reference 		no 		yes
+	    # N 3 	skipped region from the reference 	no 		yes
+	    # S 4 	soft clipping (present in SEQ) 		yes 		no
+	    # H 5 	hard clipping (NOT present in SEQ) 	no 		no
+	    # P 6 	padding (silent deletion) 		no 		no
+	    # = 7 	sequence match 				yes 		yes
+	    # X 8 	sequence mismatch 			yes 		yes
+	    # 
+	    # all possible : [MIDNSHP=X]
+	    # 
+	    # Op 	BAM Description 			ConsumesQuery ConsumesReference
+	    # 
+	    # M 0 	alignment match (or mismatch) 		yes 		yes
+	    # D 2 	deletion from the reference 		no 		yes
+	    # N 3 	skipped region from the reference 	no 		yes
+	    # = 7 	sequence match 				yes 		yes
+	    # X 8 	sequence mismatch 			yes 		yes
+	    # 
+	    # counting towards reference end point : [MDN=X]
+	    
+	    # This adds the start of the sequence and the end of the read to the hash
+	    
+	    # Setting lenght to zero before the cigar parse.
+	    $data{$readname}{$pe}{$readno}{"readend"}=$data{$readname}{$pe}{$readno}{"readstart"}-1; #minus1 due to 1 based sam file input.
+	    # Sequence - empty before entering CIGAR parsing ..
+	    $data{$readname}{$pe}{$readno}{"sequence"} = "";
+
+	    # Empty block for temp cigar
+	    {
+	    my $TEMPcigar=$cigar;
+	    while ($TEMPcigar =~ /(\d++)([MIDNSHP=X])(.*)/) 
+	    {
+	      my $number=$1;
+	      my $ident=$2;
+	      
+	      $TEMPcigar=$3;
+	      
+	      if ($ident =~ /^([MDN=X])$/)
+		{
+		  $data{$readname}{$pe}{$readno}{"readend"}+=$number;
+		}
+	    }
+	    }
+	    
+	    
+	    # Setting the sequence : this is only used in the snpcaller subroutine (so "ordinary runs" do not use this)
+	    
+	    # Old way of doing this (before bowtie2 support)
+	    # $data{$readname}{$pe}{$readno}{"sequence"} = $sequence;
+	    
+	    # Here adding bowtie2 support (full cigar parsing)
+	    # Op 	BAM Description 			ConsumesQuery ConsumesReference
+	    # 
+	    # These count normally
+	    # M 0 	alignment match (or mismatch) 		yes 		yes
+	    # = 7 	sequence match 				yes 		yes
+	    # X 8 	sequence mismatch 			yes 		yes
+	    # 
+	    # These are "skipped" - moving in seq coordinates, not printing anything 
+	    # I 1 	insertion to the reference 		yes 		no
+	    # S 4 	soft clipping (present in SEQ) 		yes 		no
+	    # 
+	    # These are "added" - not moving in seq coordinates, printing x-characters
+	    # D 2 	deletion from the reference 		no 		yes
+	    # N 3 	skipped region from the reference 	no 		yes
+	    # 
+	    # Ignoring these
+	    # H 5 	hard clipping (NOT present in SEQ) 	no 		no
+	    # P 6 	padding (silent deletion) 		no 		no
+	    
+	    # Initialising the sequence as empty string ..
+	    $data{$readname}{$pe}{$readno}{"sequence"}="";
+	    # Empty block for temp cigar and temp sequence
+	   {
+	   my $TEMPsequence=$sequence;
+	   my $TEMPcigar=$cigar;
+	   
+	   while ($TEMPcigar =~ /(\d++)([MIDNSHP=X])(.*)/)
+	   {
+	       my $addThis="";
+	       
+	       my $number=$1;
+	       my $ident=$2;
+	       $TEMPcigar=$3;
+		
+	       # These count normally
+	       if ($ident =~ /^([M=X])$/)
+	       {
+	         $addThis=substr($TEMPsequence,0,$number);
+	         $TEMPsequence=substr($TEMPsequence,$number);
+	       }
+		
+	       # These are "skipped" - moving in seq coordinates, not printing anything 
+	       if ($ident =~ /^([IS])$/)
+	       {
+	         $addThis="";
+	         $TEMPsequence=substr($TEMPsequence,$number);
+	       }
+		
+	       # These are "added" - not moving in seq coordinates, printing x-characters
+	       if ($ident =~ /^([DN])$/)
+	       {
+	         $addThis="";
+	         for (my$i=0; $i< $number; $i++)
+	         {
+		   $addThis=$addThis."x";
+		 }
+		
+	       }
+		
+	       # Ignoring these (silent in both reference and sequence)
+	       # [HP]
+		
+	       # In the end actually adding ..
+	       $data{$readname}{$pe}{$readno}{"sequence"}=$data{$readname}{$pe}{$readno}{"sequence"}.$addThis;
+	      
+	   }
+	   }
 	    
 	    #Generates a string of the coordinates of all the split paired end reads to allow duplicates to be excluded
 	    $data{$readname}{"number of reads"}++;
@@ -1039,7 +1172,7 @@ genomesFile http://$public_url/$sample\_$version\_genomes.txt
 email $email";
 
 print TRACKHUBB "genome $genome
-trackDb http://$public_url/$sample\_$version\_tracks.txt";
+trackDb http://sara.molbiol.ox.ac.uk$public_folder/$sample\_$version\_tracks.txt";
 
 
 print REPORTFH "\nThe track hub can be found at:
@@ -1502,11 +1635,16 @@ sub readAnalysisLoop
 					# $fraghash{"cis"}{$data{$analysis_read}{"captures"}}{$data{$analysis_read}{$pe}{$readno}{"chr"}}{$data{$analysis_read}{$pe}{$readno}{"fragstart"}}{"end"}= $data{$analysis_read}{$pe}{$readno}{"fragend"};
 					# }				      
 					#This puts the data for the matching lines into the %samhash
+					
+					# If we report both cis and trans .. , or we report only cis and ARE cis.
+					if ( (! $only_cis) || (($data{$analysis_read}{$pe}{$readno}{"chr"} eq $data{$analysis_read}{"cis_chr"}))  ){
+					
 					push @{$samhash{$data{$analysis_read}{"captures"}}}, $data{$analysis_read}{$pe}{$readno}{"whole line"};
 					
 					print CAPSAMFH $data{$analysis_read}{$pe}{$readno}{"whole line"};
 					print CAPSAMFH "\tCO:Z:";
 					print CAPSAMFH $data{$analysis_read}{"captures"};
+					
 					# If we are cis ..
 					if ($data{$analysis_read}{$pe}{$readno}{"chr"} eq $data{$analysis_read}{"cis_chr"}){
 					print CAPSAMFH "_CISREP\n";
@@ -1518,6 +1656,7 @@ sub readAnalysisLoop
 					$finalrepcounters{$data{$analysis_read}{"captures"}." 3b Reporter fragments CIS (final count) :"}++;
 					}
 					else{
+					if ( ! $only_cis ){
 					print CAPSAMFH "_TRANSREP\n";
 					$counters{"26c Actual reported TRANS fragments :"}++;
 					$counters{$data{$analysis_read}{"captures"}." 17c Reporter fragments TRANS (final count) :"}++;					
@@ -1526,13 +1665,26 @@ sub readAnalysisLoop
 					$finalrepcounters{"1c Actual reported TRANS fragments :"}++;
 					$finalrepcounters{$data{$analysis_read}{"captures"}." 3c Reporter fragments TRANS (final count) :"}++;
 					}
-				      
+					else{
+					$counters{"26c Filtered TRANS fragments :"}++;
+					$counters{$data{$analysis_read}{"captures"}." 17c Reporter fragments TRANS filtered (final count) :"}++;					
+					$finalcounters{"1c Filtered TRANS fragments :"}++;
+					$finalcounters{$data{$analysis_read}{"captures"}." 3c Reporter fragments TRANS filtered (final count) :"}++;
+					$finalrepcounters{"1c Filtered TRANS fragments :"}++;
+					$finalrepcounters{$data{$analysis_read}{"captures"}." 3c Reporter fragments TRANS filtered (final count) :"}++;
+					}					
+					}
+					
 					$counters{"26a Actual reported fragments :"}++;
 					$counters{$data{$analysis_read}{"captures"}." 17a Reporter fragments (final count) :"}++;
 					$finalcounters{"1a Actual reported fragments :"}++;
 					$finalcounters{$data{$analysis_read}{"captures"}." 3a Reporter fragments (final count) :"}++;					
 					$finalrepcounters{"1a Actual reported fragments :"}++;
-					$finalrepcounters{$data{$analysis_read}{"captures"}." 3a Reporter fragments (final count) :"}++;					
+					$finalrepcounters{$data{$analysis_read}{"captures"}." 3a Reporter fragments (final count) :"}++;
+					  
+					  
+					}
+					
 					
 					}
 				      }

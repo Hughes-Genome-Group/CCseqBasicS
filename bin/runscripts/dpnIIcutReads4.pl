@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License      #
 # along with CCseqBasic5.  If not, see <http://www.gnu.org/licenses/>.   #
 ##########################################################################
-
 use strict;
 
 my $min_length = 19;
@@ -166,12 +165,12 @@ if ( $filetype eq "NONFLASHED" )
 {
 print "Here READ means either R1 or R2 part of any read - both are called read, and the combined entity does not exist, as flashing was not succesfull for these.\n";
 print "In detail, \n$fragment_counter fragments was found, and of these \n$printed_counter fragments were printed - as they were longer than the set threshold $min_length\n";
-print "Of the printed fragments :\n$gatc_3_counter fragments had 5' and 3' GATC,\n$gatc_1_counter fragments had only 5' GATC,\n$gatc_2_counter fragments had only 3' GATC site,\n$gatc_0_counter fragments had no GATC.\n";
+print "Of the printed fragments (in FASTQ coordinates):\n$gatc_3_counter fragments had LEFT and RIGHT GATC,\n$gatc_1_counter fragments had only LEFT GATC,\n$gatc_2_counter fragments had only RIGHT GATC site,\n$gatc_0_counter fragments had no GATC.\n";
 }
 else {
 print "In detail, \n$fragment_counter fragments was found, and of these \n$printed_counter fragments were printed - as they were longer than the set threshold $min_length , and the read contained at least one GATC\n";
-print "Of the printed fragments :\n$gatc_3_counter fragments had 5' and 3' GATC,\n$gatc_1_counter fragments had only 5' GATC,\n$gatc_2_counter fragments had only 3' GATC site.\n";
-print "$gatc_0_counter reads were longer htan the set treshold $min_length, but had no GATC and thus were discarded .\n";
+print "Of the printed fragments (in FASTQ coordinates):\n$gatc_3_counter fragments had LEFT and RIGHT GATC,\n$gatc_1_counter fragments had only LEFT GATC,\n$gatc_2_counter fragments had only RIGHT GATC site.\n";
+print "$gatc_0_counter reads were longer than the set treshold $min_length, but had no GATC and thus were discarded .\n";
 }
 
 

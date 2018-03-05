@@ -61,6 +61,8 @@ module load samtools/1.1
 
 module load bowtie/1.1.2
 # Supports all bowtie1 versions 1.* and 0.*
+module load bowtie2/2.1.0
+# Supports all bowtie2 versions
 
 module load bedtools/2.17.0
 # Supports bedtools versions 2.1* . Does not support bedtools versions 2.2*
@@ -117,6 +119,7 @@ export PATH=$PATH:/package/perl/5.18.1/bin
 export PATH=$PATH:/package/blat/35/bin
 export PATH=$PATH:/package/python/2.7.5/bin
 
+
 # See notes of SUPPORTED VERSIONS above !
 
 echo $PATH
@@ -138,6 +141,8 @@ fi
 # UCSCtools are taken from install directory, in any case :
 
 export PATH=$PATH:/${confFolder}/ucsctools
+
+
 
 }
 
