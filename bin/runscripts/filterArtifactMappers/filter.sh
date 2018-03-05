@@ -145,9 +145,9 @@ do
             printToLogFile
             
             # Sorting the bam file for the filtering..
-            printThis="Sorting the bam file for the filtering..\nsamtools sort TEMP.bam TEMP_sorted; samtools index TEMP_sorted.bam"
+            printThis="Sorting the bam file for the filtering..\nsamtools sort -o TEMP_sorted.bam TEMP.bam; samtools index TEMP_sorted.bam"
             printToLogFile
-            samtools sort TEMP.bam TEMP_sorted
+            samtools sort -o TEMP_sorted.bam TEMP.bam
             mv -f TEMP_sorted.bam TEMP.bam
             samtools index TEMP.bam
     
