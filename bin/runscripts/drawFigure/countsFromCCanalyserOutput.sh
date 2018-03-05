@@ -29,12 +29,15 @@ restrictionEnzyme="$4"
 
 
 # All reads
-all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total reads:" | sed 's/.*:\s*//' )))
+# Old versions of Flash say "Total reads" when counting total read pairs. New versions of Flash say "Total pairs".
+# all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total reads:" | sed 's/.*:\s*//' )))
+# all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total pairs:" | sed 's/.*:\s*//' )))
+all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
 
-# Flashed 
+# Flashed (see notes for "All reads" above)
 
-allflashed=$(($( cat  ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Combined reads:" | sed 's/.*:\s*//' )))
-allnonflashed=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Uncombined reads:" | sed 's/.*:\s*//' )))
+allflashed=$(($( cat  ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Combined [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
+allnonflashed=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Uncombined [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
 
 # RE_site 	
 REflashed=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/FLASHED_${restrictionEnzyme}digestion.log | grep "had at least one ${restrictionEnzyme} site in them" | sed 's/\s.*//' )))
