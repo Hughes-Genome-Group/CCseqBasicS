@@ -133,6 +133,8 @@ echo "SONICATION LENGHT"
 echo "--sonicationSize 300 (how far from RE enzyme cut site reach the 'valid fragments'. This is the max expected library fragment size after sonication.)"
 echo
 echo "CAPTURE-C ANALYSER OPTIONS"
+echo "--useSymbolicLinks (use symbolic links between run directory and public directory to store bigwig files, "
+echo "   instead of storing the bigwigs straight in the public directory)"
 echo "--onlyCis (to analyse only cis-mapping reporters : this flag also affects BLAT OUTPUT FILES, see below)"
 echo "-s Sample name (and the name of the folder it goes into)"
 echo "--snp : snp-specific run (check your oligo coordinates file that you have defined the SNPs there)"

@@ -200,8 +200,13 @@ updateHub_part2c(){
 }
 
 updateHub_part3(){
+    TEMPname=$( echo ${sampleForCCanalyser} | sed 's/_.*//' )
     echo
+    if [ "${TEMPname}" == "RAW" ] || [ "${TEMPname}" == "PREfiltered" ] || [ "${TEMPname}" == "FILTERED" ] || [ "${TEMPname}" == "COMBINED" ] ; then
+    echo "Generated a data hub in : ${ServerAndPath}/${TEMPname}/${sampleForCCanalyser}_${CCversion}_hub.txt"
+    else
     echo "Generated a data hub in : ${ServerAndPath}/${sampleForCCanalyser}_${CCversion}_hub.txt"
+    fi
     echo 'How to load this hub to UCSC : http://sara.molbiol.ox.ac.uk/public/telenius/DataHubs/ReadMe/HowToUseA_DataHUB_160813.pdf'    
 
 }

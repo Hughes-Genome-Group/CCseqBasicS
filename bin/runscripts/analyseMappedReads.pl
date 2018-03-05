@@ -102,7 +102,8 @@ use Pod::Usage;
  -globin	Combines the two captures from the gene duplicates (HbA1 and HbA2)
  -flashed	1 or 0 (are the reads in input sam combined via flash or not ? - run out.extended with 1 and out.not_combined with 0)
  -duplfilter	1 or 0 (will the reads be duplicate diltered or not ? )
- -ucscsizes     Genome sizes file 
+ -ucscsizes     Genome sizes file
+ -symlinks      To make symbolic links to bigwigs into the public area, instead of actually storing the bigwigs there. The symlink data folder is first part of $sample name (before first underscore)
  -stringent 	enforces additional stringency - forces all reported subfragments to be unique
  -CCversion	CS3 or CS4 or CS5 (will the reads be duplicate filtered CC3 or CC4 or CC5 style ? )
  -stranded	To replicate the strand-specific (i.e. wrong) duplicate filter of CB3a/CC3 and CB4a/CC4
@@ -149,6 +150,7 @@ my $use_dump =0; #whether to create an output file with all of the non-aligning 
 my $use_snp=0; #whether to use the SNP specified in the the input file
 my $use_stranded=0; # whether we do the brain fart strand specific duplicate filter or not (CB4 CB3 CC3 CC4 do it strand specific)
 my $use_limit=0; #whether to limit the script to analysing the first n lines
+my $use_symlinks=0; #whether to use symlinks to store bigwigs or not
 my $globin = 0; #whether to include the part of the script that combines the HbA1 and 2 tracks
 my $stringent = 0;
 my $flashed = 1;
@@ -227,7 +229,9 @@ print STDOUT "\n" ;
 	"flashed=i"=>\ $flashed,			# -flashed	1 or 0 (are the reads in input sam combined via flash or not ? - run out.extended with 1 and out.not_combined with 0)
 	"duplfilter=i"=>\ $duplfilter,			# -duplfilter	1 or 0 (will the reads be duplicate diltered or not ? )
 	"CCversion=s"=>\ $version,			# -CCversion	CS3 or CS4 or CS5 (will the reads be duplicate filtered CC3 or CC4 or CC5 style ? )
-);
+	"symlinks"=>\ $use_symlinks,			# -symlinks	To make symlinks to bigwigs into the public area, instead of actually storing the bigwigs there.
+)
+;
 
 pod2usage(1) if $help;
 pod2usage(-verbose=>2) if $man;
@@ -242,12 +246,37 @@ if ( $ucscsizes eq "UNDEFINED"){
  $ucscsizes="$bigwig_folder/$genome\_sizes.txt"
 }
 
+# Creates a folder for the output files to go into - this will be a subdirectory of the file that the script is in
+my $current_directory = cwd;
+my $output_path= "$current_directory/$sample\_$version";
+
+# If user did not define public folder - setting public files to be saved in the output folder :
+if ( $public_folder eq "DATA_FOR_PUBLIC_FOLDER" )
+{
+  mkdir "$output_path/DATA_FOR_PUBLIC_FOLDER"; 
+  #print STDOUT "\nPublic url and/or public folder location not set - printing visualisation files to output directory $output_path/VISUALISATION_FILES\n";
+  print STDOUT "\nPublic folder location not set - printing visualisation files to output directory $output_path/DATA_FOR_PUBLIC_FOLDER\n";
+  $public_folder="$output_path/DATA_FOR_PUBLIC_FOLDER";
+}
+
+# If symlinks were requested, setting stuff ..
+my $store_bigwigs_here_folder="UNDETERMINED_BIGWIG_FOLDER";
+if ($use_symlinks)
+{
+$store_bigwigs_here_folder="PERMANENT_BIGWIGS_do_not_move";
+}
+else
+{
+$store_bigwigs_here_folder=$public_folder;
+}
+
 
 # Printing out the parameters in the beginning of run - Jelena added this 220515
 
 print STDOUT "Starting run with parameters :\n" ;
 print STDOUT "\n" ;
 
+print STDOUT "store_bigwigs_here_folder $store_bigwigs_here_folder \n" ;
 print STDOUT "public_folder $public_folder \n" ;
 print STDOUT "public_url $public_url \n";
 print STDOUT "ucscsizes $ucscsizes\n" ;
@@ -296,8 +325,6 @@ print STDOUT "\n";
 print STDOUT "Generating output folder.. \n";
 
 # Creates a folder for the output files to go into - this will be a subdirectory of the file that the script is in
-my $current_directory = cwd;
-my $output_path= "$current_directory/$sample\_$version";
 
 print PARAMETERLOG "datafolder $output_path \n";
 
@@ -305,17 +332,6 @@ if (-d $output_path){}
 else {mkdir $output_path};
 # We don't want to chdir - as otherwise RELATIVE file paths will not work.
 #chdir $output_path;
-
-
-
-# If user did not define public folder - setting public files to be saved in the output folder :
-if ( $public_folder eq "DATA_FOR_PUBLIC_FOLDER" )
-{
-  mkdir "$output_path/DATA_FOR_PUBLIC_FOLDER"; 
-  #print STDOUT "\nPublic url and/or public folder location not set - printing visualisation files to output directory $output_path/VISUALISATION_FILES\n";
-  print STDOUT "\nPublic folder location not set - printing visualisation files to output directory $output_path/DATA_FOR_PUBLIC_FOLDER\n";
-  $public_folder="$output_path/DATA_FOR_PUBLIC_FOLDER";
-}
 
 print STDOUT "Opening input and output files.. \n";
 
@@ -329,6 +345,21 @@ unless ($input_filename =~ /(.*).sam/) {die"filename does not match .sam, stoppe
 my $prefix_for_output = $1."_$version";
 print PARAMETERLOG "dataprefix $prefix_for_output \n";
 close PARAMETERLOG ;
+
+# Make the upper folder for bigwigs
+if (-d $store_bigwigs_here_folder){}
+else {mkdir $store_bigwigs_here_folder};
+
+# Make the inner folder for bigwigs
+if ($use_symlinks)
+{
+# RAW FILTERED etc are the first part of the name, before first underscore.
+my @splitted_sample = split /_/,$sample ;
+my $bigwig_subfolder = $splitted_sample[0];
+$store_bigwigs_here_folder=$store_bigwigs_here_folder."/".$bigwig_subfolder;
+if (-d $store_bigwigs_here_folder){}
+else {mkdir $store_bigwigs_here_folder};
+}
 
 my $outputfilename = "$sample\_$version/$prefix_for_output";
 
@@ -1190,8 +1221,8 @@ for (my$i=0; $i< (scalar (@oligo_data)); $i++)
   #if ($filesize >1000)	# ensures that wigtobigwig is not run on files containing no data
   if ($filesize >0)	# ensures that wigtobigwig is not run on files containing no data
   {
-    wigtobigwig($outputfilename."_".$oligo_data[$i][0], \*REPORTFH, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-    wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_win", \*REPORTFH, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+    wigtobigwig($outputfilename."_".$oligo_data[$i][0], \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+    wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_win", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
     
     my $short_filename = $outputfilename."_".$oligo_data[$i][0];
     if ($short_filename =~ /(.*)\/(\V++)/) {$short_filename = $2};
@@ -1967,15 +1998,27 @@ sub fragtable_out
 #if this fails to work try running: module add ucsctools  at the unix command line
 sub wigtobigwig 
 {
-    my ($filename, $report_filehandle, $public_folder, $public_url, $description) = @_;
+    my ($filename, $report_filehandle, $store_bigwigs_here_folder, $public_folder, $public_url, $description) = @_;
     print $report_filehandle "track type=bigWig name=\"$filename\" description=\"$description\" bigDataUrl=http://$public_url/$filename.bw\n";
     print "track type=bigWig name=\"$filename\" description=\"$description\" bigDataUrl=http://$public_url/$filename.bw\n";
     
     system ("wigToBigWig -clip $filename.wig $ucscsizes $filename.bw") == 0 or print STDOUT "couldn't bigwig $genome file $filename\n";
     my $short_filename = $filename.".bw";
     if ($short_filename =~ /(.*)\/(\V++)/) {$short_filename = $2};
-    system ("mv $filename.bw $public_folder/$short_filename") == 0 or print STDOUT "couldn't move $genome file $filename\n";		
-    # system ("chmod 755 $public_folder/$short_filename") == 0 or print STDOUT "couldn't chmod $genome file $filename\n";    
+    
+    system ("mv $filename.bw $store_bigwigs_here_folder/$short_filename") == 0 or print STDOUT "couldn't move $genome file $filename\n";		
+    
+    # system ("mv $filename.bw $public_folder/$short_filename") == 0 or print STDOUT "couldn't move $genome file $filename\n";		
+    # system ("chmod 755 $public_folder/$short_filename") == 0 or print STDOUT "couldn't chmod $genome file $filename\n";
+    
+    # If these are not the same - we have symlink run
+    if ( $store_bigwigs_here_folder ne $public_folder )
+    {
+      print STDOUT "ln -fs \$\(pwd\)/$store_bigwigs_here_folder/$short_filename $public_folder/$short_filename\n";
+      system("ln -fs \$\(pwd\)/$store_bigwigs_here_folder/$short_filename $public_folder/$short_filename") == 0 or print STDOUT "couldn't symlink $genome file $filename\n";
+    }
+    
+    
 }
 
 #This ouputs a the hash of arrays in the format: samhash{name of capture}[line of sam file]

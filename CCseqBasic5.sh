@@ -310,7 +310,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,strandSpecificDuplicates,onlyCis,UMI,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,sonicationSize: -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,strandSpecificDuplicates,onlyCis,UMI,useSymbolicLinks,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,sonicationSize: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -330,6 +330,7 @@ while true ; do
         -v) LOWERCASE_V="$2"; shift 2;;
         --help) usage ; shift;;
         --UMI) otherParameters="$otherParameters --umi" ; shift;;
+        --useSymbolicLinks) otherParameters="$otherParameters --symlinks" ; shift;;
         --CCversion) CCversion="$2"; shift 2;;       
         --dpn) REenzyme="dpnII" ; shift;;
         --nla) REenzyme="nlaIII" ; shift;;
@@ -977,9 +978,11 @@ echo
     
     rm -rf ../filteringLogFor_PREfiltered_${Sample}_${CCversion} ../RAW_${Sample}_${CCversion} ../PREfiltered_${Sample}_${CCversion} ../FILTERED_${Sample}_${CCversion} ../COMBINED_${Sample}_${CCversion}
 
+    # These are temp symlinks to filteringLogFor_PREfiltered_${Sample}_${CCversion} files
+    rm -f ../FLASHED_REdig.sam ../NONFLASHED_REdig.sam
     
 # Remove the malformed public folder for a new try..
-    rm -rf ${PublicPath}
+    rm -rf ${PublicPath} ../PERMANENT_BIGWIGS_do_not_move
     
 # Restoring the input sam files..
 
