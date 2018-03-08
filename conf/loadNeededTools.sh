@@ -70,9 +70,8 @@ module load bedtools/2.17.0
 module load flash/1.2.8
 # Not known if would support other flash versions. Most probably will support.
 
-module load fastqc/0.10.1
-# Will not support fastqc versions 0.11.* or newer.
-# CCseqBasic3 includes a legacy version of fastqc ( fastqc_v0.10.1.zip ), which you can install if you don't have "old enough" fastqc.
+module load fastqc/0.11.4
+# Will not support fastqc versions 0.10.* or older
 
 module load trim_galore/0.3.1
 # Not known if would support other trim_galore versions. Most probably will support.
@@ -112,7 +111,7 @@ export PATH=$PATH:/package/bowtie/1.1.2/bin
 export PATH=$PATH:/package/bowtie2/2.1.0/bin
 export PATH=$PATH:/package/bedtools/2.17.0/bin
 export PATH=$PATH:/package/flash/1.2.8/bin
-export PATH=$PATH:/package/fastqc/0.10.1/bin
+export PATH=$PATH:/package/fastqc/0.11.4/bin
 export PATH=$PATH:/package/trim_galore/0.3.1/bin
 export PATH=$PATH:/package/cutadapt/1.2.1/bin
 export PATH=$PATH:/package/perl/5.18.1/bin

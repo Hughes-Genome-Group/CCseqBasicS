@@ -693,10 +693,17 @@ printToLogFile
 ${RunScriptsPath}/QC_and_Trimming.sh --fastqc
 
     # Changing names of fastqc folders to be "ORIGINAL"
-    # mv -f READ1_fastqc READ1_fastqc_ORIGINAL
-    # mv -f READ2_fastqc READ2_fastqc_ORIGINAL
-    mv -f READ1_fastqc.zip READ1_fastqc_ORIGINAL.zip
-    mv -f READ2_fastqc.zip READ2_fastqc_ORIGINAL.zip
+    
+    rm -rf READ1_fastqc_ORIGINAL
+    rm -rf READ2_fastqc_ORIGINAL
+    
+    mkdir READ1_fastqc_ORIGINAL
+    mkdir READ2_fastqc_ORIGINAL
+    
+    mv -f READ1_fastqc.html READ1_fastqc_ORIGINAL/fastqc_report.html
+    mv -f READ2_fastqc.html READ2_fastqc_ORIGINAL/fastqc_report.html 
+    mv -f READ1_fastqc.zip  READ1_fastqc_ORIGINAL.zip
+    mv -f READ2_fastqc.zip  READ2_fastqc_ORIGINAL.zip
    
     ls -lht
 
@@ -732,8 +739,16 @@ printToLogFile
 ${RunScriptsPath}/QC_and_Trimming.sh --fastqc
 
     # Changing names of fastqc folders to be "TRIMMED"
-    # mv -f READ1_fastqc READ1_fastqc_TRIMMED
-    # mv -f READ2_fastqc READ2_fastqc_TRIMMED
+    
+    rm -rf READ1_fastqc_TRIMMED
+    rm -rf READ2_fastqc_TRIMMED
+    
+    mkdir READ1_fastqc_TRIMMED
+    mkdir READ2_fastqc_TRIMMED
+    
+    mv -f READ1_fastqc.html READ1_fastqc_TRIMMED/fastqc_report.html
+    mv -f READ2_fastqc.html READ2_fastqc_TRIMMED/fastqc_report.html 
+    
     mv -f READ1_fastqc.zip READ1_fastqc_TRIMMED.zip
     mv -f READ2_fastqc.zip READ2_fastqc_TRIMMED.zip
     
@@ -756,16 +771,24 @@ rm -f READ1.fastq READ2.fastq
 printThis="Running fastQC for FLASHed and nonflashed files.."
 printToLogFile
 
+rm -rf FLASHED_fastqc
+rm -rf NONFLASHED_fastqc
+    
+mkdir FLASHED_fastqc
+mkdir NONFLASHED_fastqc
+    
 printThis="fastqc --quiet -f fastq FLASHED.fastq"
 printToLogFile
 
 fastqc --quiet -f fastq FLASHED.fastq
+mv -f FLASHED_fastqc.html FLASHED_fastqc/fastqc_report.html
 
 
 printThis="fastqc --quiet -f fastq NONFLASHED.fastq"
 printToLogFile
 
 fastqc --quiet -f fastq NONFLASHED.fastq
+mv -f NONFLASHED_fastqc.html NONFLASHED_fastqc/fastqc_report.html
 
 
 ################################################################
@@ -808,16 +831,24 @@ rm -f NONFLASHED.fastq
 printThis="Running fastQC for RE-digested files.."
 printToLogFile
 
+rm -rf FLASHED_REdig_fastqc
+rm -rf NONFLASHED_REdig_fastqc
+    
+mkdir FLASHED_REdig_fastqc
+mkdir NONFLASHED_REdig_fastqc
+    
 printThis="fastqc --quiet -f fastq FLASHED_REdig.fastq"
 printToLogFile
 
 fastqc --quiet -f fastq FLASHED_REdig.fastq
+mv -f FLASHED_REdig_fastqc.html FLASHED_REdig_fastqc/fastqc_report.html
 
 
 printThis="fastqc --quiet -f fastq NONFLASHED_REdig.fastq"
 printToLogFile
 
 fastqc --quiet -f fastq NONFLASHED_REdig.fastq
+mv -f NONFLASHED_REdig_fastqc.html NONFLASHED_REdig_fastqc/fastqc_report.html
 
 ################################################################
 # Running Bowtie for the digested file..

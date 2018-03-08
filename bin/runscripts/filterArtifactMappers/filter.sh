@@ -145,9 +145,17 @@ do
             printToLogFile
             
             # Sorting the bam file for the filtering..
-            printThis="Sorting the bam file for the filtering..\nsamtools sort -o TEMP_sorted.bam TEMP.bam; samtools index TEMP_sorted.bam"
+            # Lifting this to other versions of samtools 1.* than 1.1 (the ones not allowing the legacy use any more)
+            # To support this T flag is needed for "transition versions" (where both the old and new annotation can still be used)
+            # See for example https://github.com/samtools/samtools/issues/171
+            
+            # The new usage is now :
+            # The below generates out.bam in "bam" format, and sorts with prefix "tempThisThing" and takes input from head.bam
+            # samtools sort -o out.bam -O bam -T tempThisThing head.bam
+            
+            printThis="Sorting the bam file for the filtering..\nsamtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam; samtools index TEMP_sorted.bam"
             printToLogFile
-            samtools sort -o TEMP_sorted.bam TEMP.bam
+            samtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam
             mv -f TEMP_sorted.bam TEMP.bam
             samtools index TEMP.bam
     
