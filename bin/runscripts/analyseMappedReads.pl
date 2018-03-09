@@ -141,6 +141,7 @@ my $genome = "UNDEFINED";
 # Optional parameters :
 my $public_folder = "DATA_FOR_PUBLIC_FOLDER";
 my $public_url = "UNDETERMINED_SERVER/DATA_FOR_PUBLIC_FOLDER";
+my $store_bigwigs_here_folder="UNDETERMINED_BIGWIG_FOLDER";
 
 # Parameters with hardcoded default value :
 my $window = 2000;
@@ -260,7 +261,6 @@ if ( $public_folder eq "DATA_FOR_PUBLIC_FOLDER" )
 }
 
 # If symlinks were requested, setting stuff ..
-my $store_bigwigs_here_folder="UNDETERMINED_BIGWIG_FOLDER";
 if ($use_symlinks)
 {
 $store_bigwigs_here_folder="PERMANENT_BIGWIGS_do_not_move";
