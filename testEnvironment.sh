@@ -719,14 +719,23 @@ echo
 sleep 2
 
 echo "Python .."
+echo "(Python 3.* is NOT supported. Check below, that you have Python 2.*)"
 echo
 python --version
 python --version >> /dev/null
 exitCode=$(( ${exitCode} + $? ))
 echo
 
-sleep 2
+sleep 4
 
+echo "Matplotlib - within python .."
+echo "(matplotlib 1.3.* or older are NOT supported. Check below, that you have at least matplotlib 1.4.1 )"
+echo
+python -c "import matplotlib as mpl; print mpl.__version__" 
+exitCode=$(( ${exitCode} + $? ))
+echo
+
+sleep 4
 
 ##########################################################################
 

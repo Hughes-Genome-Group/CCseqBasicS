@@ -2016,6 +2016,8 @@ sub wigtobigwig
     {
       print STDOUT "ln -fs \$\(pwd\)/$store_bigwigs_here_folder/$short_filename $public_folder/$short_filename\n";
       system("ln -fs \$\(pwd\)/$store_bigwigs_here_folder/$short_filename $public_folder/$short_filename") == 0 or print STDOUT "couldn't symlink $genome file $filename\n";
+      system("ls -lh $public_folder/$short_filename") == 0 or print STDOUT "couldn't list generated symlink $genome file $public_folder/$short_filename\n";
+      
     }
     
     
