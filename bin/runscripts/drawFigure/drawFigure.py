@@ -19,8 +19,9 @@
 # print "Preparing to run - check where we are and which version we have.."
 import sys
 # print ""
-print "We are running in Python and machine :"
+print "We are running in machine :"
 print sys.platform
+print "We are running in Python version :"
 print sys.version
 print ""
 # print "We can load from these paths :"
@@ -48,6 +49,8 @@ import re
 # 
 # print "Importing matplotlib"
 import matplotlib as mpl
+print "We are running matplotlib version :"
+print mpl.__version__
 # 
 # print "Available back ends (instead of X windows) :"
 # print (mpl.rcsetup.non_interactive_bk)
