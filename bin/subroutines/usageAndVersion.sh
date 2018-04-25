@@ -96,6 +96,7 @@ echo
 echo "RESTRICTION ENZYME SETTINGS"
 echo "--dpn  (default) : dpnII is the RE of the experiment"
 echo "--nla  : nlaIII is the RE of the experiment"
+echo "--hind : hindIII is the RE of the experiment"
 echo
 echo "BOWTIE SETTINGS"
 echo "--bowtie1 / --bowtie2 (default is bowtie1 - decide if bowtie1 or bowtie2 is to be used. bowtie2 is better to long reads - read lenght more than 70b, sonication fragment lenght more than 350b)"
