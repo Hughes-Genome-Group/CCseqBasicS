@@ -70,7 +70,7 @@ foreach $chr(@chrs)
 my @frags = split (/AAGCTT/i,$genomehash{$chr});
 
 # Deals with the first fragment
-    my $start=1; my $end= $start + (length$frags[0])+1; 
+    my $start=1; my $end= $start + (length$frags[0]);
     print OUTPUT "$chr:$start-$end\n";
     
 # Deals with all the middle fragments
@@ -83,5 +83,6 @@ my @frags = split (/AAGCTT/i,$genomehash{$chr});
 # Deals with the last fragment
     $start = $end+1; $end = $start + (length $frags[$#frags]) +1;
     print OUTPUT "$chr:$start-$end\n";
+    
 }
 
