@@ -1282,8 +1282,7 @@ mv parameters_for_filtering.log filteringLogFor_${sampleForCCanalyser}_${CCversi
 cd filteringLogFor_${sampleForCCanalyser}_${CCversion}
 
 TEMPreturnvalue=0
-${CaptureFilterPath}/filter.sh --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall ${ploidyFilter} --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log
-TEMPreturnvalue=$?
+TEMPreturnvalue=$( ${CaptureFilterPath}/filter.sh --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall ${ploidyFilter} --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log )
 cat filtering.log
 rm -f ${publicPathForCCanalyser}/filtering.log
 cp filtering.log ${publicPathForCCanalyser}/.

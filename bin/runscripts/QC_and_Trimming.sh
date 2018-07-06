@@ -31,8 +31,17 @@ PipeTopPath="$( echo $0 | sed 's/\/runscripts\/QC_and_Trimming.sh$//' )"
 
 CapturePipePath="${PipeTopPath}/subroutines"
 
+# DEBUG SUBROUTINES - for the situations all hell breaks loose
+# . ${CapturePipePath}/debugHelpers.sh
+
 # TESTING file existence, log file output general messages
-. ${CapturePipePath}/testers_and_loggers.sh
+CaptureCommonHelpersPath=$( dirname ${PipeTopPath} )"/commonSubroutines"
+. ${CaptureCommonHelpersPath}/testers_and_loggers.sh
+if [ "$?" -ne 0 ]; then
+    printThis="testers_and_loggers.sh safety routines cannot be found in $0. Cannot continue without safety features turned on ! \n EXITING !! "
+    printToLogFile
+    exit 1
+fi
 
 #------------------------------------------
 
@@ -45,6 +54,41 @@ echo
 
 
 #------------------------------------------
+# Setting $HOME to the current dir
+echo 'Turning on safety measures for cd rm and mv commands in $0 - restricting script to file operations "from this dir below" only :'
+HOME=$(pwd)
+echo $HOME
+echo
+# - to enable us to track mv rm and cd commands
+# from taking over the world accidentally
+# this is done in testers_and_loggers.sh subroutines, which are to be used
+# every time something gets parsed, and after that when the parsed value is used to mv cd or rm anything
+# ------------------------------------------
+
+# Test the testers and loggers ..
+
+printThis="Testing the tester subroutines in $0 .."
+printToLogFile
+printThis="${CaptureCommonHelpersPath}/testers_and_loggers_test.sh 1> testers_and_loggers_test.out 2> testers_and_loggers_test.err"
+printToLogFile
+   
+${CaptureCommonHelpersPath}/testers_and_loggers_test.sh 1> testers_and_loggers_test.out 2> testers_and_loggers_test.err
+# The above exits if any of the tests don't work properly.
+
+# The below exits if the logger test sub wasn't found (path above wrong or file not found)
+if [ "$?" -ne 0 ]; then
+    printThis="Testing testers_and_loggers.sh safety routines failed in $0. Cannot continue without testing safety features ! \n EXITING !! "
+    printToLogFile
+    exit 1
+else
+    printThis="Testing the tester subroutines completed - continuing ! "
+    printToLogFile
+fi
+
+# Comment this out, if you want to save these files :
+rm -f testers_and_loggers_test.out testers_and_loggers_test.err
+
+#------------------------------------------
 
 printThis="$0"
 printToLogFile
@@ -54,7 +98,7 @@ printToLogFile
 #module load trim_galore/0.3.1
 
 # SHELL SCRIPTS inherit from their parents - (uncommenting) the following line proves that, if you are in doubt !
-# module list
+# module list 2>&1
 
 # FILES IT REQUIRES :
 # ${READ1}.fastq and ${READ2}.fastq - in the folder the script is launched.
@@ -277,14 +321,17 @@ elif [ "${runMode}" -eq 3 ] ; then
     printThis="Allows 10% sequencing errors, at least ${S}b has to match, excludes both reads in pair if EITHER of them end up shorter than ${L}bp\nCuts the low-quality part of 3' end - quality cutoff being : ${qualFilter}, in PHRED${QUAL} quality score scheme"
     printToTrimmingLogFile
 
+trimmingOK=1
 if [ "${singleEnd}" -eq 0 ] ; then
     printThis="trim_galore --trim1 --phred${QUAL} --paired -q ${qualFilter} -a ${A1} -a2 ${A2} --length ${L} --stringency ${S} ${READ1}.fastq ${READ2}.fastq"
     printToTrimmingLogFile
     trim_galore --trim1 "--phred${QUAL}" --paired -q "${qualFilter}" -a "${A1}" -a2 "${A2}" --length "${L}" --stringency "${S}" "${READ1}.fastq" "${READ2}.fastq" >> "read_trimming.log"
+    if [ $? -ne 0 ]; then trimmingOK=0;fi
 else
     printThis="trim_galore --phred${QUAL} -q ${qualFilter} -a ${A1} --length ${L} --stringency ${S} ${READ1}.fastq"
     printToTrimmingLogFile
     trim_galore "--phred${QUAL}" -q "${qualFilter}" -a "${A1}" --length "${L}" --stringency "${S}" "${READ1}.fastq" >> "read_trimming.log"    
+    if [ $? -ne 0 ]; then trimmingOK=0;fi
 fi
 
 
@@ -301,12 +348,50 @@ fi
 
     rm -f *trimming_report.txt
     
+# Check if trimming went find, if not, exit 1
+
+if [ "${trimmingOK}" -eq 0 ]; then
+    printThis="Trimming crashed !\n EXITING !! "
+    printToLogFile
+    exit 1    
+fi
+    
+# Check if files exist, if not, exit 1
+
+if [ ! -s ${READ1}_val_1.fq ]; then
+    printThis="Trimming failed : Trimgalore output file ${READ1}_val_1.fq is empty ! \n EXITING !! "
+    printToLogFile
+    exit 1    
+fi
+
+if [ "${singleEnd}" -eq 0 ] ; then
+if [ ! -s ${READ1}_val_2.fq ]; then
+    printThis="Trimming failed : Trimgalore output file ${READ1}_val_2.fq is empty ! \n EXITING !! "
+    printToLogFile
+    exit 1    
+fi    
+fi
+    
     # OVERWRITE STEP !!!!
     
 if [ "${singleEnd}" -eq 0 ] ; then
+    
+    moveCommand='mv -f ${READ1}_val_1.fq ${READ1}.fastq'
+    moveThis="${READ1}"
+    moveToHere="${READ1}"
+    checkMoveSafety    
     mv -f "${READ1}_val_1.fq" "${READ1}.fastq"
+
+    moveCommand='mv -f ${READ2}_val_1.fq ${READ2}.fastq'
+    moveThis="${READ2}"
+    moveToHere="${READ2}"
+    checkMoveSafety      
     mv -f "${READ2}_val_2.fq" "${READ2}.fastq"
 else
+    moveCommand='mv -f ${READ1}_trimmed.fq ${READ1}.fastq'
+    moveThis="${READ1}"
+    moveToHere="${READ1}"
+    checkMoveSafety  
     mv -f "${READ1}_trimmed.fq" "${READ1}.fastq" 
 fi
 
@@ -334,6 +419,8 @@ elif [ "${runMode}" -eq 5 ] ; then
    A1=${A1_5prime}
    A2=${A2_5prime}
    
+    trimmingOK=1
+   
     printThis="Running cutadapt for ILLUMINA PAIRED END SEQUENCING ADAPTERS only - like this :\nTrims both reads against the REVERSE COMPLEMENT (GCTCTTCCGATCT) of Illumina next-to-the-read 13bp adaptor sequence AGATCGGAAGAGC, (and everything before it in 5' end)"
     printToTrimmingLogFile
     
@@ -343,7 +430,8 @@ elif [ "${runMode}" -eq 5 ] ; then
     printThis="READ 1"
     printToTrimmingLogFile
     cutadapt -O "${S}" "--quality-base=${QUAL}" -q "${qualFilter}" -m 0 -g "${A1}" "${READ1}.fastq" -o TEMP_R1_trimmed.fastq >> "read_trimming.log"
-   
+    if [ $? -ne 0 ]; then trimmingOK=0;fi
+
 if [ "${singleEnd}" -eq 0 ] ; then
     printThis="READ 2"
     printToTrimmingLogFile
@@ -356,14 +444,28 @@ if [ "${singleEnd}" -eq 0 ] ; then
     printToTrimmingLogFile
     
     trim_galore "--phred${QUAL}" --trim1 --paired -q "${qualFilter}" -a "${A1}" --length "${L}" --stringency 1000 TEMP_R1_trimmed.fastq TEMP_R2_trimmed.fastq >> "read_trimming.log"
+    if [ $? -ne 0 ]; then trimmingOK=0;fi
     rm -f TEMP_R1_trimmed.fastq TEMP_R2_trimmed.fastq
 
+    moveCommand='mv -f TEMP_R1_trimmed_val_1.fq ${READ1}.fastq'
+    moveThis="${READ1}"
+    moveToHere="${READ1}"
+    checkMoveSafety  
     mv -f "TEMP_R1_trimmed_val_1.fq" "${READ1}.fastq"
     mv -f "TEMP_R2_trimmed_val_2.fq" "${READ2}.fastq"
 else
+    moveCommand='mv -f TEMP_R1_trimmed.fastq ${READ1}.fastq'
+    moveThis="${READ1}"
+    moveToHere="${READ1}"
+    checkMoveSafety  
     mv -f "TEMP_R1_trimmed.fastq" "${READ1}.fastq"
 fi
 
+if [ "${trimmingOK}" -eq 0 ]; then
+    printThis="Trimming crashed !\n EXITING !! "
+    printToLogFile
+    exit 1    
+fi
     
 echo
 echo "TRIMMING STEP LOG FILE PRODUCED / UPDATED :"
