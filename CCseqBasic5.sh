@@ -865,7 +865,7 @@ echo "Beginning bowtie run (outputting run command after completion) .."
 setMparameter
 
 if [ "${BOWTIE}" -eq 2 ] ; then
-bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U FLASHED_REdig.fastq > FLASHED_REdig.sam
+bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U FLASHED_REdig.fastq > FLASHED_REdig_unfiltered.sam
 echo "bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U FLASHED_REdig.fastq"
 else
 bowtie -p 1 --chunkmb "${BOWTIEMEMORY}" ${otherBowtie1Parameters} ${bowtieQuals} ${mParameter} --best --strata --sam "${BowtieGenome}" FLASHED_REdig.fastq > FLASHED_REdig_unfiltered.sam
