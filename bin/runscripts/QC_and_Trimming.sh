@@ -35,7 +35,7 @@ CapturePipePath="${PipeTopPath}/subroutines"
 # . ${CapturePipePath}/debugHelpers.sh
 
 # TESTING file existence, log file output general messages
-CaptureCommonHelpersPath=$( dirname ${PipeTopPath} )"/subroutines"
+CaptureCommonHelpersPath="${PipeTopPath}"/subroutines"
 . ${CaptureCommonHelpersPath}/testers_and_loggers.sh
 if [ "$?" -ne 0 ]; then
     printThis="testers_and_loggers.sh safety routines cannot be found in $0. Cannot continue without safety features turned on ! \n EXITING !! "
