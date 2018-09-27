@@ -82,7 +82,7 @@ dpnGenomeName=$( echo "${GenomeFasta}" | sed 's/.*\///' | sed 's/\..*//' )
 # output file :
 # ${GenomeFasta}_dpnII_coordinates.txt
 
-fullPathDpnGenome=$(pwd)"/genome_dpnII_coordinates.txt"
+fullPathDpnGenome=$(pwd)"/genome_${REenzyme}_coordinates.txt"
 
 }
 
