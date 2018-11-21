@@ -330,7 +330,7 @@ while true ; do
         -s) Sample=$2 ; shift 2;;
         -v) LOWERCASE_V=$2; shift 2;;
         --help) usage ; shift;;
-        --UMI) otherParameters="$otherParameters --umi" ; shift;;
+        --UMI) printThis="UMI flag temporarily broken 01Nov2018\nEXITING";printToLogFile;exit 1;otherParameters="$otherParameters --umi" ; shift;;
         --useSymbolicLinks) otherParameters="$otherParameters --symlinks" ; shift;;
         --CCversion) CCversion="$2"; shift 2;;       
         --dpn) REenzyme="dpnII" ; shift;;
