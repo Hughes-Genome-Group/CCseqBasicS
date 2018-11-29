@@ -721,6 +721,12 @@ printThis="${RunScriptsPath}/QC_and_Trimming.sh -q ${intQuals} --filter 3 --qmin
 printToLogFile
 
 ${RunScriptsPath}/QC_and_Trimming.sh -q "${intQuals}" --filter 3 --qmin ${QMIN}
+    if [ "$?" -ne 0 ]; then
+    printThis="TrimGalore run failed ! Possible reasons : \n 1) did you maybe use .gz packed files without adding --gz to the run parameters ? \n 2) did you try to run with corrupted input fastq files ? \n EXITING !! "
+    printToLogFile
+    exit 1
+    fi
+
 
 doQuotaTesting
 ls -lht
