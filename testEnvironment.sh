@@ -641,6 +641,7 @@ echo
 sleep 3
 
 echo "Samtools .."
+echo "(samtools 0.x and 1.1 are not supported. Check below, that you have at least samtools 1.3 )"
 echo
 samtools 2>&1 | head -n 3 | grep -v "^\s*$"
 which samtools >> /dev/null

@@ -56,8 +56,8 @@ if [ "${useModuleSystem}" -eq 1 ]; then
 module purge
 # Removing all already-loaded modules to start from clean table
 
-module load samtools/1.1
-# Supports all samtools versions in 1.* series. Does not support samtools/0.* .
+module load samtools/1.3
+# Supports samtools 1.* versions 1.3 or newer. Does not support samtools/0.* or samtools 1.1.
 
 module load bowtie/1.1.2
 # Supports all bowtie1 versions 1.* and 0.*
