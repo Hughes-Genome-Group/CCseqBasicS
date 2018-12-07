@@ -82,6 +82,30 @@ trap finish EXIT
 
 #------------------------------------------
 
+# script top path setup , usage script load.
+
+CCversion="CS5"
+captureScript="analyseMappedReads"
+CCseqBasicVersion="CCseqBasic5"
+
+
+CaptureTopPath="$( echo $0 | sed 's/\/'${CCseqBasicVersion}'.sh$//' )"
+CapturePipePath="${CaptureTopPath}/bin/subroutines"
+
+. ${CapturePipePath}/usageAndVersion.sh
+
+#------------------------------------------
+
+# help user cases .
+
+if [ "$1" == '-h' ] || [ "$1" == '--help' ]
+then
+    usage ;
+fi
+
+
+#------------------------------------------
+
 QSUBOUTFILE="qsub.out"
 QSUBERRFILE="qsub.err"
 
@@ -154,10 +178,6 @@ strandSpecificDuplicates=0
 
 #------------------------------------------
 
-CCversion="CS5"
-captureScript="analyseMappedReads"
-CCseqBasicVersion="CCseqBasic5"
-
 echo "${CCseqBasicVersion}.sh - by Jelena Telenius, 05/01/2016"
 echo
 timepoint=$( date )
@@ -179,10 +199,6 @@ echo
 # Loading subroutines in ..
 
 echo "Loading subroutines in .."
-
-CaptureTopPath="$( echo $0 | sed 's/\/'${CCseqBasicVersion}'.sh$//' )"
-
-CapturePipePath="${CaptureTopPath}/bin/subroutines"
 
 # HUBBING subroutines
 . ${CapturePipePath}/hubbers.sh
@@ -206,7 +222,8 @@ CapturePipePath="${CaptureTopPath}/bin/subroutines"
 . ${CapturePipePath}/blacklistSetters.sh
 
 # PRINTING HELP AND VERSION MESSAGES
-. ${CapturePipePath}/usageAndVersion.sh
+# . ${CapturePipePath}/usageAndVersion.sh
+# (loaded already above - where the help user case is done)
 
 #------------------------------------------
 
