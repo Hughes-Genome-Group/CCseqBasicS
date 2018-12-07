@@ -73,9 +73,11 @@ echo "and remember to delete your malformed /public/ hub-folders (especially the
 echo
 
 else
-echo
-echo "Analysis complete !"
-date
+    if [ "${thisWashelpRequest}" != 1 ];then
+    echo
+    echo "Analysis complete !"
+    date
+    fi
 fi
 }
 trap finish EXIT
@@ -98,8 +100,10 @@ CapturePipePath="${CaptureTopPath}/bin/subroutines"
 
 # help user cases .
 
+thisWashelpRequest=0
 if [ "$1" == '-h' ] || [ "$1" == '--help' ]
 then
+    thisWashelpRequest=1
     usage ;
 fi
 
