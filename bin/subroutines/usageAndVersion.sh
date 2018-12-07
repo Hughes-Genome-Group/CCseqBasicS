@@ -47,7 +47,8 @@ echo "Run the script in an empty folder - it will generate all the files and fol
 echo
 echo "OBLIGATORY FLAGS FOR THE PIPE RUN :"
 echo
-echo "-o /path/to/oligo/file.txt : the file containing the DPN-fragments within which the BIOTINYLATED OLIGOS oligos reside, and their proximity exclusions (standard practise : 1000bases both directions), and possible SNP sites (see pipeline manual how to construct this file : ${manualURLpath} )"
+echo "-f /path/to/fragment/file.txt : the file containing the DPN-fragments within which the BIOTINYLATED OLIGOS oligos reside, and their proximity exclusions (standard practise : 1000bases both directions), and possible SNP sites (see pipeline manual how to construct this file : ${manualURLpath} )"
+echo "-o (synonymous to -f above)"
 echo "--R1 /path/to/read1.fastq : fastq file from miseq or hiseq run (in future also .gz packed will be supported)"
 echo "--R2 /path/to/read2.fastq : fastq file from miseq or hiseq run (in future also .gz packed will be supported)"
 echo "--genome mm9 : genome to use to map and analyse the sample (supports most WIMM genomes - mm9,mm10,hg18,hg19 - report to Jelena if some genomes don't seem to work ! )"

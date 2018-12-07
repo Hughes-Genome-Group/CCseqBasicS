@@ -345,6 +345,7 @@ while true ; do
         -h) usage ; shift;;
         -m) LOWERCASE_M=$2 ; shift 2;;
         -M) CAPITAL_M=$2 ; shift 2;;
+        -f) OligoFile=$2 ; shift 2;;
         -o) OligoFile=$2 ; shift 2;;
         -w) WINDOW=$2 ; shift 2;;
         -i) INCREMENT=$2 ; shift 2;;
