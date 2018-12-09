@@ -47,8 +47,8 @@ echo "Run the script in an empty folder - it will generate all the files and fol
 echo
 echo "OBLIGATORY FLAGS FOR THE PIPE RUN :"
 echo
-echo "-f /path/to/fragment/file.txt : the file containing the DPN-fragments within which the BIOTINYLATED OLIGOS oligos reside, and their proximity exclusions (standard practise : 1000bases both directions), and possible SNP sites (see pipeline manual how to construct this file : ${manualURLpath} )"
-echo "-o (synonymous to -f above)"
+echo "-c /path/to/capturefragment/file.txt : the file containing the RE-fragments within which the BIOTINYLATED CAPTURESITES reside, and their proximity exclusions (standard practise : 1000bases both directions), and possible SNP sites (see pipeline manual how to construct this file : ${manualURLpath} )"
+echo "-o (synonymous to -c above)"
 echo "--R1 /path/to/read1.fastq : fastq file from miseq or hiseq run (in future also .gz packed will be supported)"
 echo "--R2 /path/to/read2.fastq : fastq file from miseq or hiseq run (in future also .gz packed will be supported)"
 echo "--genome mm9 : genome to use to map and analyse the sample (supports most WIMM genomes - mm9,mm10,hg18,hg19 - report to Jelena if some genomes don't seem to work ! )"
@@ -56,11 +56,11 @@ echo "--pf /public/username/location/for/UCSC/visualisation/files : path to a fo
 echo "-s SampleName : the name of the sample - no weird characters, no whitespace, no starting with number, only characters azAz_09 allowed (letters, numbers, underscore)"
 echo
 echo "THE MINIMAL RUN COMMAND :"
-echo "${RunScriptsPath}/${nameOfScript} -o /path/to/oligo/file.txt --R1 /path/to/read1.fastq --R2 /path/to/read2.fastq --genome mm9 --pf /public/username/location/for/UCSC/visualisation/files"
+echo "${RunScriptsPath}/${nameOfScript} -o /path/to/capturesite/file.txt --R1 /path/to/read1.fastq --R2 /path/to/read2.fastq --genome mm9 --pf /public/username/location/for/UCSC/visualisation/files"
 echo "where genome (f.ex 'mm9')is the genome build the data is to be mapped to."
 echo
 echo "The above command expanded (to show the default settings) :"
-echo "${RunScriptsPath}/${nameOfScript} -o /path/to/oligo/file.txt --R1 /path/to/read1.fastq --R2 /path/to/read2.fastq --genome mm9 --pf /public/username/location/for/UCSC/visualisation/files"
+echo "${RunScriptsPath}/${nameOfScript} -o /path/to/capturesite/file.txt --R1 /path/to/read1.fastq --R2 /path/to/read2.fastq --genome mm9 --pf /public/username/location/for/UCSC/visualisation/files"
 echo "   -s sample --maxins 250 -m 2 --chunkmb 256 --trim -w 200 -i 20"
 echo
 echo "OPTIONAL FLAGS FOR TUNING THE PIPE RUN :"
@@ -81,8 +81,8 @@ echo "fastq --> fastqc --> trimming  --> fastqc again --> flashing --> fastqc ag
 echo "This run will thus repeat only the last 2 steps - it will delete the previous output folder, and repeat the analysis from CaptureC analyser onwards, and generate the data hub."
 echo "This re-run will take only ~30 minutes, when the whole pipe takes ~5h to run !"
 echo "Using this flag is good idea, when your sam file (Combined_reads_REdig.sam) is OK (it looks like a BIG file full of reads),"
-echo "but your capture run went somehow wonky (missing hub, missing bigwigs, typos in oligo file etc)."
-echo "Fix your files (oligo file typos, wrong paths etc), and start the run in the same folder you ran it the first time"
+echo "but your capture run went somehow wonky (missing hub, missing bigwigs, typos in capture-site (REfragment) file etc)."
+echo "Fix your files (capture-site (REfragment) file typos, wrong paths etc), and start the run in the same folder you ran it the first time"
 echo "- it will delete the previous captureC analyser output folder, and tries to regenerate it, using the corrected parameters you gave."
 echo
 echo "--BLATforREUSEfolderPath /full/path/to/previous/F4_blatPloidyFilteringLog_CC4/BlatPloidyFilterRun/REUSE_blat folder"
@@ -139,7 +139,7 @@ echo "--useSymbolicLinks (use symbolic links between run directory and public di
 echo "   instead of storing the bigwigs straight in the public directory)"
 echo "--onlyCis (to analyse only cis-mapping reporters : this flag also affects BLAT OUTPUT FILES, see below)"
 echo "-s Sample name (and the name of the folder it goes into)"
-echo "--snp : snp-specific run (check your oligo coordinates file that you have defined the SNPs there)"
+echo "--snp : snp-specific run (check your capture-site (REfragment) coordinates file that you have defined the SNPs there)"
 echo "--globin : combine captures globin capture sites :"
 echo "  To combine ONLY alpha globin  :  --globin 1 (name your globin capture sites Hba-1 and Hba-2)"
 echo "-s Sample name (and the name of the folder it goes into)"
@@ -160,7 +160,7 @@ echo "--minScore 10 (minimum match score)"
 echo "--maxIntron 4000 (to make blat run quicker) (blat default value is 750000) - max intron size"
 echo "--oneOff 0 (set this to 1, if you want to allow one mismatch per tile. Setting this to 1 will make blat slow.)"
 echo "--BLATforREUSEfolderPath /full/path/to/previous/F4_blatPloidyFilteringLog_CC4/BlatPloidyFilterRun/REUSE_blat folder"
-echo "   (enables previously ran BLAT for the same oligos, to be re-used in the run)"
+echo "   (enables previously ran BLAT for the same capture-site (REfragment)s, to be re-used in the run)"
 echo
 echo "CAPTURE-C BLAT + PLOIDY FILTERING OPTIONS"
 echo "--extend 20000  Extend the Blat-filter 20000bases both directions from the psl-file regions outwards. (default 20 000)"

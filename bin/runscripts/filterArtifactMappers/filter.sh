@@ -22,14 +22,14 @@
 
 # This code does the following :
 
-# 1) generates blat filter files for each oligo
+# 1) generates blat filter files for each capture-site (REfragment)
 # 2) filters the gff files and sam files (these are the CCanalyser output)
 #    2a) ploidy filter
 #    2b) blat filter
 # 3) runs the DESeq differential analysis for each sample (?)
 
 GENOME="UNDEFINED"
-oligofile="UNDEFINED"
+capturesitefile="UNDEFINED"
 recoordinatefile="UNDEFINED"
 datafolder="UNDEFINED"
 # dataprefix="UNDEFINED"
@@ -91,18 +91,18 @@ ploidyGFFoverlap(){
 
 blatGFFoverlap(){
 
-    # If we have this oligo mentioned in the blat filter files ..
-    if [ -s "${oligoname}_blat_blat_filter_extendedBy${extend}b.gff" ] ; then
+    # If we have this capture-site (REfragment) mentioned in the blat filter files ..
+    if [ -s "${capturesitename}_blat_blat_filter_extendedBy${extend}b.gff" ] ; then
         
         #intersectappend.pl <a gff3 file> <b gff3 file> <facet name> <return value true> <return value false>
         
-            echo "intersectappend.pl ${file} ${oligoname}_blat_blat_filter_extendedBy${extend}b.gff BlatFilteredRegion TRUE FALSE "
-            echo "intersectappend.pl ${file} ${oligoname}_blat_blat_filter_extendedBy${extend}b.gff BlatFilteredRegion TRUE FALSE "  >> "/dev/stderr"
+            echo "intersectappend.pl ${file} ${capturesitename}_blat_blat_filter_extendedBy${extend}b.gff BlatFilteredRegion TRUE FALSE "
+            echo "intersectappend.pl ${file} ${capturesitename}_blat_blat_filter_extendedBy${extend}b.gff BlatFilteredRegion TRUE FALSE "  >> "/dev/stderr"
         
-        ${RunScriptsPath}/intersectappend.pl ${file} ${oligoname}_blat_blat_filter_extendedBy${extend}b.gff BlatFilteredRegion TRUE FALSE > ${outputfolder}/${newname}_BF.gff
+        ${RunScriptsPath}/intersectappend.pl ${file} ${capturesitename}_blat_blat_filter_extendedBy${extend}b.gff BlatFilteredRegion TRUE FALSE > ${outputfolder}/${newname}_BF.gff
         
     else
-        echo "No blat filtering needed for this oligo ! - or this is globines combined track (or other track not listed in oligo file), for which this step is skipped.."
+        echo "No blat filtering needed for this capture-site (REfragment) ! - or this is globines combined track (or other track not listed in capture-site (REfragment) file), for which this step is skipped.."
         cp ${file} ${outputfolder}/${newname}_noBF.gff
     fi    
     
@@ -414,7 +414,7 @@ blatparams=$(pwd)"/blatParams.txt"
 # These will be listed in the parameters file :
 
 #public_folder /public/telenius/capturetests/orig 
-#oligo_filename /hts/data6/telenius/developmentAndTesting/captureVS1_VS2comparison_030915/oligos.txt
+#capturesite_filename /hts/data6/telenius/developmentAndTesting/captureVS1_VS2comparison_030915/capturesites.txt
 #sample orig
 #restriction_enzyme_coords_file /hts/data2/jdavies/07mm9_dpn/mm9_dpnII_coordinates.txt 
 #version CC2
@@ -425,7 +425,7 @@ blatparams=$(pwd)"/blatParams.txt"
 
 
 GENOME=$( cat ${parameterfile} | grep "^genome\s" | sed 's/^genome\s\s*//' )
-oligofile=$( cat ${parameterfile} | grep "^oligo_filename\s" | sed 's/^oligo_filename\s\s*//' )
+capturesitefile=$( cat ${parameterfile} | grep "^capturesite_filename\s" | sed 's/^capturesite_filename\s\s*//' )
 recoordinatefile=$( cat ${parameterfile} | grep "^restriction_enzyme_coords_file\s" | sed 's/^restriction_enzyme_coords_file\s\s*//' )
 datafolder=$( cat ${parameterfile} | grep "^datafolder\s" | sed 's/^datafolder\s\s*//' | sed 's/\s\s*$//' )
 
@@ -434,7 +434,7 @@ dataprefixFLASHED=$( cat ${parameterfile} | grep "^dataprefix_FLASHED\s" | sed '
 dataprefixNONFLASHED=$( cat ${parameterfile} | grep "^dataprefix_NONFLASHED\s" | sed 's/^dataprefix_NONFLASHED\s\s*//'  | sed 's/\s\s*$//' )
 
 echo "GENOME ${GENOME}" >> parameters_norm.log
-echo "oligofile ${oligofile}" >> parameters_norm.log
+echo "capturesitefile ${capturesitefile}" >> parameters_norm.log
 echo "recoordinatefile ${recoordinatefile}" >> parameters_norm.log
 echo "dataprefixFLASHED ${dataprefixFLASHED}" >> parameters_norm.log
 echo "dataprefixNONFLASHED ${dataprefixNONFLASHED}" >> parameters_norm.log
@@ -480,7 +480,7 @@ echo "Starting run with parameters :"
 echo
 
 echo "GENOME ${GENOME}" > parameters_norm.log
-echo "oligofile ${oligofile}" >> parameters_norm.log
+echo "capturesitefile ${capturesitefile}" >> parameters_norm.log
 echo "recoordinatefile ${recoordinatefile}" >> parameters_norm.log
 echo "dataprefixFLASHED ${dataprefixFLASHED}" >> parameters_norm.log
 echo "dataprefixNONFLASHED ${dataprefixNONFLASHED}" >> parameters_norm.log
@@ -505,7 +505,7 @@ cat parameters_norm.log
 
 # Testing file existence..
 
-testedFile=$( echo ${oligofile} )
+testedFile=$( echo ${capturesitefile} )
 fileTesting
 testedFile=$( echo ${recoordinatefile} )
 fileTesting
@@ -535,15 +535,15 @@ chmod u=rwx ./1_blat.sh
 
 printThis="-------------------------------------"
 printToLogFile
-printThis="Running blat filter generation for each oligo.."
+printThis="Running blat filter generation for each capturesite.."
 printToLogFile
 
-echo "${CaptureFilterPath}/1_blat.sh -o ${oligofile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}"
-echo "${CaptureFilterPath}/1_blat.sh -o ${oligofile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}"  >> "/dev/stderr"
+echo "${CaptureFilterPath}/1_blat.sh -o ${capturesitefile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}"
+echo "${CaptureFilterPath}/1_blat.sh -o ${capturesitefile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}"  >> "/dev/stderr"
 
 cp ${CaptureFilterPath}/1_blat.sh .
 chmod u=rwx 1_blat.sh
-./1_blat.sh -o ${oligofile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}
+./1_blat.sh -o ${capturesitefile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}
 rm -f 1_blat.sh
 
 # Here (or to the above script) we need to add --globin functionality
@@ -639,10 +639,10 @@ do
     
     #intersectappend.pl <a gff3 file> <b gff3 file> <facet name> <return value true> <return value false>
     
-    oligoname=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
+    capturesitename=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
     newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
     
-    echo "${oligoname} FLASHED .."
+    echo "${capturesitename} FLASHED .."
     ploidyGFFoverlap
     
 done
@@ -652,10 +652,10 @@ do
     
     #intersectappend.pl <a gff3 file> <b gff3 file> <facet name> <return value true> <return value false>
     
-    oligoname=$( echo $file | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/.gff$//' )
+    capturesitename=$( echo $file | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/.gff$//' )
     newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
 
-    echo "${oligoname} NONFLASHED .."
+    echo "${capturesitename} NONFLASHED .."
     flashstatus="NONFLASHED"
     ploidyGFFoverlap    
     
@@ -666,7 +666,7 @@ else
     
 for file in TEMPdir/${dataprefixFLASHED}*.gff
 do
-    oligoname=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
+    capturesitename=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
     newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
     cp ${file} TEMPdir2/${newname}_noPF.gff
     
@@ -675,7 +675,7 @@ done
 for file in TEMPdir/${dataprefixNONFLASHED}*.gff
 do
    
-    oligoname=$( echo $file | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/.gff$//' )
+    capturesitename=$( echo $file | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/.gff$//' )
     newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
     cp ${file} TEMPdir2/${newname}_noPF.gff    
 
@@ -700,8 +700,8 @@ printToLogFile
 for file in TEMPdir2/${dataprefixFLASHED}*PF.gff
 do
     
-    oligoname=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/_noPF.gff$//' | sed 's/_PF.gff$//' )
-    echo "${oligoname} FLASHED.."
+    capturesitename=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/_noPF.gff$//' | sed 's/_PF.gff$//' )
+    echo "${capturesitename} FLASHED.."
     newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
     
     blatGFFoverlap
@@ -711,8 +711,8 @@ done
 for file in TEMPdir2/${dataprefixNONFLASHED}*PF.gff
 do
   
-    oligoname=$( echo $file | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/_noPF.gff$//' | sed 's/_PF.gff$//' )
-    echo "${oligoname} NONFLASHED.."
+    capturesitename=$( echo $file | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/_noPF.gff$//' | sed 's/_PF.gff$//' )
+    echo "${capturesitename} NONFLASHED.."
     newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
     
     blatGFFoverlap
@@ -747,7 +747,7 @@ printToLogFile
 printThis="Filtering reporter SAM files for ploidy and blat regions, and combining filtered SAM files for re-run in CCanalyser.."
 printToLogFile
 
-#oligoname=$( echo $file | sed 's/.*'${dataprefix}'_//' | sed 's/.gff$//' )
+#capturesitename=$( echo $file | sed 's/.*'${dataprefix}'_//' | sed 's/.gff$//' )
 
 printThis="-------------------------------------"
 printToLogFile

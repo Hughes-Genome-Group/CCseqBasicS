@@ -44,12 +44,12 @@ my %column_names;
 # Input-files..
 
 #my $REcoordsfile="/hts/data2/jdavies/07mm9_dpn/mm9_dpnII_coordinates.txt";
-#my $oligofilename ="/hts/data6/telenius/developmentAndTesting/captureVS1_VS2comparison_030915/VS2_forLikeOrig_3rdtry/TEMP_Hba-1_oligocoordinate.txt";
-#my $alloligofilename ="/hts/data2/jdavies/19CapC_analysis/Coordinate_files/30g_coordinates.txt";
+#my $capturesitefilename ="/hts/data6/telenius/developmentAndTesting/captureVS1_VS2comparison_030915/VS2_forLikeOrig_3rdtry/TEMP_Hba-1_capturesitecoordinate.txt";
+#my $allcapturesitefilename ="/hts/data2/jdavies/19CapC_analysis/Coordinate_files/30g_coordinates.txt";
 
 my $REcoordsfile="UNDEFINED";
-my $oligofilename ="UNDEFINED";
-my $alloligofilename ="UNDEFINED";
+my $capturesitefilename ="UNDEFINED";
+my $allcapturesitefilename ="UNDEFINED";
 
 # psl-inputfile
 my $filename="UNDEFINED";
@@ -59,8 +59,8 @@ my $filename="UNDEFINED";
 (
 	"f=s"=>\ $filename, 		# -f		Input filename 
 	"r=s"=>\ $REcoordsfile,	# -r		Restriction coordinates filename 
-	"o=s"=>\ $oligofilename,			# -o		Oligonucleotide position filename
-	"a=s"=>\ $alloligofilename,			# -o		Oligonucleotide position filename
+	"o=s"=>\ $capturesitefilename,			# -o		Capturesitenucleotide position filename
+	"a=s"=>\ $allcapturesitefilename,			# -o		Capturesitenucleotide position filename
 );
 
 # Printing out the parameters in the beginning of run - Jelena added this 220515
@@ -75,8 +75,8 @@ print STDOUT "Starting run with parameters :\n" ;
 print STDOUT "\n" ;
 
 print STDOUT "file_name $filename\n";
-print STDOUT "oligo_filename $oligofilename\n";
-print STDOUT "alloligo_filename $alloligofilename\n";
+print STDOUT "capturesite_filename $capturesitefilename\n";
+print STDOUT "allcapturesite_filename $allcapturesitefilename\n";
 print STDOUT "restriction_enzyme_coords_file $REcoordsfile \n";
 
 ##############################
@@ -121,47 +121,47 @@ while (my $line = <DPNFH>)
 my @chr_index = keys %dpn_data;
 foreach my $chr(@chr_index) {@{$dpn_data{$chr}} = sort {$a <=> $b} @{$dpn_data{$chr}};}
 
-# Uploads coordinates of capture oligos and exclusion regions into the array @oligo_data
+# Uploads coordinates of capture capturesites and exclusion regions into the array @capturesite_data
 # 0=name; 1=capture chr; 2 = capture start; 3 = capture end; 4= exclusion chr; 5 = exclusion start; 6 = exclusion end; 7 = snp position; 8 = SNP sequence
-my %oligo_data;
-open(OLIGOFH, $oligofilename) or die "Cannot open oligo file $oligofilename $!\n";
-print STDOUT "Reading oligo file $oligofilename ..\n";
+my %capturesite_data;
+open(CAPTURESITEFH, $capturesitefilename) or die "Cannot open capturesite file $capturesitefilename $!\n";
+print STDOUT "Reading capturesite file $capturesitefilename ..\n";
 my @line_labels = qw(name cap_chr cap_start cap_end pe_chr pe_start pe_end snp_coord snp_base);
 
-while ( <OLIGOFH> )
+while ( <CAPTURESITEFH> )
 {
   chomp;
   my @line = split /\s++/;
   my $gene_name = $line[0];
   chomp $gene_name;
   
-  $counters{"02 Oligo coordinates loaded:"}++;
+  $counters{"02 Capturesite coordinates loaded:"}++;
   
   for (my$i=1; ($i <scalar (@line) and $i < scalar (@line_labels)); $i++)
     {
-    $oligo_data{$gene_name}{$line_labels[$i]} = $line[$i];
+    $capturesite_data{$gene_name}{$line_labels[$i]} = $line[$i];
     };
 };
 
 # Upload ALL COORDINATES in the experiment - as well !
-my %alloligo_data;
-open(ALLOLIGOFH, $alloligofilename) or die "Cannot open oligo file $alloligofilename $!\n";
-print STDOUT "Reading coordinates for all capture oligos from file $alloligofilename .. \n";
+my %allcapturesite_data;
+open(ALLCAPTURESITEFH, $allcapturesitefilename) or die "Cannot open capturesite file $allcapturesitefilename $!\n";
+print STDOUT "Reading coordinates for all capture capturesites from file $allcapturesitefilename .. \n";
 print LOGOUT "Excluded PSL fragments closer than 1E6 bases from the capture site.\n\n";
 print LOGOUT "1st column : cap site 1E6 nearby zone chr:start-stop, 2nd column : PSL file chr:start-stop\n\n";
 
-while ( <ALLOLIGOFH> )
+while ( <ALLCAPTURESITEFH> )
 {
   chomp;
   my @line = split /\s++/;
   my $gene_name = $line[0];
   chomp $gene_name;
   
-  $counters{"02b Oligo coordinates loaded from whole capture experiment file :"}++;
+  $counters{"02b Capturesite coordinates loaded from whole capture experiment file :"}++;
   
   for (my$i=1; ($i <scalar (@line) and $i < scalar (@line_labels)); $i++)
     {
-    $alloligo_data{$gene_name}{$line_labels[$i]} = $line[$i];
+    $allcapturesite_data{$gene_name}{$line_labels[$i]} = $line[$i];
     };
 };
 
@@ -193,9 +193,9 @@ while (my $line = <PSLFH>)
         my $flag =0;
 
         
-        #foreach my $gene_name(keys %alloligo_data) # Removes sequences that blat to inside one of the capture sites (e.g. HbA1 to HbA2)
+        #foreach my $gene_name(keys %allcapturesite_data) # Removes sequences that blat to inside one of the capture sites (e.g. HbA1 to HbA2)
         #{
-        #    if (($chr eq $alloligo_data{$gene_name}{"cap_chr"}) and ($midpoint > $alloligo_data{$gene_name}{"cap_start"}) and  ($midpoint < $alloligo_data{$gene_name}{"cap_end"}))
+        #    if (($chr eq $allcapturesite_data{$gene_name}{"cap_chr"}) and ($midpoint > $allcapturesite_data{$gene_name}{"cap_start"}) and  ($midpoint < $allcapturesite_data{$gene_name}{"cap_end"}))
         #    {$flag++;
         #     print STDOUT "Excluded PSL line overlapping $gene_name capture ..\n";
         #     $counters{"04 PSL lines discarded as they map into one of the capture sites:"}++;

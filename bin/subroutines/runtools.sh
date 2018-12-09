@@ -141,17 +141,17 @@ runCCanalyser(){
 printThis="Running CAPTURE-C analyser for the aligned file.."
 printToLogFile
 
-testedFile="${OligoFile}"
+testedFile="${CapturesiteFile}"
 doTempFileTesting
 
 mkdir -p "${publicPathForCCanalyser}"
 
-printThis="perl ${RunScriptsPath}/${CCscriptname} -f ${samDirForCCanalyser}/${samForCCanalyser} -o ${OligoFile} -r ${fullPathDpnGenome} --pf ${publicPathForCCanalyser} --pu ${JamesUrlForCCanalyser} -s ${sampleForCCanalyser} --genome ${GENOME} --ucscsizes ${ucscBuild} -w ${WINDOW} -i ${INCREMENT} --flashed ${FLASHED} --duplfilter ${DUPLFILTER} ${otherParameters}"
+printThis="perl ${RunScriptsPath}/${CCscriptname} -f ${samDirForCCanalyser}/${samForCCanalyser} -o ${CapturesiteFile} -r ${fullPathDpnGenome} --pf ${publicPathForCCanalyser} --pu ${JamesUrlForCCanalyser} -s ${sampleForCCanalyser} --genome ${GENOME} --ucscsizes ${ucscBuild} -w ${WINDOW} -i ${INCREMENT} --flashed ${FLASHED} --duplfilter ${DUPLFILTER} ${otherParameters}"
 printToLogFile
 
 echo "-f Input filename "
 echo "-r Restriction coordinates filename "
-echo "-o Oligonucleotide position filename "
+echo "-o Capturesitenucleotide position filename "
 echo "--CCversion CS3 or CS4 or CS5 (which version of the duplicate filtering we will perform)"
 echo "--pf Your public folder"
 echo "--pu Your public url"
@@ -175,13 +175,13 @@ echo "--wobble Wobble bin width. default 1(turned off). UMI runs recommendation 
 
 runDir=$( pwd )
 
-# Copy used oligo file for archiving purposes..
-cp ${OligoFile} usedOligoFile.txt
+# Copy used capture-site (REfragment) file for archiving purposes..
+cp ${CapturesiteFile} usedCapturesiteFile.txt
 
 # remove parameter file from possible earlier run..
 rm -f parameters_for_normalisation.log
 
-perl ${RunScriptsPath}/${CCscriptname} --CCversion "${CCversion}" -f "${samDirForCCanalyser}/${samForCCanalyser}" -o "${OligoFile}" -r "${fullPathDpnGenome}" --pf "${publicPathForCCanalyser}" --pu "${JamesUrlForCCanalyser}" -s "${sampleForCCanalyser}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" -w "${WINDOW}" -i "${INCREMENT}" --flashed "${FLASHED}" --duplfilter "${DUPLFILTER}" ${otherParameters}
+perl ${RunScriptsPath}/${CCscriptname} --CCversion "${CCversion}" -f "${samDirForCCanalyser}/${samForCCanalyser}" -o "${CapturesiteFile}" -r "${fullPathDpnGenome}" --pf "${publicPathForCCanalyser}" --pu "${JamesUrlForCCanalyser}" -s "${sampleForCCanalyser}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" -w "${WINDOW}" -i "${INCREMENT}" --flashed "${FLASHED}" --duplfilter "${DUPLFILTER}" ${otherParameters}
 
 echo "Contents of run folder :"
 ls -lht
@@ -195,15 +195,15 @@ echo "Counts of output files - by file type :"
 
 count=$( ls -1 ${publicPathForCCanalyser} | grep -c '.bw' )
 echo
-echo "${count} bigwig files (should be x2 the amount of oligos, if all had captures)"
+echo "${count} bigwig files (should be x2 the amount of capture-site (REfragment)s, if all had captures)"
 
 count=$( ls -1 ${sampleForCCanalyser}_${CCversion} | grep -c '.wig' )
 echo
-echo "${count} wig files (should be x2 the amount of oligos, if all had captures)"
+echo "${count} wig files (should be x2 the amount of capture-site (REfragment)s, if all had captures)"
 
 count=$( ls -1 ${sampleForCCanalyser}_${CCversion} | grep -c '.gff')
 echo
-echo "${count} gff files (should be x1 the amount of oligos, if all had captures)"
+echo "${count} gff files (should be x1 the amount of capture-site (REfragment)s, if all had captures)"
 
 echo
 echo "Output log files :"

@@ -290,15 +290,15 @@ then
 cp -f "${sampleForCCanalyser}_${CCversion}/COMBINED_report4_${CCversion}.txt" "${publicPathForCCanalyser}/${sampleForCCanalyser}_logFiles/."
 fi
     
-# Make the bigbed file from the bed file of oligo coordinates and used exlusions ..
+# Make the bigbed file from the bed file of capture-site (REfragment) coordinates and used exlusions ..
 
-tail -n +2 "${OligoFile}" | sort -k1,1 -k2,2n > tempBed.bed
-bedOrigName=$( echo "${OligoFile}" | sed 's/\..*//' | sed 's/.*\///' )
-bedname=$( echo "${OligoFile}" | sed 's/\..*//' | sed 's/.*\///' | sed 's/^/'${Sample}'_/' )
+tail -n +2 "${CapturesiteFile}" | sort -k1,1 -k2,2n > tempBed.bed
+bedOrigName=$( echo "${CapturesiteFile}" | sed 's/\..*//' | sed 's/.*\///' )
+bedname=$( echo "${CapturesiteFile}" | sed 's/\..*//' | sed 's/.*\///' | sed 's/^/'${Sample}'_/' )
 
-# Oligo coordinates 
+# Capturesite coordinates 
 tail -n +2 "${sampleForCCanalyser}_${CCversion}/${bedOrigName}.bed" | awk 'NR%2==1' | sort -k1,1 -k2,2n > tempBed.bed
-bedToBigBed -type=bed9 tempBed.bed ${ucscBuild} "${sampleForCCanalyser}_${CCversion}/${bedname}_oligo.bb"
+bedToBigBed -type=bed9 tempBed.bed ${ucscBuild} "${sampleForCCanalyser}_${CCversion}/${bedname}_capturesite.bb"
 rm -f tempBed.bed
 
 # Exclusion fragments
@@ -306,10 +306,10 @@ tail -n +2 "${sampleForCCanalyser}_${CCversion}/${bedOrigName}.bed" | awk 'NR%2=
 bedToBigBed -type=bed9 tempBed.bed ${ucscBuild} "${sampleForCCanalyser}_${CCversion}/${bedname}_exclusion.bb"
 rm -f tempBed.bed
 
-mv -f "${sampleForCCanalyser}_${CCversion}/${bedname}_oligo.bb" ${publicPathForCCanalyser}
+mv -f "${sampleForCCanalyser}_${CCversion}/${bedname}_capturesite.bb" ${publicPathForCCanalyser}
 mv -f "${sampleForCCanalyser}_${CCversion}/${bedname}_exclusion.bb" ${publicPathForCCanalyser}
 
-    fileName=$( echo ${publicPathForCCanalyser}/${bedname}_oligo.bb | sed 's/^.*\///' )
+    fileName=$( echo ${publicPathForCCanalyser}/${bedname}_capturesite.bb | sed 's/^.*\///' )
     trackName=$( echo ${fileName} | sed 's/\.bb$//' )
     longLabel="${trackName}_coordinates"
     trackColor="133,0,122"
@@ -588,7 +588,7 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
 
  rm -f TEMP_tracks.txt
  
-    # Adding the combined files and the oligo tracks
+    # Adding the combined files and the capture-site (REfragment) tracks
     
     # Here used to be also sed 's/visibility hide/visibility full/' : to set only the COMBINED tracks visible.
     # As multi-capture samples grep more frequent, this was taken out of the commands below.
@@ -649,9 +649,9 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     
     echo "<hr />" >> temp_description.html
     
-    echo "Oligo coordinates given to the run :" >> temp_description.html
+    echo "Capturesite coordinates given to the run :" >> temp_description.html
     echo "<pre>" >> temp_description.html
-    cat ${OligoFile} | cut -f 1-4 | awk '{print $1"\tchr"$2"\t"$3"\t"$4}' >> temp_description.html
+    cat ${CapturesiteFile} | cut -f 1-4 | awk '{print $1"\tchr"$2"\t"$3"\t"$4}' >> temp_description.html
     echo "</pre>" >> temp_description.html
     
     echo "<hr />" >> temp_description.html
