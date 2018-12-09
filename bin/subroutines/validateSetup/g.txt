@@ -239,7 +239,7 @@ CaptureDigestPath="/home/molhaem2/telenius/CCseqBasic/digests"
 #
 # ----------------------------------------------
 #
-# mm9 = intra-house peak call (Jim Hughes research group) of these regions in sonication (control) sample data.
+# mm9 = intra-house peak call (Jim Hughes research group) of these regions in amplicon (control) sample data.
 # mm10 = lift-over of the mm9 track
 #
 # ----------------------------------------------
@@ -270,7 +270,7 @@ genomesWhichHaveBlacklist[5]="mm9PARP"
 # - i.e. : not all genomes have to have a blacklist.
 # If the genome is not listed here, blacklist filtering is NOT conducted within the pipeline (turned off automatically).
 
-# It is recommended to generate intra-house peak call for ALL GENOMES - from a control (sonication etc) data , however.
+# It is recommended to generate intra-house peak call for ALL GENOMES - from a control (amplicon etc) data , however.
 # This is not so crucial as it is for analysis of DNaseI, ATAC or ChIP-seq data, but better safe than sorry !
 
 BLACKLIST[0]="${confFolder}/BLACKLIST/mm9.bed"

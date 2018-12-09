@@ -154,7 +154,7 @@ PublicPath="UNDETERMINED"
 ploidyFilter=""
 extend=20000
 
-sonicationSize=300
+ampliconSize=300
 
 # If we have many capture-site (REfragment)s, the stuff can be eased up by analysing only in cis.
 onlyCis=0
@@ -332,7 +332,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,strandSpecificDuplicates,onlyCis,UMI,useSymbolicLinks,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,sonicationSize:,ampliconSize: -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,strandSpecificDuplicates,onlyCis,UMI,useSymbolicLinks,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -377,8 +377,8 @@ while true ; do
         --ada3read2) ADA32=$2 ; shift 2;;
         --extend) extend=$2 ; shift 2;;
         --noPloidyFilter) ploidyFilter="--noploidyfilter " ; shift;;
-        --sonicationSize) sonicationSize=$2 ; shift 2;;
-        --ampliconSize) sonicationSize=$2 ; shift 2;;
+        --ampliconSize) ampliconSize=$2 ; shift 2;;
+        --sonicationSize) ampliconSize=$2 ; shift 2;;
         --strandSpecificDuplicates) otherParameters="$otherParameters --stranded"; strandSpecificDuplicates=1 ; shift;;
         --dump) otherParameters="$otherParameters --dump" ; shift;;
         --snp) otherParameters="$otherParameters --snp" ; shift;;
@@ -562,7 +562,7 @@ echo "maxIntron ${maxIntron}" >> parameters_capc.log
 echo "oneOff ${oneOff}" >> parameters_capc.log
 echo "extend ${extend}"  >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
-echo "ampliconSize ${sonicationSize}"  >> parameters_capc.log
+echo "ampliconSize ${ampliconSize}"  >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
 echo "ploidyFilter ${ploidyFilter}"  >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
@@ -976,13 +976,13 @@ generateReDigest
 
 cd ${TEMPweAreHere}
 
-# RE enzyme genome blacklist generation (regions farther than sonication lenght from the cut site)
+# RE enzyme genome blacklist generation (regions farther than amplicon lenght from the cut site)
 
 fullPathDpnBlacklist=""
 generateReBlacklist
 
 # Filtering based on RE enzyme genome blacklist ..
-printThis="Filtering out reads which are farther away from cut sites than PCR amplicon size ${sonicationSize} .."
+printThis="Filtering out reads which are farther away from cut sites than PCR amplicon size ${ampliconSize} .."
 printToLogFile
 
 flashstatus="FLASHED"
@@ -1083,7 +1083,7 @@ dpnGenomeName=""
 fullPathDpnGenome=""
 generateReDigest
 
-# RE enzyme genome blacklist generation (regions farther than sonication lenght from the cut site)
+# RE enzyme genome blacklist generation (regions farther than amplicon lenght from the cut site)
 
 fullPathDpnBlacklist=""
 generateReBlacklist

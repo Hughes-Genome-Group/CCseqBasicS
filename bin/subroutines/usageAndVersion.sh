@@ -133,6 +133,7 @@ echo "(to save time in your runs : add the output file to your digests folder, a
 echo ""
 echo "PCR AMPLICON SIZE"
 echo "--ampliconSize 300 (how far from RE enzyme cut site reach the 'valid fragments'. This is the max expected library fragment size, at the PCR amplification step.)"
+echo "--sonicationSize 300 (synonymous to --ampliconSize)"
 echo
 echo "CAPTURE-C ANALYSER OPTIONS"
 echo "--useSymbolicLinks (use symbolic links between run directory and public directory to store bigwig files, "

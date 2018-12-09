@@ -30,7 +30,7 @@ printToLogFile
 rm -f genome_${REenzyme}_blacklist.bed
 
 # Plus/minus 300 bases to both directions
-cat ${fullPathDpnGenome} | sed 's/:/\t/' | sed 's/-/\t/' | awk '{if(($3-$2)>(2*'${sonicationSize}')){print "chr"$1"\t"$2+'${sonicationSize}'"\t"$3-'${sonicationSize}'}}' > genome_${REenzyme}_blacklist.bed
+cat ${fullPathDpnGenome} | sed 's/:/\t/' | sed 's/-/\t/' | awk '{if(($3-$2)>(2*'${ampliconSize}')){print "chr"$1"\t"$2+'${ampliconSize}'"\t"$3-'${ampliconSize}'}}' > genome_${REenzyme}_blacklist.bed
 
 testedFile="genome_${REenzyme}_blacklist.bed"
 doTempFileTesting
