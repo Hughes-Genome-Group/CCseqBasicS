@@ -264,6 +264,11 @@ echo "perl ${CapturePipePath}/2_psl_parser.pl -f ${file} -o ${basename}_captures
 echo "perl ${CapturePipePath}/2_psl_parser.pl -f ${file} -o ${basename}_capturesitecoordinate.txt -a ${capturesitefile} -r ${recoordinatefile}" >> "/dev/stderr"
 echo
 perl ${CapturePipePath}/2_psl_parser.pl -f ${file} -o ${basename}_capturesitecoordinate.txt -a ${capturesitefile} -r ${recoordinatefile}
+if [ "$?" -ne 0 ]; then
+printThis="Run filtering script (2_psl_parser.pl) for ${basename} crashed ! \n EXITING !! "
+printToLogFile
+exit 1
+fi
 
 done
 
@@ -273,6 +278,11 @@ rm -f TEMP*_capturesitecoordinate.txt
 rm -rf REUSE_blat
 mkdir REUSE_blat
 mv -f TEMP*blat.psl REUSE_blat/.
+if [ "$?" -ne 0 ]; then
+printThis="Couldn't move generated psl files to folder REUSE_blat ! \n EXITING !! "
+printToLogFile
+exit 1
+fi
 
 # Saving only files which have content :
 
@@ -295,6 +305,11 @@ do
 
 newname=$( echo $file | sed 's/TEMP_//' )
 mv -f $file ${newname}
+if [ "$?" -ne 0 ]; then
+printThis="Couldn't rename output file $file to become ${newname} ! \n EXITING !! "
+printToLogFile
+exit 1
+fi
 
 done
 
@@ -316,6 +331,11 @@ newname=$( echo $file | sed 's/.gfc$//' )
 cat ${file} | sed 's/:/\tcol2\tcol3\t/' | sed 's/-/\t/' | sed 's/$/\t.\t.\t.\tfacet=0/' > ${newname}.gff
 
 bedtools slop -i ${newname}.gff -g ${ucscBuild} -b ${extend} > ${newname}_extendedBy${extend}b.gff
+if [ "$?" -ne 0 ]; then
+printThis="Bedtools slop to extend filtering coordinates failed for ${newname} ! \n EXITING !! "
+printToLogFile
+exit 1
+fi
 
 done
 

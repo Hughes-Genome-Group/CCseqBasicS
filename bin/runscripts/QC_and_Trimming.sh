@@ -262,10 +262,20 @@ echo "RUNNING FASTQC .."
 
 echo "fastqc --quiet -f fastq ${READ1}.fastq"
 fastqc -f fastq "${READ1}.fastq"
+if [ "$?" -ne 0 ]; then
+printThis="FastQC failed for READ1 ! \n EXITING !! "
+printToLogFile
+exit 1
+fi
 
 if [ "${singleEnd}" -eq 0 ] ; then
 echo "fastqc --quiet -f fastq ${READ2}.fastq"
 fastqc -f fastq "${READ2}.fastq"
+if [ "$?" -ne 0 ]; then
+printThis="FastQC failed for READ2 ! \n EXITING !! "
+printToLogFile
+exit 1
+fi
 fi
 
 ###################################################################

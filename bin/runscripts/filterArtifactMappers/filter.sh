@@ -50,6 +50,8 @@ onlyCis=0
 
 pipelinecall=0
 
+ONLY_BLAT_FILES=0
+
 #   -tileSize=N sets the size of match that triggers an alignment.  
 #               Usually between 8 and 12
 #               Default is 11 for DNA and 5 for protein.
@@ -110,6 +112,11 @@ blatGFFoverlap(){
 
 filterSams()
 {
+    
+# If we have a file ..
+find ${datafolder}/${dataprefix}_capture*.sam
+didWeHaveProblemsInFindingSams=$?
+if [ "${didWeHaveProblemsInFindingSams}" -eq 0 ]; then
 
 for file in ${datafolder}/${dataprefix}_capture*.sam
 do
@@ -126,42 +133,45 @@ do
 # Combined_reads_REdig_CC2_Hba-1.sam
 
 
-    basename=$( echo $file | sed 's/.*'${dataprefix}'_capture_//' | sed 's/\.sam$//' )
-    reporterfile=$( echo $file | sed 's/'${dataprefix}'_capture_/'${dataprefix}'_/' )
+basename=$( echo $file | sed 's/.*'${dataprefix}'_capture_//' | sed 's/\.sam$//' )
+reporterfile=$( echo $file | sed 's/'${dataprefix}'_capture_/'${dataprefix}'_/' )
+
+# Only if we actually need to filter something !
+if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff" ] ; then
    
     samDataLineCount1000=$( cat ${file} | head -n 1000 | grep -cv "^@" )
 
     if [ "${samDataLineCount1000}" -ne "0" ]; then
-        
-           printThis="Filtering the reporter SAM file for ${basename} .."
-           printToLogFile
-        
-            # Generating the bam file for the filtering..
-            printThis="Generating the bam file for the filtering..\n samtools view -Sb -o TEMP.bam ${reporterfile}"
-            printToLogFile
-            samtools view -Sb -o TEMP.bam ${reporterfile}
-            samDataLineCount=$( samtools view -c TEMP.bam )
-            echo "Before filtering we have ${samDataLineCount} data lines in the SAM file"
-            printToLogFile
-            
-            # Sorting the bam file for the filtering..
-            # Lifting this to other versions of samtools 1.* than 1.1 (the ones not allowing the legacy use any more)
-            # To support this T flag is needed for "transition versions" (where both the old and new annotation can still be used)
-            # See for example https://github.com/samtools/samtools/issues/171
-            
-            # The new usage is now :
-            # The below generates out.bam in "bam" format, and sorts with prefix "tempThisThing" and takes input from head.bam
-            # samtools sort -o out.bam -O bam -T tempThisThing head.bam
-            
-            printThis="Sorting the bam file for the filtering..\nsamtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam; samtools index TEMP_sorted.bam"
-            printToLogFile
-            samtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam
-            mv -f TEMP_sorted.bam TEMP.bam
-            samtools index TEMP.bam
+
+    printThis="Filtering the reporter SAM file for ${basename} .."
+    printToLogFile
+
+    # Generating the bam file for the filtering..
+    printThis="Generating the bam file for the filtering..\n samtools view -Sb -o TEMP.bam ${reporterfile}"
+    printToLogFile
+    samtools view -Sb -o TEMP.bam ${reporterfile}
+    samDataLineCount=$( samtools view -c TEMP.bam )
+    echo "Before filtering we have ${samDataLineCount} data lines in the SAM file"
+    printToLogFile
+    
+    # Sorting the bam file for the filtering..
+    # Lifting this to other versions of samtools 1.* than 1.1 (the ones not allowing the legacy use any more)
+    # To support this T flag is needed for "transition versions" (where both the old and new annotation can still be used)
+    # See for example https://github.com/samtools/samtools/issues/171
+    
+    # The new usage is now :
+    # The below generates out.bam in "bam" format, and sorts with prefix "tempThisThing" and takes input from head.bam
+    # samtools sort -o out.bam -O bam -T tempThisThing head.bam
+    
+    printThis="Sorting the bam file for the filtering..\nsamtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam; samtools index TEMP_sorted.bam"
+    printToLogFile
+    samtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam
+    mv -f TEMP_sorted.bam TEMP.bam
+    samtools index TEMP.bam
     
     # Generating the heading (this could be under if clause - as now it is overwritten every round of the loop)
     samtools view -H -o TEMPheading_${dataprefix}.sam TEMP.bam
-
+    
     # We check PLOIDY filter sam region count, and filter for ploidy..
     echo "${basename} ${dataprefix} - checking the need of filtering for PLOIDY regions.."
     
@@ -197,6 +207,7 @@ do
         
         # Counting overlaps..
         overlaps=$( samtools view -c -L TEMP.bed TEMP.bam )
+        rm -f TEMP.bed
         
         echo "We will filter ${overlaps} sam fragments which overlap with the BLAT-filter regions.."
     
@@ -240,6 +251,22 @@ do
     
     fi
     
+# If we actually dont' need to filter anything (the _forBlatAndPloidyFiltering.gff was empty) , we can just use the SAM reporter file as it is ..  
+else
+    printThis="Filtering not needed for reporter ${basename} SAM file ${reporterfile} \n - no reads overlapped the to-be-filtered regions."
+    printToLogFile
+    # Symlinking to existing file..
+    # ln -s ${reporterfile} ${outputfolder}/${basename}_filtered.sam
+    
+    rm -f ${outputfolder}/${basename}_filtered.sam
+    cp ${reporterfile} ${outputfolder}/${basename}_filtered.sam
+    
+    samfragments=$( cat ${outputfolder}/${basename}_filtered.sam | grep -cv "^@" )
+    
+    printThis="After skipping PLOIDY and BLAT filter we have all the ${samfragments} sam fragments left in our ${basename} ${dataprefix} reporter fragment file."
+    printToLogFile
+fi
+    
     #--------------------------------------
     # Combining filtered SAM files for re-run in CCanalyser..
     
@@ -252,10 +279,10 @@ do
     # samtools sort -n  - sort by read name : ready for ccanalyser
     # However - now it is via unix commands for the time being.
     
-    ls -lht ${outputfolder}/${basename}_filtered.sam
+    ls -lhtL ${outputfolder}/${basename}_filtered.sam
     ls -lht ${datafolder}/${dataprefix}_capture_${basename}.sam
 
-    ls -lht ${outputfolder}/${basename}_filtered.sam >> "/dev/stderr"
+    ls -lhtL ${outputfolder}/${basename}_filtered.sam >> "/dev/stderr"
     ls -lht ${datafolder}/${dataprefix}_capture_${basename}.sam >> "/dev/stderr"
 
     
@@ -276,9 +303,16 @@ do
     ls -lht | grep TEMP >> "/dev/stderr"
     rm -f TEMP_sorted.sam
 
-    ls -lht | grep combined >> "/dev/stderr"
+# We list them in any case ..
+ls -lht | grep combined >> "/dev/stderr"
 
 done
+
+# If we didn't have a file (we just skip all ! )..
+else
+    printThis="Filtering was not done for reporter ${basename} SAM file \n - SAM file ${reporterfile} was not there (no reads to filter)."
+    printToLogFile    
+fi
     
 }
 
@@ -367,7 +401,7 @@ echo
 echo 
 
 
-OPTS=`getopt -o p: --long parameterfile:,noploidyfilter,pipelinecall,extend:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,reuseBLAT:,onlyCis: -- "$@"`
+OPTS=`getopt -o p: --long parameterfile:,noploidyfilter,pipelinecall,extend:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,reuseBLAT:,onlyCis:,onlyBlat: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -389,6 +423,7 @@ while true ; do
         --oneOff) oneOff=$2 ; shift 2;;
         --reuseBLAT) reuseBLATpath=$2 ; shift 2;;
         --onlyCis) onlyCis=$2; shift 2;;
+        --onlyBlat) ONLY_BLAT_FILES=$2; shift 2;;
         
         --) shift; break;;
     esac
@@ -523,7 +558,7 @@ module load blat/35
 
 module unload samtools
 # The 1.x is needed - as we use the "overlap bed file" in samtools view, which is "new" feature.
-module load samtools/1.1
+module load samtools/1.3
 
 module list
 
@@ -535,7 +570,7 @@ chmod u=rwx ./1_blat.sh
 
 printThis="-------------------------------------"
 printToLogFile
-printThis="Running blat filter generation for each capturesite.."
+printThis="Running blat filter generation for each capture-site (REfragment).."
 printToLogFile
 
 echo "${CaptureFilterPath}/1_blat.sh -o ${capturesitefile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}"
@@ -543,8 +578,32 @@ echo "${CaptureFilterPath}/1_blat.sh -o ${capturesitefile} -f ${GenomeFasta} -u 
 
 cp ${CaptureFilterPath}/1_blat.sh .
 chmod u=rwx 1_blat.sh
+TEMPreturnvalue=0
 ./1_blat.sh -o ${capturesitefile} -f ${GenomeFasta} -u ${ucscBuild} -r ${recoordinatefile} -p ${CaptureFilterPath} -e ${extend} --blatparams ${blatparams} --reusefile ${reuseBLATpath} --onlyCis ${onlyCis}
+
+if [ "${TEMPreturnvalue}" -ne 0 ]; then
+
+    printThis="BLAT filtering crashed !"
+    
+    printThis="EXITING !"
+    printToLogFile
+    
+    exit 1 
+    
+fi
+
+
 rm -f 1_blat.sh
+
+# -----------------------------------------
+# Early exit for ONLY_BLAT_FILES user case ..
+# -----------------------------------------
+
+if [ "${ONLY_BLAT_FILES}" -eq "1" ]; then
+  exit 0  
+fi
+
+# -----------------------------------------
 
 # Here (or to the above script) we need to add --globin functionality
 # At the moment we do not generate the HbaCombined and HbbCombined gfc files
@@ -633,7 +692,12 @@ fi
 
 
 cp ${datafolder}/*.gff $file TEMPdir/.
-   
+
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixFLASHED}*.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported FLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else
 for file in TEMPdir/${dataprefixFLASHED}*.gff
 do
     
@@ -646,7 +710,13 @@ do
     ploidyGFFoverlap
     
 done
+fi
 
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixNONFLASHED}*.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported NONFLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else
 for file in TEMPdir/${dataprefixNONFLASHED}*.gff
 do
     
@@ -660,10 +730,16 @@ do
     ploidyGFFoverlap    
     
 done
+fi
 
 else
 # If we don't ploidy filter, we copy, with name _noPF.gff
-    
+
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixFLASHED}*.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported FLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else       
 for file in TEMPdir/${dataprefixFLASHED}*.gff
 do
     capturesitename=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
@@ -671,7 +747,13 @@ do
     cp ${file} TEMPdir2/${newname}_noPF.gff
     
 done
+fi
 
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixNONFLASHED}*.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported NONFLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else
 for file in TEMPdir/${dataprefixNONFLASHED}*.gff
 do
    
@@ -680,7 +762,8 @@ do
     cp ${file} TEMPdir2/${newname}_noPF.gff    
 
 done
-    
+fi
+
 fi
 
 # Deleting temporary files as last step..
@@ -697,6 +780,12 @@ printThis="Generating blat-excluded regions list for blat filtering.."
 printToLogFile
 
 
+areWeActuallyHavingGffFiles=$(($( ls TEMPdir2/${dataprefixFLASHED}*PF.gff | grep -c "" )))
+# areWeActuallyHavingGffFiles=0
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported FLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else  
 for file in TEMPdir2/${dataprefixFLASHED}*PF.gff
 do
     
@@ -707,7 +796,14 @@ do
     blatGFFoverlap
    
 done
+fi
 
+areWeActuallyHavingGffFiles=$(($( ls TEMPdir2/${dataprefixNONFLASHED}*PF.gff | grep -c "" )))
+# areWeActuallyHavingGffFiles=0
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported NONFLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else  
 for file in TEMPdir2/${dataprefixNONFLASHED}*PF.gff
 do
   
@@ -718,6 +814,7 @@ do
     blatGFFoverlap
     
 done
+fi
 
 rm -rf TEMPdir2
 
@@ -736,9 +833,29 @@ do
     newname=$( echo $file | sed 's/.*\///' | sed 's/_noPF_noBF.gff$//' | sed 's/_PF_noBF.gff$//' | sed 's/_noPF_BF.gff$//' | sed 's/_PF_BF.gff$//' )
 
     # We have to do grep -v here, as we don't know which of the filter combinations we actually have..
-    cat $file | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
-    cat $file | grep 'BlatFilteredRegion=TRUE' > ${outputfolder}/${newname}_forBlatFiltering.gff
-    cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+    doWeHaveanyPloidyREfragments=$((cat $file | grep -c 'PloidyRegion=TRUE'))
+    doWeHaveanyBlatREfragments=$((cat $file | grep -c 'BlatFilteredRegion=TRUE'))
+    
+    doWeHaveanyREfragments=$((cat $file | grep -c '=TRUE'))
+
+    if [ "${doWeHaveanyPloidyREfragments}" -ne 0 ]; then
+        cat $file | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
+    else
+        echo "" > ${outputfolder}/${newname}_forPloidyFiltering.gff
+    fi
+        
+    if [ "${doWeHaveanyBlatREfragments}" -ne 0 ]; then
+        cat $file | grep 'BlatFilteredRegion=TRUE' > ${outputfolder}/${newname}_forBlatFiltering.gff
+    else
+        echo "" > ${outputfolder}/${newname}_forBlatFiltering.gff
+    fi
+    
+    # And if we have one or the other, we can also combine and sort them ..
+    if [ "${doWeHaveanyREfragments}" -ne 0 ]; then
+        cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+    else
+        echo "" > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+    fi   
     
 done
 
@@ -772,22 +889,33 @@ filterSams
     
 # Make bed file of all blat-filter-marked DPNII regions..
 
-cat ${outputfolder}/*.gff | grep BlatFilteredRegion=TRUE | cut -f 1,3,4,5 | awk '{ print $1"\t"$3"\t"$4"\t"$2 }' > ${outputfolder}/blatFilterMarkedREfragments.bed
+# Only if we actually needed to filter something !
+if [ -s "${outputfolder}/${newname}_forBlatFiltering.gff" ] ; then
 
-printThis="Combined filtered SAM file - final touches.."
-printToLogFile 
+    cat ${outputfolder}/*.gff | grep BlatFilteredRegion=TRUE | cut -f 1,3,4,5 | awk '{ print $1"\t"$3"\t"$4"\t"$2 }' > ${outputfolder}/blatFilterMarkedREfragments.bed
+    
+    printThis="Combined filtered SAM file - final touches.."
+    printToLogFile 
+    
+    ls -lht TEMP*.sam
+    ls -lht TEMP*.sam >> "/dev/stderr"
+    
+    dataprefix="${dataprefixFLASHED}"
+    cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
+    rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
+    
+    dataprefix="${dataprefixNONFLASHED}"
+    
+    cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
+    rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
 
-ls -lht TEMP*.sam
-ls -lht TEMP*.sam >> "/dev/stderr"
+else
+    dataprefix="${dataprefixFLASHED}"
+    mv -f TEMP_${dataprefix}_combined.sam ${outputfolder}/${dataprefix}_filtered_combined.sam
+    dataprefix="${dataprefixNONFLASHED}"
+    mv -f TEMP_${dataprefix}_combined.sam ${outputfolder}/${dataprefix}_filtered_combined.sam
+fi
 
-dataprefix="${dataprefixFLASHED}"
-cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
-rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
-
-dataprefix="${dataprefixNONFLASHED}"
-
-cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
-rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
 
 ls -lht ${outputfolder}/*filtered_combined.sam
 ls -lht ${outputfolder}/*filtered_combined.sam >> "/dev/stderr"

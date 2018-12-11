@@ -90,7 +90,6 @@ CCversion="CS5"
 captureScript="analyseMappedReads"
 CCseqBasicVersion="CCseqBasic5"
 
-
 CaptureTopPath="$( which $0 | sed 's/\/'${CCseqBasicVersion}'.sh$//' )"
 CapturePipePath="${CaptureTopPath}/bin/subroutines"
 
@@ -125,6 +124,10 @@ BOWTIEMEMORY="256"
 Sample="sample"
 Read1=""
 Read2=""
+
+LANES=1
+GZIP=0
+SINGLE_END=0
 
 CUSTOMAD=-1
 ADA31="no"
@@ -169,6 +172,7 @@ oneOff=0 # oneOff=1 would allow 1 mismatch in tile (blat default = 0 - that is a
 # Whether we reuse blat results from earlier run ..
 # Having this as "." will search from the run dir when blat is ran - so file will not be found, and thus BLAT will be ran normally.
 reuseBLATpath="."
+ONLY_BLAT=0
 
 REenzyme="dpnII"
 
@@ -219,6 +223,9 @@ echo "Loading subroutines in .."
 # RUNNING the main tools (flash, ccanalyser, etc..)
 . ${CapturePipePath}/runtools.sh
 
+# INPUT the fastq files
+. ${CapturePipePath}/inputFastqs.sh
+
 # SETTING THE GENOME BUILD PARAMETERS
 . ${CapturePipePath}/genomeSetters.sh
 
@@ -267,7 +274,7 @@ echo
 
 #------------------------------------------
 
-# Calling in the CONFIGURA`TION script and its default setup :
+# Calling in the CONFIGURATION script and its default setup :
 
 # Defaulting this to "not in use" - if it is not set in the config file.
 CaptureDigestPath="NOT_IN_USE"
@@ -332,7 +339,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,strandSpecificDuplicates,onlyCis,UMI,useSymbolicLinks,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,onlyCis,onlyBlat,UMI,useSymbolicLinks,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -345,8 +352,8 @@ while true ; do
         -h) usage ; shift;;
         -m) LOWERCASE_M=$2 ; shift 2;;
         -M) CAPITAL_M=$2 ; shift 2;;
-        -c) CapturesiteFile=$2 ; shift 2;;
         -o) CapturesiteFile=$2 ; shift 2;;
+        -c) CapturesiteFile=$2 ; shift 2;;
         -w) WINDOW=$2 ; shift 2;;
         -i) INCREMENT=$2 ; shift 2;;
         -s) Sample=$2 ; shift 2;;
@@ -361,8 +368,11 @@ while true ; do
         --onlyCCanalyser) ONLY_CC_ANALYSER=1 ; shift;;
         --onlyHub) ONLY_HUB=1 ; shift;;
         --onlyCis) onlyCis=1;otherParameters="$otherParameters --onlycis"; shift;;
+        --onlyBlat) ONLY_BLAT=1 ; shift;;
         --R1) Read1=$2 ; shift 2;;
         --R2) Read2=$2 ; shift 2;;
+        --lanes) LANES=$2 ; shift 2;;
+        --gz) GZIP=1 ; shift;;
         --bowtie1) BOWTIE=1 ; shift;;
         --bowtie2) BOWTIE=2 ; shift;;
         --chunkmb) BOWTIEMEMORY=$2 ; shift 2;;
@@ -508,6 +518,23 @@ exit 1
 fi
 
 #---------------------------------------------------------
+# Here parsing the parameter files - if they are not purely tab-limited, but partially space-limited, or multiple-tab limited, this fixes it.
+
+echo
+echo "PARAMETER FILES GIVEN IN RUN FOLDER (if any) :"
+echo
+
+if [ $(ls PIPE*.txt 2>/dev/null| grep -c "") -gt 0 ]; then
+
+for file in ./PIPE*.txt
+    do
+        echo ${file}
+        sed -i 's/\s\s*/\t/g' ${file}
+    done
+    
+fi
+    
+#---------------------------------------------------------
 
 echo "Run with parameters :"
 echo
@@ -522,8 +549,11 @@ echo "CaptureFilterPath ${CaptureFilterPath}" >> parameters_capc.log
 echo "CaptureDigestPath ${CaptureDigestPath}" >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
 echo "Sample ${Sample}" >> parameters_capc.log
+echo "------------------------------" >> parameters_capc.log
+echo "GZIP ${GZIP} (TRUE=1, FALSE=0) - if fastq input files are gzipped "
 echo "Read1 ${Read1}" >> parameters_capc.log
 echo "Read2 ${Read2}" >> parameters_capc.log
+echo "------------------------------" >> parameters_capc.log
 echo "GENOME ${GENOME}" >> parameters_capc.log
 echo "GenomeIndex ${GenomeIndex}" >> parameters_capc.log
 echo "CapturesiteFile ${CapturesiteFile}" >> parameters_capc.log
@@ -591,6 +621,104 @@ echo "Chromosome sizes for UCSC bigBed generation will be red from : ${ucscBuild
 testedFile="${CapturesiteFile}"
 doInputFileTesting
 
+#---------------------------------------------------------
+
+# Doing the ONLY_BLAT  user case first - they doesn't need existing input files (except the capture-site (REfragment) file) - so we shouldn't enter any testing of parameters here.
+
+if [[ "${ONLY_BLAT}" -eq "1" ]]; then
+{
+
+  paramGenerationRunFineOK=0
+  
+  printThis="Running ONLY BLATS (user given --onlyBlat flag, or parallel run first step)"
+  printToLogFile
+
+  # --------------------------
+  
+  # RE enzyme digestion (if needed .. )
+
+  dpnGenomeName=""
+  fullPathDpnGenome=""
+  generateReDigest
+
+  CCscriptname="${captureScript}.pl"
+  runCCanalyserOnlyBlat
+
+
+  # Return information to log file if we are parallel ..
+  if [ "${paramGenerationRunFineOK}" -ne 0 ];then {
+
+    printThis="CCanalyser to prepare BLAT runs failed."
+    printToLogFile
+    printThis="EXITING !"
+    printToLogFile
+  
+  exit 1
+  }
+  fi
+  
+  # --------------------------
+
+  ${CaptureFilterPath}/filter.sh --onlyBlat ${ONLY_BLAT} --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log
+  # cat filtering.log
+
+  if [ "$?" -ne 0 ]; then {
+      printThis="Running filter.sh crashed - BLAT filtering failed !"
+      printToLogFile
+      printThis="EXITING !"
+      printToLogFile    
+      exit 1
+  }  
+  fi
+
+  # --------------------------
+  
+  rm -rf blat_run_params
+  mkdir blat_run_params
+  mv blatParams.txt blat_run_params/.
+  mv -f parameters_*.log blat_run_params/.
+    
+  echo  > How_to_use_these_BLAT_files.txt   
+  echo "Use the generated BLAT filtering .psl files by adding this to your run command : " >> How_to_use_these_BLAT_files.txt
+  echo  >> How_to_use_these_BLAT_files.txt 
+  echo '--BLATforREUSEfolderPath '$( pwd )/BlatPloidyFilterRun/REUSE_blat/ >> How_to_use_these_BLAT_files.txt
+  
+  echo  > How_to_use_these_BLAT_files.txt
+  echo "Your psl-files for BLAT-filtering can be found in folder :\n $( pwd )/BlatPloidyFilterRun/REUSE_blat/" >> How_to_use_these_BLAT_files.txt
+  echo  >> How_to_use_these_BLAT_files.txt
+  echo "Use the generated BLAT filtering .psl files by adding this to your run command : " >> How_to_use_these_BLAT_files.txt
+  echo  >> How_to_use_these_BLAT_files.txt 
+  echo '--BLATforREUSEfolderPath '$( pwd )/BlatPloidyFilterRun/REUSE_blat/ >> How_to_use_these_BLAT_files.txt
+  echo  >> How_to_use_these_BLAT_files.txt
+  echo "Here full list of generated files : " >> How_to_use_these_BLAT_files.txt
+  echo >> How_to_use_these_BLAT_files.txt
+  echo "ls -lht $( pwd )/BlatPloidyFilterRun/REUSE_blat/" >> How_to_use_these_BLAT_files.txt
+  ls -lht $( pwd )/BlatPloidyFilterRun/REUSE_blat/ >> How_to_use_these_BLAT_files.txt
+  echo >> How_to_use_these_BLAT_files.txt
+  
+  printThis="Your psl-files for BLAT-filtering can be found in folder :\n $( pwd )/BlatPloidyFilterRun/REUSE_blat/"
+  printToLogFile
+
+  echo "Use the generated BLAT filtering .psl files in CCseqBasic by adding this to your run command : "
+  echo '--BLATforREUSEfolderPath '$( pwd )/BlatPloidyFilterRun/REUSE_blat/ 
+  
+  printThis="Details of this in the ouput file 'How_to_use_these_BLAT_files.txt' "
+  printToLogFile
+
+  
+  echo
+  echo "All done !"
+  echo  >> "/dev/stderr"
+  echo "All done !" >> "/dev/stderr"
+  
+  exit 0
+  
+}
+fi
+
+
+# ---------------------------------------
+
 # Making output folder.. (and crashing run if found it existing from a previous crashed run)
 if [[ ${ONLY_HUB} -eq "0" ]]; then
 if [[ ${ONLY_CC_ANALYSER} -eq "0" ]]; then
@@ -628,39 +756,124 @@ fi
 if [[ ${ONLY_HUB} -eq "0" ]]; then
 if [[ ${ONLY_CC_ANALYSER} -eq "0" ]]; then
 
+#--------Test if fastq paths given correctly ------------------------------------------------------
+
+if [ -r "./PIPE_fastqPaths.txt" ] && [ "${Read1}" != "" ]; then
+    printThis="PIPE_fastqPaths.txt and --R1 parameter given at the same time. Only one at a time is allowed !"
+    printToLogFile
+    printThis="EXITING ! "
+    printToLogFile
+    exit 1
+fi
+
+if [ -r "./PIPE_fastqPaths.txt" ] && [ "${Read2}" != "" ]; then
+    printThis="PIPE_fastqPaths.txt and --R2 parameter given at the same time. Only one at a time is allowed !"
+    printToLogFile
+    printThis="EXITING ! "
+    printToLogFile
+    exit 1
+fi
+    
+#--------THE-LOOP-over-all-FASTQ-file-based-data-sets------------------------------------------------------
+
+if [ -r "./PIPE_fastqPaths.txt" ] ; then
+
+    # Check how many columns we have.
+    test=0
+    test=$( cut -f 3 ./PIPE_fastqPaths.txt | grep -vc "^\s*$" )
+
+    # If we have 2 columns paired end :
+    if [ "${test}" -eq "0" ]; then
+
+    # Fake list - only first element gets filled (as this is multi-lane support, no multi-sample support)
+    fileList1=($( cat ./PIPE_fastqPaths.txt | grep -v '^\s*$' | cut -f 1 | tr '\n' ',' | sed 's/,$//' ))
+    fileList2=($( cat ./PIPE_fastqPaths.txt | grep -v '^\s*$' | cut -f 2 | grep -v '^\s*$' | tr '\n' ',' | sed 's/,$//' ))
+    
+    # If we have 3 columns paired end :
+    else
+    
+    cat ./PIPE_fastqPaths.txt | grep -v '^\s*$' | cut -f 1,3 | awk '{ print $2"/"$1 }'| sed 's/\/\//\//' > forRead1.txt
+    cat ./PIPE_fastqPaths.txt | grep -v '^\s*$' | cut -f 2,3 | awk '{ print $2"/"$1 }'| sed 's/\/\//\//' > forRead2.txt
+    
+    # Fake list - only first element gets filled (as this is multi-lane support, no multi-sample support)
+    fileList1=($( cat ./forRead1.txt | tr '\n' ',' | sed 's/,$//' ))
+    fileList2=($( cat ./forRead2.txt | tr '\n' ',' | sed 's/,$//' ))
+    
+    rm -f forRead1.txt forRead2.txt
+    
+    fi
+    
+    LANES=$(($( cat ./PIPE_fastqPaths.txt | grep -v '^\s*$' | grep -c "" )))
+    
+else
+
+#---------------------------------------
+    
+# If we didn't have PIPE_fastqPaths.txt , we have Read1 and Read2 as input parameters instead.
+
 # Copy files over..
 
-testedFile="${Read1}"
+    # Fake list - only first element gets filled (as this is multi-lane support, no multi-sample support)
+    fileList1=(${Read1})
+    fileList2=(${Read2})
+    
+    LANES=1
+
+#---------------------------------------
+
+fi
+
+# Fetch the files  ..
+
+printRunStartArraysFastq
+
+echo "LANES ${LANES}" >> parameters_capc.log
+echo "LANES ${LANES}"
+
+# This is a fake list - only having one element (see above)
+for (( i=0; i<=$(( ${#fileList1[@]} -1 )); i++ ))
+do
+    
+    # If we have single lane sequencing.
+    if [ "$LANES" -eq 1 ] ; then 
+    
+    #Fetch FASTQ :
+    fetchFastq
+    
+    else
+
+    # If we have MULTIPLE lanes from sequencing.
+    
+    fetchFastqMultilane
+
+    fi
+    
+done
+
+#---------------------------------------
+
+# Check that we have the files ..
+
+testedFile="READ1.fastq"
 doInputFileTesting
-testedFile="${Read2}"
+testedFile="READ2.fastq"
 doInputFileTesting
 
-if [ "${Read1}" != "READ1.fastq" ] ; then
-printThis="Copying input file R1.."
-printToLogFile
-cp "${Read1}" F1_beforeCCanalyser_${Sample}_${CCversion}/READ1.fastq
-else
-printThis="Making safety copy of the original READ1.fastq : READ1.fastq_original.."
-printToLogFile
-cp "${Read1}" F1_beforeCCanalyser_${Sample}_${CCversion}/READ1.fastq_original
-fi
-doQuotaTesting
+mv -f READ1.fastq F1_beforeCCanalyser_${Sample}_${CCversion}/READ1.fastq
+mv -f READ2.fastq F1_beforeCCanalyser_${Sample}_${CCversion}/READ2.fastq
 
-if [ "${Read2}" != "READ2.fastq" ] ; then
-printThis="Copying input file R2.."
-printToLogFile
-cp "${Read2}" F1_beforeCCanalyser_${Sample}_${CCversion}/READ2.fastq
-else
-printThis="Making safety copy of the original READ2.fastq : READ2.fastq_original.."
-printToLogFile
-cp "${Read2}" F1_beforeCCanalyser_${Sample}_${CCversion}/READ2.fastq_original
-fi
-doQuotaTesting
+
+echo "Generated fastqs :"
+ls -lh F1_beforeCCanalyser_${Sample}_${CCversion} | cut -d " " -f 1,2,3,4 --complement
+echo "In folder :"
+pwd 
 
 testedFile="F1_beforeCCanalyser_${Sample}_${CCversion}/READ1.fastq"
 doTempFileTesting
 testedFile="F1_beforeCCanalyser_${Sample}_${CCversion}/READ2.fastq"
 doTempFileTesting
+
+#---------------------------------------
 
 # Save capture-site (REfragment) file full path (to not to lose the file when we cd into the folder, if we used relative paths ! )
 TEMPdoWeStartWithSlash=$(($( echo ${CapturesiteFile} | awk '{print substr($1,1,1)}' | grep -c '/' )))
@@ -716,6 +929,11 @@ printThis="${RunScriptsPath}/QC_and_Trimming.sh --fastqc"
 printToLogFile
 
 ${RunScriptsPath}/QC_and_Trimming.sh --fastqc
+if [ "$?" -ne 0 ]; then
+printThis="FastQC run failed ! Possible reasons : \n 1) did you maybe use .gz packed files without adding --gz to the run parameters ? \n 2) did you try to run with corrupted input fastq files ? \n EXITING !! "
+printToLogFile
+exit 1
+fi
 
     # Changing names of fastqc folders to be "ORIGINAL"
     
@@ -744,12 +962,11 @@ printThis="${RunScriptsPath}/QC_and_Trimming.sh -q ${intQuals} --filter 3 --qmin
 printToLogFile
 
 ${RunScriptsPath}/QC_and_Trimming.sh -q "${intQuals}" --filter 3 --qmin ${QMIN}
-    if [ "$?" -ne 0 ]; then
-    printThis="TrimGalore run failed ! Possible reasons : \n 1) did you maybe use .gz packed files without adding --gz to the run parameters ? \n 2) did you try to run with corrupted input fastq files ? \n EXITING !! "
-    printToLogFile
-    exit 1
-    fi
-
+if [ "$?" -ne 0 ]; then
+printThis="TrimGalore run failed ! Possible reasons : \n 1) did you maybe use .gz packed files without adding --gz to the run parameters ? \n 2) did you try to run with corrupted input fastq files ? \n EXITING !! "
+printToLogFile
+exit 1
+fi
 
 doQuotaTesting
 ls -lht
@@ -982,7 +1199,7 @@ fullPathDpnBlacklist=""
 generateReBlacklist
 
 # Filtering based on RE enzyme genome blacklist ..
-printThis="Filtering out reads which are farther away from cut sites than PCR amplicon size ${ampliconSize} .."
+printThis="Filtering out reads which are farther away from cut sites than amplicon size ${ampliconSize} .."
 printToLogFile
 
 flashstatus="FLASHED"

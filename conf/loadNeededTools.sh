@@ -106,7 +106,7 @@ echo
 # Note !!!!!
 # - the script does not check already existing conflicting programs within $PATH (which may contain executable with same names as these)
 
-export PATH=$PATH:/package/samtools/1.1/bin
+export PATH=$PATH:/package/samtools/1.3/bin
 export PATH=$PATH:/package/bowtie/1.1.2/bin
 export PATH=$PATH:/package/bowtie2/2.1.0/bin
 export PATH=$PATH:/package/bedtools/2.17.0/bin

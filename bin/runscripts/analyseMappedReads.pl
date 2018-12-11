@@ -161,6 +161,9 @@ my $use_umi = 0; # whether this is UMI run or not, if yes, filter based on UMI i
 my $wobble_bin_width = 1 ; # wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
 my $only_cis = 0 ; # analysing only cis-reads (easing up the computational load for many-capturesite samples which continue straight to PeakC which is essentially a cis program)
 
+# If only generating blat filter parameter file :
+my $only_filtering_params = 0;
+
 # Code excecution start values :
 my $analysis_read;
 my $last_read="first";
@@ -231,6 +234,7 @@ print STDOUT "\n" ;
 	"duplfilter=i"=>\ $duplfilter,			# -duplfilter	1 or 0 (will the reads be duplicate diltered or not ? )
 	"CCversion=s"=>\ $version,			# -CCversion	CS3 or CS4 or CS5 (will the reads be duplicate filtered CC3 or CC4 or CC5 style ? )
 	"symlinks"=>\ $use_symlinks,			# -symlinks	To make symlinks to bigwigs into the public area, instead of actually storing the bigwigs there.
+	"onlyparamsforfiltering"=>\ $only_filtering_params,   # Just generate parameters for filtering run.
 )
 ;
 
@@ -276,6 +280,13 @@ $store_bigwigs_here_folder=$public_folder;
 print STDOUT "Starting run with parameters :\n" ;
 print STDOUT "\n" ;
 
+print STDOUT "capturesite_filename $capturesite_filename\n";
+print STDOUT "sample $sample\n" ;
+print STDOUT "version $version\n";
+
+# If we just generate the filtering params, we don't care about other output (even to the log files) ..
+if ( ! $only_filtering_params ){
+
 print STDOUT "store_bigwigs_here_folder $store_bigwigs_here_folder \n" ;
 print STDOUT "public_folder $public_folder \n" ;
 print STDOUT "public_url $public_url \n";
@@ -286,10 +297,7 @@ print STDOUT "input_filename_path $input_filename_path\n";
 print STDOUT "flashed $flashed (1 or 0 - if this is sam file from out.extended (1) or out.not_combined (0) )\n";
 print STDOUT "duplfilter $duplfilter (1 or 0)\n";
 print STDOUT "duplicate filtering style : $version \n" ;
-print STDOUT "capturesite_filename $capturesite_filename\n";
-print STDOUT "sample $sample\n" ;
 print STDOUT "restriction_enzyme_coords_file $restriction_enzyme_coords_file \n";
-print STDOUT "version $version\n";
 print STDOUT "window $window \n";
 print STDOUT "increment $increment \n";
 print STDOUT "use_dump $use_dump\n";
@@ -303,6 +311,8 @@ print STDOUT "only_cis $only_cis \n";
 print STDOUT "use_umi $use_umi \n";
 print STDOUT "wobble_bin_width $wobble_bin_width \n";
 
+}
+
 my $parameter_filename = "parameters_for_filtering.log";
 unless (open(PARAMETERLOG, ">$parameter_filename")){die "Cannot open file $parameter_filename $! , stopped "};
 
@@ -314,7 +324,18 @@ print PARAMETERLOG "version $version\n";
 print PARAMETERLOG "genome $genome\n";
 print PARAMETERLOG "globin $globin \n";
 
-pod2usage(2) unless ($input_filename_path); 
+# ___________________________________________
+
+# Early exit for $only_filtering_params
+if ($only_filtering_params){
+
+close PARAMETERLOG ;
+
+exit ;
+
+}
+
+# ___________________________________________
 
 # Check parameters - fail if obligatory ones not given :
 
@@ -346,7 +367,12 @@ my $prefix_for_output = $1."_$version";
 print PARAMETERLOG "dataprefix $prefix_for_output \n";
 close PARAMETERLOG ;
 
+
+# ___________________________________________
+
+
 # Make the upper folder for bigwigs
+
 if (-d $store_bigwigs_here_folder){}
 else {mkdir $store_bigwigs_here_folder};
 

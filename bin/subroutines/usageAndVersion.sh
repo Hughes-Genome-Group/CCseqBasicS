@@ -49,8 +49,8 @@ echo "OBLIGATORY FLAGS FOR THE PIPE RUN :"
 echo
 echo "-c /path/to/capturefragment/file.txt : the file containing the RE-fragments within which the BIOTINYLATED CAPTURESITES reside, and their proximity exclusions (standard practise : 1000bases both directions), and possible SNP sites (see pipeline manual how to construct this file : ${manualURLpath} )"
 echo "-o (synonymous to -c above)"
-echo "--R1 /path/to/read1.fastq : fastq file from miseq or hiseq run (in future also .gz packed will be supported)"
-echo "--R2 /path/to/read2.fastq : fastq file from miseq or hiseq run (in future also .gz packed will be supported)"
+echo "--R1 /path/to/read1.fastq : fastq file from miseq or hiseq run (if this is .gz packed, add also flag --gz)"
+echo "--R2 /path/to/read2.fastq : fastq file from miseq or hiseq run (if this is .gz packed, add also flag --gz)"
 echo "--genome mm9 : genome to use to map and analyse the sample (supports most WIMM genomes - mm9,mm10,hg18,hg19 - report to Jelena if some genomes don't seem to work ! )"
 echo "--pf /public/username/location/for/UCSC/visualisation/files : path to a folder where you want the data hub to be generated. Does not need to exist - pipeline will generate it for you."
 echo "-s SampleName : the name of the sample - no weird characters, no whitespace, no starting with number, only characters azAz_09 allowed (letters, numbers, underscore)"
@@ -68,6 +68,18 @@ echo
 echo "HELP"
 echo "-h, --help : prints this help"
 echo
+echo "FASTQ FILE INPUT OPTIONS"
+echo "One fastq file pair can be given with --R1 and --R2 parameters. If these are gzipped, add parameter --gz"
+echo "Multiple fastq file pairs can be given in PIPE_fastqPaths.txt which has file format :"
+echo
+echo "R1a.fastq.gz  R2a.fastq.gz  /path/to/these/files"
+echo "R1b.fastq.gz  R2b.fastq.gz  /path/to/these/files"
+echo "or"
+echo "/path/to/this/file/R1a.fastq.gz  /path/to/this/file/R2a.fastq.gz"
+echo "/path/to/this/file/R1b.fastq.gz  /path/to/this/file/R2b.fastq.gz"
+echo
+echo "If these files are gzipped, add parameter --gz"
+echo 
 echo "OUTPUT LOG FILE NAMES"
 echo "--outfile qsub.out (the STDOUT log file name in your RUN COMMAND - see above )"
 echo "--errfile qsub.err (the STDERR log file name in your RUN COMMAND - see above )"

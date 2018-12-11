@@ -169,7 +169,7 @@ echo "--duplfilter 1 or 0 (will the reads be duplicate filtered)\n"
 echo "--parp Filter artificial chromosome chrPARP out before visualisation"
 echo "--stringent enforces additional stringency - forces all reported subfragments to be unique"
 echo "--stranded To replicate the strand-specific (i.e. wrong) duplicate filter of CB3a/CC3 and CB4a/CC4"
-echo "--umi Run contains UMI indices - alter the duplicate filter accordingly : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this"
+# echo "--umi Run contains UMI indices - alter the duplicate filter accordingly : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this"
 echo "--wobble Wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base."
 
 
@@ -221,5 +221,46 @@ echo
 echo "Fastq files :"
 ls -1 ${sampleForCCanalyser}_${CCversion} | grep '.fastq'   
     
+}
+
+runCCanalyserOnlyBlat(){
+    
+################################################################
+# Running CAPTURE-C analyser for the aligned file..
+
+printThis="Running onlyBlat CAPTURE-C analyser .."
+printToLogFile
+
+testedFile="${CapturesiteFile}"
+doTempFileTesting
+
+printThis="perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion ${CCversion} -o ${CapturesiteFile} --genome ${GENOME} -r "${fullPathDpnGenome}" --ucscsizes ${ucscBuild} ${otherParameters}"
+printToLogFile
+
+runDir=$( pwd )
+
+# Copy used capture-site (REfragment) file for archiving purposes..
+cp ${CapturesiteFile} usedCapturesiteFile.txt
+
+# remove parameter file from possible earlier run..
+rm -f parameters_for_filtering.log
+
+perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion "${CCversion}" -o "${CapturesiteFile}" --genome "${GENOME}" -r "${fullPathDpnGenome}" --ucscsizes "${ucscBuild}" ${otherParameters}
+
+if [ "$?" -ne 0 ];then
+    printThis="Filtering parameter generation run reported error !"
+    printNewChapterToLogFile
+    paramGenerationRunFineOK=0
+else
+    printThis="Filtering parameter generation succeeded !"
+    printToLogFile    
+fi
+
+
+echo "Contents of run folder :"
+ls -lht
+
+cat parameters_for_filtering.log
+   
 }
 
