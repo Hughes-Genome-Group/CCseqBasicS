@@ -66,7 +66,7 @@ SERVERADDRESS="userweb.molbiol.ox.ac.uk"
 
 # /public/telenius/dnasepipetests/PORTtest291216b
 
-REMOVEfromPUBLICFILEPATH=""
+REMOVEfromPUBLICFILEPATH="/t1-data"
 
 # For example, your disk area location is :
 # /upper/folder/public/datafile.txt
