@@ -80,6 +80,8 @@ echo "/path/to/this/file/R1b.fastq.gz  /path/to/this/file/R2b.fastq.gz"
 echo
 echo "If these files are gzipped, add parameter --gz"
 echo 
+echo "If these files are SRR archive format (instead of Illumina format), add parameter --SRR"
+echo 
 echo "OUTPUT LOG FILE NAMES"
 echo "--outfile qsub.out (the STDOUT log file name in your RUN COMMAND - see above )"
 echo "--errfile qsub.err (the STDERR log file name in your RUN COMMAND - see above )"

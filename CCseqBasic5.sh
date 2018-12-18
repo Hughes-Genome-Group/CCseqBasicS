@@ -184,6 +184,8 @@ ONLY_HUB=0
 
 strandSpecificDuplicates=0
 
+srrFastq=0
+
 #------------------------------------------
 
 echo "${CCseqBasicVersion}.sh - by Jelena Telenius, 05/01/2016"
@@ -339,7 +341,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,onlyCis,onlyBlat,UMI,useSymbolicLinks,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,onlyCis,onlyBlat,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -373,6 +375,7 @@ while true ; do
         --R2) Read2=$2 ; shift 2;;
         --lanes) LANES=$2 ; shift 2;;
         --gz) GZIP=1 ; shift;;
+        --SRR) srrFastq=1 ; shift;;
         --bowtie1) BOWTIE=1 ; shift;;
         --bowtie2) BOWTIE=2 ; shift;;
         --chunkmb) BOWTIEMEMORY=$2 ; shift 2;;
@@ -553,6 +556,7 @@ echo "------------------------------" >> parameters_capc.log
 echo "GZIP ${GZIP} (TRUE=1, FALSE=0) - if fastq input files are gzipped "
 echo "Read1 ${Read1}" >> parameters_capc.log
 echo "Read2 ${Read2}" >> parameters_capc.log
+echo "srrFastq ${srrFastq} (TRUE=1, FALSE=0) - if fastq files are SRR format (instead of Illumina) " >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
 echo "GENOME ${GENOME}" >> parameters_capc.log
 echo "GenomeIndex ${GenomeIndex}" >> parameters_capc.log
@@ -893,6 +897,41 @@ cd F1_beforeCCanalyser_${Sample}_${CCversion}
 
 if [[ ${ONLY_HUB} -eq "0" ]]; then
 if [[ ${ONLY_CC_ANALYSER} -eq "0" ]]; then
+    
+#---------------------------------------
+
+# SRR to Illumina - if we have --SRR flag  ..
+
+if [ "${srrFastq}" -eq 1 ]; then
+
+printThis="Transforming read names from SRR format to Illumina format .."
+printToLogFile
+
+printThis="${RunScriptsPath}/srr_to_illumina.pl READ1.fastq 1 "
+printToLogFile
+
+${RunScriptsPath}/srr_to_illumina.pl READ1.fastq 1
+
+ls -lh READ1*fastq | cut -d " " -f 1,2,3,4 --complement
+mv -f READ1_asIllumina.fastq READ1.fastq
+
+printThis="${RunScriptsPath}/srr_to_illumina.pl READ1.fastq 2 "
+printToLogFile
+
+${RunScriptsPath}/srr_to_illumina.pl READ2.fastq 2
+
+ls -lh READ2*fastq | cut -d " " -f 1,2,3,4 --complement
+mv -f READ2_asIllumina.fastq READ2.fastq
+
+testedFile="READ1.fastq"
+doInputFileTesting
+testedFile="READ2.fastq"
+doInputFileTesting
+
+fi
+
+#---------------------------------------
+
 
 ################################################################
 #Check BOWTIE quality scores..
