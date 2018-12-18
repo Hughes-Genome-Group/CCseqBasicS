@@ -58,6 +58,15 @@ if ($f_counter==4)
         $hash{"new name"} = $1;
         #$hash{"new name end"} = " ".$2.":".$3
         }
+      # Other option : illumina old format :
+     # @HWUSI-EAS100R:6:73:941:1973#0/1
+     # @HWUSI-EAS100R:6:73:941:1973#0/2
+     elsif($hash{"name"} =~ /(.*:.*:.*:.*:.*#\d++)\/(\d)/)
+     {
+        $hash{"PE"}=$2;
+        $hash{"new name"} = $1;
+        #$hash{"new name end"} = " ".$2.":".$3
+        }    
 
 # codes for marking
 # :0 no AAGCTT cut
