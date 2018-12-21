@@ -165,13 +165,16 @@ echo "-w 200   or   --window 200  : custom window size (instead of default 200b)
 echo "-i 20    or   --increment 20 : custom window increment (instead of default 20b). "
 echo
 echo "BLAT FILTERING - blat parameters :"
-echo "blat -oneOff=0 -minScore=10 -maxIntron=4000 -tileSize=11 -stepSize=5 -minIdentity=70 -repMatch=999999"
+echo "blat -tileSize=11 -stepSize=5 -minScore=10 -minMatch=2 -minIdentity=70 -maxIntron=4000 -oneOff=0 -repMatch=999999"
 echo
 echo "BLAT OPTIONS :"
 echo "--onlyCis (to generate blat-filtering files for only cis chromosomes : this flag also affects CAPTURE-C ANALYSER, see above)"
-echo "--stepSize 5 (spacing between tiles). if you want your blat run faster, set this to 11."
 echo "--tileSize 11 (the size of match that triggers an alignment)"
+echo "--stepSize 5 (spacing between tiles). if you want your blat run faster, set this to 11."
 echo "--minScore 10 (minimum match score)"
+echo "--minMatch 2 (how many tiles have to match, to trigger a match)"
+echo "--minIdentity 70 (identity within each tile to the reference, to trigger a match)"
+echo "--minIdentity 70 (identity within each tile to the reference, to trigger a match)"
 echo "--maxIntron 4000 (to make blat run quicker) (blat default value is 750000) - max intron size"
 echo "--oneOff 0 (set this to 1, if you want to allow one mismatch per tile. Setting this to 1 will make blat slow.)"
 echo "--BLATforREUSEfolderPath /full/path/to/previous/F4_blatPloidyFilteringLog_CC4/BlatPloidyFilterRun/REUSE_blat folder"

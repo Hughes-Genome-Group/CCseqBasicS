@@ -166,6 +166,8 @@ onlyCis=0
 stepSize=5 # Jon default - James used blat default, which is "tileSize", in this case thus 11 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
 tileSize=11 # Jon, James default
 minScore=10 # Jon new default. Jon default before2016 and CC4 default until 080916 minScore=30 - James used minScore=30 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
+minIdentity=70 # Jon, James default.
+minMatch=2 # blat default
 maxIntron=4000 # blat default 750000- James used maxIntron=4000 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
 oneOff=0 # oneOff=1 would allow 1 mismatch in tile (blat default = 0 - that is also CC3 and CC2 default)
 
@@ -341,7 +343,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,onlyCis,onlyBlat,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,onlyCis,onlyBlat,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,minIdentity:,minMatch:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -409,8 +411,10 @@ while true ; do
         --seedlen) bowtie1MismatchBehavior="${bowtie1MismatchBehavior} --seedlen $2 " ; ${bowtie2MismatchBehavior}="${bowtie2MismatchBehavior} -L $2 " ; shift 2;;
         --maqerr) bowtie1MismatchBehavior="${bowtie1MismatchBehavior} --maqerr $2 " ; shift 2;;
         --stepSize) stepSize=$2 ; shift 2;;
-        --tileSize) tileSize==$2 ; shift 2;;
+        --tileSize) tileSize=$2 ; shift 2;;
         --minScore) minScore=$2 ; shift 2;;
+        --minMatch) minMatch=$2 ; shift 2;;
+        --minIdentity) minIdentity=$2 ; shift 2;;
         --maxIntron) maxIntron=$2 ; shift 2;;
         --oneOff) oneOff=$2 ; shift 2;;
         --outfile) QSUBOUTFILE=$2 ; shift 2;;
@@ -663,7 +667,7 @@ if [[ "${ONLY_BLAT}" -eq "1" ]]; then
   
   # --------------------------
 
-  ${CaptureFilterPath}/filter.sh --onlyBlat ${ONLY_BLAT} --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log
+  ${CaptureFilterPath}/filter.sh --onlyBlat ${ONLY_BLAT} --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --minIdentity=${minIdentity} --minMatch=${minMatch} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log
   # cat filtering.log
 
   if [ "$?" -ne 0 ]; then {
@@ -1128,6 +1132,12 @@ printThis="fastqc --quiet -f fastq FLASHED_REdig.fastq"
 printToLogFile
 
 fastqc --quiet -f fastq FLASHED_REdig.fastq
+if [ "$?" -ne 0 ]; then
+printThis="FastqQC run failed ! Possible reasons : \n 1) did you maybe use SRR archive format fastq files without adding --SRR to the run parameters ? \n 2) Fastq files not in Illumina format ? (also here you can rescue with --SRR if your rolling read ID is the first field in the fastq @name line) \n EXITING !! "
+printToLogFile
+exit 1
+fi
+
 mv -f FLASHED_REdig_fastqc.html FLASHED_REdig_fastqc/fastqc_report.html
 
 
@@ -1554,8 +1564,8 @@ echo "${CaptureFilterPath}/filter.sh -p parameters_for_filtering.log -s ${Captur
 #        --maxIntron) maxIntron=$2 ; shift 2;;
 #        --oneOff) oneOff=$2 ; shift 2;;
 
-echo "--stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff}"
-echo "--stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff}" >> "/dev/stderr"
+echo "--stepSize ${stepSize} --minScore ${minScore} --maxIntron ${maxIntron} --tileSize ${tileSize} --minIdentity=${minIdentity} --minMatch=${minMatch} --oneOff ${oneOff}"
+echo "--stepSize ${stepSize} --minScore ${minScore} --maxIntron ${maxIntron} --tileSize ${tileSize} --minIdentity=${minIdentity} --minMatch=${minMatch} --oneOff ${oneOff}" >> "/dev/stderr"
 
 echo "--reuseBLAT ${reuseBLATpath}"
 echo "--reuseBLAT ${reuseBLATpath}" >> "/dev/stderr"
@@ -1567,7 +1577,7 @@ mv parameters_for_filtering.log filteringLogFor_${sampleForCCanalyser}_${CCversi
 cd filteringLogFor_${sampleForCCanalyser}_${CCversion}
 
 TEMPreturnvalue=0
-${CaptureFilterPath}/filter.sh --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall ${ploidyFilter} --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log
+${CaptureFilterPath}/filter.sh --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall ${ploidyFilter} --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron ${maxIntron} --tileSize ${tileSize} --minIdentity=${minIdentity} --minMatch=${minMatch} --oneOff ${oneOff} > filtering.log
 TEMPreturnvalue=$?
 cat filtering.log
 rm -f ${publicPathForCCanalyser}/filtering.log

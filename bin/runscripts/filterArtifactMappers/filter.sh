@@ -68,16 +68,17 @@ ONLY_BLAT_FILES=0
 #               Also affected by stepSize. When stepSize is halved repMatch is
 #               doubled to compensate.
 
-# Setting the minIdentity to 70, as this is to find DUPLICATED regions. the default for finding these has been traditionally set to 70.
-minIdentity=70 # Jon default 0 (used in CC4 pipe i.e filter version VS103 up to 08Sep2016) - James used minIdentity=70 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
 repMatch=999999 # Jon default
 
 # User flags, with defaults
+minMatch=2 # blat default
 stepSize=5 # Jon default - James used blat default, which is "tileSize", in this case thus 11 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
 tileSize=11 # Jon, James default
 minScore=10 # Jon default 10, Jon before2016 default 20 (used in CC4 i.e filter version VS103 pipe up to 08Sep2016), James used minScore=30 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
 maxIntron=4000 # blat default maxIntron=750000 (used in CC4 pipe i.e filter version VS103 up to 08Sep2016) - James used maxIntron=4000 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
 oneOff=0 # allow 1 mismatch in tile (blat default = 0 - that is also CC3 and CC2 default)
+# Setting the minIdentity to 70, as this is to find DUPLICATED regions. the default for finding these has been traditionally set to 70.
+minIdentity=70 # Jon default 0 (used in CC4 pipe i.e filter version VS103 up to 08Sep2016) - James used minIdentity=70 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
 
 # Whether we reuse blat results from earlier run ..
 # Having this as "." will search from the run dir when blat is ran - so file will not be found, and thus BLAT will be ran normally.
@@ -116,6 +117,8 @@ filterSams()
 # If we have a file ..
 find ${datafolder}/${dataprefix}_capture*.sam
 didWeHaveProblemsInFindingSams=$?
+
+
 if [ "${didWeHaveProblemsInFindingSams}" -eq 0 ]; then
 
 for file in ${datafolder}/${dataprefix}_capture*.sam
@@ -266,7 +269,7 @@ else
     printThis="After skipping PLOIDY and BLAT filter we have all the ${samfragments} sam fragments left in our ${basename} ${dataprefix} reporter fragment file."
     printToLogFile
 fi
-    
+
     #--------------------------------------
     # Combining filtered SAM files for re-run in CCanalyser..
     
@@ -285,7 +288,6 @@ fi
     ls -lhtL ${outputfolder}/${basename}_filtered.sam >> "/dev/stderr"
     ls -lht ${datafolder}/${dataprefix}_capture_${basename}.sam >> "/dev/stderr"
 
-    
     cat ${outputfolder}/${basename}_filtered.sam | grep -v "^@" > TEMP.sam
     cat ${datafolder}/${dataprefix}_capture_${basename}.sam  | grep -v "^@" >> TEMP.sam
     ls -lht | grep TEMP >> "/dev/stderr"
@@ -401,7 +403,7 @@ echo
 echo 
 
 
-OPTS=`getopt -o p: --long parameterfile:,noploidyfilter,pipelinecall,extend:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,reuseBLAT:,onlyCis:,onlyBlat: -- "$@"`
+OPTS=`getopt -o p: --long parameterfile:,noploidyfilter,pipelinecall,extend:,stepSize:,tileSize:,minScore:,maxIntron:,minIdentity:,minMatch:,oneOff:,reuseBLAT:,onlyCis:,onlyBlat: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -420,6 +422,8 @@ while true ; do
         --tileSize) tileSize=$2 ; shift 2;;
         --minScore) minScore=$2 ; shift 2;;
         --maxIntron) maxIntron=$2 ; shift 2;;
+        --minMatch) minMatch=$2 ; shift 2;;
+        --minIdentity) minIdentity=$2 ; shift 2;;
         --oneOff) oneOff=$2 ; shift 2;;
         --reuseBLAT) reuseBLATpath=$2 ; shift 2;;
         --onlyCis) onlyCis=$2; shift 2;;
@@ -442,8 +446,8 @@ if [ ! -s "${parameterfile}" ] ; then
     exit 1
 fi
 
-echo "blat -stepSize=${stepSize} -minScore=${minScore} -minIdentity=${minIdentity} -maxIntron=${maxIntron} -tileSize=${tileSize} -repMatch=${repMatch} -oneOff=${oneOff} ${GenomeFasta} ${file} ${basename}_blat.psl"
-echo -n " -stepSize=${stepSize} -minScore=${minScore} -minIdentity=${minIdentity} -maxIntron=${maxIntron} -tileSize=${tileSize} -repMatch=${repMatch} -oneOff=${oneOff}" > blatParams.txt
+echo "blat -stepSize=${stepSize} -minScore=${minScore} -minIdentity=${minIdentity} -maxIntron=${maxIntron} -tileSize=${tileSize} -minMatch=${minMatch} -repMatch=${repMatch} -oneOff=${oneOff} ${GenomeFasta} ${file} ${basename}_blat.psl"
+echo -n " -stepSize=${stepSize} -minScore=${minScore} -minIdentity=${minIdentity} -maxIntron=${maxIntron} -tileSize=${tileSize} -minMatch=${minMatch} -repMatch=${repMatch} -oneOff=${oneOff}" > blatParams.txt
 blatparams=$(pwd)"/blatParams.txt"
 
 # These will be listed in the parameters file :
@@ -529,10 +533,14 @@ echo "datafolder ${datafolder}" >> parameters_norm.log
 echo "outputfolder ${outputfolder}" >> parameters_norm.log
 echo "extend ${extend}" >> parameters_norm.log
 echo "ploidyfilter ${ploidyfilter} (1 yes, 0 no)" >> parameters_norm.log
+
 echo "stepSize ${stepSize}" >> parameters_norm.log
 echo "tileSize ${tileSize}" >> parameters_norm.log
 echo "minScore ${minScore}" >> parameters_norm.log
 echo "maxIntron ${maxIntron}" >> parameters_norm.log
+echo "minIdentity ${minIdentity}" >> parameters_norm.log
+echo "minMatch ${minMatch}" >> parameters_norm.log
+echo "repMatch ${repMatch}" >> parameters_norm.log
 echo "oneOff ${oneOff}" >> parameters_norm.log
 
 cat parameters_norm.log
