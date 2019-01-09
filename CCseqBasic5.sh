@@ -169,7 +169,7 @@ minScore=10 # Jon new default. Jon default before2016 and CC4 default until 0809
 minIdentity=70 # Jon, James default.
 minMatch=2 # blat default
 maxIntron=4000 # blat default 750000- James used maxIntron=4000 (this was the setting in CC2 and CC3 - i.e filter versions VS101 and VS102)
-oneOff=0 # oneOff=1 would allow 1 mismatch in tile (blat default = 0 - that is also CC3 and CC2 default)
+oneOff=1 # oneOff=1 would allow 1 mismatch in tile (blat default = 0 - that is also CC3 and CC2 default)
 
 # Whether we reuse blat results from earlier run ..
 # Having this as "." will search from the run dir when blat is ran - so file will not be found, and thus BLAT will be ran normally.

@@ -165,7 +165,7 @@ echo "-w 200   or   --window 200  : custom window size (instead of default 200b)
 echo "-i 20    or   --increment 20 : custom window increment (instead of default 20b). "
 echo
 echo "BLAT FILTERING - blat parameters :"
-echo "blat -tileSize=11 -stepSize=5 -minScore=10 -minMatch=2 -minIdentity=70 -maxIntron=4000 -oneOff=0 -repMatch=999999"
+echo "blat -tileSize=11 -stepSize=5 -minScore=10 -minMatch=2 -minIdentity=70 -maxIntron=4000 -oneOff=1 -repMatch=999999"
 echo
 echo "BLAT OPTIONS :"
 echo "--onlyCis (to generate blat-filtering files for only cis chromosomes : this flag also affects CAPTURE-C ANALYSER, see above)"
@@ -176,7 +176,7 @@ echo "--minMatch 2 (how many tiles have to match, to trigger a match)"
 echo "--minIdentity 70 (identity within each tile to the reference, to trigger a match)"
 echo "--minIdentity 70 (identity within each tile to the reference, to trigger a match)"
 echo "--maxIntron 4000 (to make blat run quicker) (blat default value is 750000) - max intron size"
-echo "--oneOff 0 (set this to 1, if you want to allow one mismatch per tile. Setting this to 1 will make blat slow.)"
+echo "--oneOff 1 (set this to 0, if you want to dis-allow one mismatch per tile. Setting this to 0 will speed up blat, but may not be able to find all your micro-homology regions.)"
 echo "--BLATforREUSEfolderPath /full/path/to/previous/F4_blatPloidyFilteringLog_CC4/BlatPloidyFilterRun/REUSE_blat folder"
 echo "   (enables previously ran BLAT for the same capture-site (REfragment)s, to be re-used in the run)"
 echo
