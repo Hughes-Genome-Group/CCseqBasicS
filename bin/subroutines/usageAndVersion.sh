@@ -176,7 +176,7 @@ echo "--minMatch 2 (how many tiles have to match, to trigger a match)"
 echo "--minIdentity 70 (identity within each tile to the reference, to trigger a match)"
 echo "--minIdentity 70 (identity within each tile to the reference, to trigger a match)"
 echo "--maxIntron 4000 (to make blat run quicker) (blat default value is 750000) - max intron size"
-echo "--oneOff 1 (set this to 0, if you want to dis-allow one mismatch per tile. Setting this to 0 will speed up blat, but may not be able to find all your micro-homology regions.)"
+echo "--oneOff 0 (set this to 1, if you want to allow one mismatch per tile. Setting this to 1 will make blat slow.)"
 echo "--BLATforREUSEfolderPath /full/path/to/previous/F4_blatPloidyFilteringLog_CC4/BlatPloidyFilterRun/REUSE_blat folder"
 echo "   (enables previously ran BLAT for the same capture-site (REfragment)s, to be re-used in the run)"
 echo
