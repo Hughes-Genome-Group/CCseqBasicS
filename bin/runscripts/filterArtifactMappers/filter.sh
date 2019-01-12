@@ -841,10 +841,10 @@ do
     newname=$( echo "${file}" | sed 's/.*\///' | sed 's/_noPF_noBF.gff$//' | sed 's/_PF_noBF.gff$//' | sed 's/_noPF_BF.gff$//' | sed 's/_PF_BF.gff$//' )
 
     # We have to do grep -v here, as we don't know which of the filter combinations we actually have..
-    doWeHaveanyPloidyREfragments=$((cat "${file}" | grep -c 'PloidyRegion=TRUE'))
-    doWeHaveanyBlatREfragments=$((cat "${file}" | grep -c 'BlatFilteredRegion=TRUE'))
+    doWeHaveanyPloidyREfragments=$(($( cat "${file}" | grep -c 'PloidyRegion=TRUE' )))
+    doWeHaveanyBlatREfragments=$(($(cat "${file}" | grep -c 'BlatFilteredRegion=TRUE')))
     
-    doWeHaveanyREfragments=$((cat "${file}" | grep -c '=TRUE'))
+    doWeHaveanyREfragments=$(($(cat "${file}" | grep -c '=TRUE')))
 
     if [ "${doWeHaveanyPloidyREfragments}" -ne 0 ]; then
         cat "${file}" | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
