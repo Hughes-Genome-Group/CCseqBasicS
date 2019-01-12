@@ -136,8 +136,8 @@ do
 # Combined_reads_REdig_CC2_Hba-1.sam
 
 
-basename=$( echo $file | sed 's/.*'${dataprefix}'_capture_//' | sed 's/\.sam$//' )
-reporterfile=$( echo $file | sed 's/'${dataprefix}'_capture_/'${dataprefix}'_/' )
+basename=$( echo "${file}" | sed 's/.*'${dataprefix}'_capture_//' | sed 's/\.sam$//' )
+reporterfile=$( echo "${file}" | sed 's/'${dataprefix}'_capture_/'${dataprefix}'_/' )
 
 # Only if we actually need to filter something !
 if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff" ] ; then
@@ -699,7 +699,7 @@ if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
 fi
 
 
-cp ${datafolder}/*.gff $file TEMPdir/.
+cp ${datafolder}/*.gff "${file}" TEMPdir/.
 
 areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixFLASHED}*.gff | grep -c "" )))
 if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
@@ -711,8 +711,8 @@ do
     
     #intersectappend.pl <a gff3 file> <b gff3 file> <facet name> <return value true> <return value false>
     
-    capturesitename=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
-    newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
+    capturesitename=$( echo "${file}" | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
+    newname=$( echo "${file}" | sed 's/.*\///' | sed 's/.gff$//' )
     
     echo "${capturesitename} FLASHED .."
     ploidyGFFoverlap
@@ -730,8 +730,8 @@ do
     
     #intersectappend.pl <a gff3 file> <b gff3 file> <facet name> <return value true> <return value false>
     
-    capturesitename=$( echo $file | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/.gff$//' )
-    newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
+    capturesitename=$( echo "${file}" | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/.gff$//' )
+    newname=$( echo "${file}" | sed 's/.*\///' | sed 's/.gff$//' )
 
     echo "${capturesitename} NONFLASHED .."
     flashstatus="NONFLASHED"
@@ -750,8 +750,8 @@ if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
 else       
 for file in TEMPdir/${dataprefixFLASHED}*.gff
 do
-    capturesitename=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
-    newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
+    capturesitename=$( echo "${file}" | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
+    newname=$( echo "${file}" | sed 's/.*\///' | sed 's/.gff$//' )
     cp ${file} TEMPdir2/${newname}_noPF.gff
     
 done
@@ -765,8 +765,8 @@ else
 for file in TEMPdir/${dataprefixNONFLASHED}*.gff
 do
    
-    capturesitename=$( echo $file | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/.gff$//' )
-    newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
+    capturesitename=$( echo "${file}" | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/.gff$//' )
+    newname=$( echo "${file}" | sed 's/.*\///' | sed 's/.gff$//' )
     cp ${file} TEMPdir2/${newname}_noPF.gff    
 
 done
@@ -797,9 +797,9 @@ else
 for file in TEMPdir2/${dataprefixFLASHED}*PF.gff
 do
     
-    capturesitename=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/_noPF.gff$//' | sed 's/_PF.gff$//' )
+    capturesitename=$( echo "${file}" | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/_noPF.gff$//' | sed 's/_PF.gff$//' )
     echo "${capturesitename} FLASHED.."
-    newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
+    newname=$( echo "${file}" | sed 's/.*\///' | sed 's/.gff$//' )
     
     blatGFFoverlap
    
@@ -815,9 +815,9 @@ else
 for file in TEMPdir2/${dataprefixNONFLASHED}*PF.gff
 do
   
-    capturesitename=$( echo $file | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/_noPF.gff$//' | sed 's/_PF.gff$//' )
+    capturesitename=$( echo "${file}" | sed 's/.*'${dataprefixNONFLASHED}'_//' | sed 's/_noPF.gff$//' | sed 's/_PF.gff$//' )
     echo "${capturesitename} NONFLASHED.."
-    newname=$( echo $file | sed 's/.*\///' | sed 's/.gff$//' )
+    newname=$( echo "${file}" | sed 's/.*\///' | sed 's/.gff$//' )
     
     blatGFFoverlap
     
@@ -838,22 +838,22 @@ printToLogFile
 for file in ${outputfolder}/*BF.gff
 do
 
-    newname=$( echo $file | sed 's/.*\///' | sed 's/_noPF_noBF.gff$//' | sed 's/_PF_noBF.gff$//' | sed 's/_noPF_BF.gff$//' | sed 's/_PF_BF.gff$//' )
+    newname=$( echo "${file}" | sed 's/.*\///' | sed 's/_noPF_noBF.gff$//' | sed 's/_PF_noBF.gff$//' | sed 's/_noPF_BF.gff$//' | sed 's/_PF_BF.gff$//' )
 
     # We have to do grep -v here, as we don't know which of the filter combinations we actually have..
-    doWeHaveanyPloidyREfragments=$((cat $file | grep -c 'PloidyRegion=TRUE'))
-    doWeHaveanyBlatREfragments=$((cat $file | grep -c 'BlatFilteredRegion=TRUE'))
+    doWeHaveanyPloidyREfragments=$((cat "${file}" | grep -c 'PloidyRegion=TRUE'))
+    doWeHaveanyBlatREfragments=$((cat "${file}" | grep -c 'BlatFilteredRegion=TRUE'))
     
-    doWeHaveanyREfragments=$((cat $file | grep -c '=TRUE'))
+    doWeHaveanyREfragments=$((cat "${file}" | grep -c '=TRUE'))
 
     if [ "${doWeHaveanyPloidyREfragments}" -ne 0 ]; then
-        cat $file | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
+        cat "${file}" | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
     else
         echo "" > ${outputfolder}/${newname}_forPloidyFiltering.gff
     fi
         
     if [ "${doWeHaveanyBlatREfragments}" -ne 0 ]; then
-        cat $file | grep 'BlatFilteredRegion=TRUE' > ${outputfolder}/${newname}_forBlatFiltering.gff
+        cat "${file}" | grep 'BlatFilteredRegion=TRUE' > ${outputfolder}/${newname}_forBlatFiltering.gff
     else
         echo "" > ${outputfolder}/${newname}_forBlatFiltering.gff
     fi
@@ -872,7 +872,7 @@ printToLogFile
 printThis="Filtering reporter SAM files for ploidy and blat regions, and combining filtered SAM files for re-run in CCanalyser.."
 printToLogFile
 
-#capturesitename=$( echo $file | sed 's/.*'${dataprefix}'_//' | sed 's/.gff$//' )
+#capturesitename=$( echo "${file}" | sed 's/.*'${dataprefix}'_//' | sed 's/.gff$//' )
 
 printThis="-------------------------------------"
 printToLogFile
