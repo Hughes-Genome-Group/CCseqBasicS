@@ -292,17 +292,17 @@ fi
     
 # Make the bigbed file from the bed file of capture-site (REfragment) coordinates and used exlusions ..
 
-tail -n +2 "${CapturesiteFile}" | sort -k1,1 -k2,2n > tempBed.bed
+tail -n +2 "${CapturesiteFile}" | sort -T $(pwd) -k1,1 -k2,2n > tempBed.bed
 bedOrigName=$( echo "${CapturesiteFile}" | sed 's/\..*//' | sed 's/.*\///' )
 bedname=$( echo "${CapturesiteFile}" | sed 's/\..*//' | sed 's/.*\///' | sed 's/^/'${Sample}'_/' )
 
 # Capturesite coordinates 
-tail -n +2 "${sampleForCCanalyser}_${CCversion}/${bedOrigName}.bed" | awk 'NR%2==1' | sort -k1,1 -k2,2n > tempBed.bed
+tail -n +2 "${sampleForCCanalyser}_${CCversion}/${bedOrigName}.bed" | awk 'NR%2==1' | sort -T $(pwd) -k1,1 -k2,2n > tempBed.bed
 bedToBigBed -type=bed9 tempBed.bed ${ucscBuild} "${sampleForCCanalyser}_${CCversion}/${bedname}_capturesite.bb"
 rm -f tempBed.bed
 
 # Exclusion fragments
-tail -n +2 "${sampleForCCanalyser}_${CCversion}/${bedOrigName}.bed" | awk 'NR%2==0' | sort -k1,1 -k2,2n > tempBed.bed
+tail -n +2 "${sampleForCCanalyser}_${CCversion}/${bedOrigName}.bed" | awk 'NR%2==0' | sort -T $(pwd) -k1,1 -k2,2n > tempBed.bed
 bedToBigBed -type=bed9 tempBed.bed ${ucscBuild} "${sampleForCCanalyser}_${CCversion}/${bedname}_exclusion.bb"
 rm -f tempBed.bed
 
@@ -610,7 +610,7 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     
     # Adding the bigbed track for BLAT-filter-marked RE-fragments :
 
-    cat filteringLogFor_PREfiltered_${Sample}_${CCversion}/BlatPloidyFilterRun/BLAT_PLOIDY_FILTERED_OUTPUT/blatFilterMarkedREfragments.bed | sort -k1,1 -k2,2n > tempBed.bed
+    cat filteringLogFor_PREfiltered_${Sample}_${CCversion}/BlatPloidyFilterRun/BLAT_PLOIDY_FILTERED_OUTPUT/blatFilterMarkedREfragments.bed | sort -T $(pwd) -k1,1 -k2,2n > tempBed.bed
     bedToBigBed -type=bed4 tempBed.bed ${ucscBuild} ${sampleForCCanalyser}_${CCversion}_blatFilterMarkedREfragments.bb
     rm -f tempBed.bed
     

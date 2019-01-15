@@ -146,7 +146,7 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
 
     if [ "${samDataLineCount1000}" -ne "0" ]; then
 
-    printThis="Filtering the reporter SAM file for ${basename} .."
+    printThis="Filtering the reporter SAM file for ${basename} (${dataprefix}) .."
     printToLogFile
 
     # Generating the bam file for the filtering..
@@ -241,7 +241,7 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
     printThis="After PLOIDY and BLAT filter we have ${samfragments} sam fragments left in our ${basename} ${dataprefix} reporter fragment file."
     printToLogFile
 
-    samtools view -h -o ${outputfolder}/${basename}_filtered.sam TEMP.bam
+    samtools view -h -o ${outputfolder}/${dataprefix}_${basename}_filtered_reporters.sam TEMP.bam
     rm -f TEMP.bam*
     
     # Removing temporary files..
@@ -259,12 +259,12 @@ else
     printThis="Filtering not needed for reporter ${basename} SAM file ${reporterfile} \n - no reads overlapped the to-be-filtered regions."
     printToLogFile
     # Symlinking to existing file..
-    # ln -s ${reporterfile} ${outputfolder}/${basename}_filtered.sam
+    # ln -s ${reporterfile} ${outputfolder}/${dataprefix}_${basename}_filtered_reporters.sam
     
-    rm -f ${outputfolder}/${basename}_filtered.sam
-    cp ${reporterfile} ${outputfolder}/${basename}_filtered.sam
+    rm -f ${outputfolder}/${dataprefix}_${basename}_filtered_reporters.sam
+    cp ${reporterfile} ${outputfolder}/${dataprefix}_${basename}_filtered_reporters.sam
     
-    samfragments=$( cat ${outputfolder}/${basename}_filtered.sam | grep -cv "^@" )
+    samfragments=$( cat ${outputfolder}/${dataprefix}_${basename}_filtered_reporters.sam | grep -cv "^@" )
     
     printThis="After skipping PLOIDY and BLAT filter we have all the ${samfragments} sam fragments left in our ${basename} ${dataprefix} reporter fragment file."
     printToLogFile
@@ -282,27 +282,32 @@ fi
     # samtools sort -n  - sort by read name : ready for ccanalyser
     # However - now it is via unix commands for the time being.
     
-    ls -lhtL ${outputfolder}/${basename}_filtered.sam
+    ls -lht TEMP_${basename}_blat_blat_filter_excluded.list
+    
+    ls -lhtL ${outputfolder}/${dataprefix}_${basename}_filtered_reporters.sam
     ls -lht ${datafolder}/${dataprefix}_capture_${basename}.sam
 
-    ls -lhtL ${outputfolder}/${basename}_filtered.sam >> "/dev/stderr"
+    ls -lhtL ${outputfolder}/${dataprefix}_${basename}_filtered_reporters.sam >> "/dev/stderr"
     ls -lht ${datafolder}/${dataprefix}_capture_${basename}.sam >> "/dev/stderr"
 
-    cat ${outputfolder}/${basename}_filtered.sam | grep -v "^@" > TEMP.sam
+    cat ${outputfolder}/${dataprefix}_${basename}_filtered_reporters.sam | grep -v "^@" > TEMP.sam
     cat ${datafolder}/${dataprefix}_capture_${basename}.sam  | grep -v "^@" >> TEMP.sam
-    ls -lht | grep TEMP >> "/dev/stderr"
+    ls -lht | grep TEMP | grep -v blat_blat_filter_excluded.list >> "/dev/stderr"
+    
+    # Here we delete this, we don't really need them ..
+    rm -f ${outputfolder}/${dataprefix}_${basename}_filtered_reporters.sam
 
     # Sorting the files..
 
     cut -f 1 TEMP.sam | sed 's/:PE[12]:[0123456789][0123456789]*$//' > TEMP_sortcolumn.txt
     
-    paste TEMP_sortcolumn.txt TEMP.sam | sort -k1,1 | cut -f 1 --complement > TEMP_sorted.sam
-    ls -lht | grep TEMP >> "/dev/stderr"
+    paste TEMP_sortcolumn.txt TEMP.sam | sort -k1,1 -T $(pwd) | cut -f 1 --complement > TEMP_sorted.sam
+    ls -lht | grep TEMP | grep -v blat_blat_filter_excluded.list >> "/dev/stderr"
     rm -f TEMP.sam TEMP_sortcolumn.txt
     
     # Adding to existing file..
     cat TEMP_sorted.sam >> TEMP_${dataprefix}_combined.sam
-    ls -lht | grep TEMP >> "/dev/stderr"
+    ls -lht | grep TEMP | grep -v blat_blat_filter_excluded.list >> "/dev/stderr"
     rm -f TEMP_sorted.sam
 
 # We list them in any case ..
@@ -860,7 +865,7 @@ do
     
     # And if we have one or the other, we can also combine and sort them ..
     if [ "${doWeHaveanyREfragments}" -ne 0 ]; then
-        cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+        cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -T $(pwd) -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
     else
         echo "" > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
     fi   
@@ -894,7 +899,6 @@ rm -f TEMPheading_${dataprefix}.sam
 rm -f TEMP_${dataprefix}_combined.sam   
 filterSams
 
-    
 # Make bed file of all blat-filter-marked DPNII regions..
 
 # Only if we actually needed to filter something !
@@ -909,11 +913,12 @@ if [ -s "${outputfolder}/${newname}_forBlatFiltering.gff" ] ; then
     ls -lht TEMP*.sam >> "/dev/stderr"
     
     dataprefix="${dataprefixFLASHED}"
+    ls -lht TEMPheading_${dataprefix}.sam
     cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
     rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
     
     dataprefix="${dataprefixNONFLASHED}"
-    
+    ls -lht TEMPheading_${dataprefix}.sam
     cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
     rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
 
