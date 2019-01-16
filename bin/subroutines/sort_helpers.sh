@@ -59,8 +59,13 @@ sortIn1E6bunches(){
        
    done
    
-   sort -m -S ${BOWTIEMEMORY}M ${sortParams} -T ${thisIsWhereIam} preSortedfile* > TEMPsortedMerged.txt
-   rm -f preSortedfile*
+   if [ "${TEMPPcounter}" -ne 1 ]; then
+       sort -m -S ${BOWTIEMEMORY}M ${sortParams} -T ${thisIsWhereIam} preSortedfile* > TEMPsortedMerged.txt
+       rm -f preSortedfile*
+   else
+        mv -f preSortedfile1.txt TEMPsortedMerged.txt
+   fi
+    
    
 }
 

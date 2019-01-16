@@ -311,6 +311,8 @@ fi
     
     sortParams='-k1,1'
     thisIsWhereIam=$(pwd)
+    printThis="Starting to sort ${dataprefix}_${basename} reporter+captures blat filtered sam file BIG time - will save temporary files in ${thisIsWhereIam}"
+    printToLogFile
     sortIn1E6bunches
     # needs these to be set :
     # thisIsWhereIam=$( pwd )
