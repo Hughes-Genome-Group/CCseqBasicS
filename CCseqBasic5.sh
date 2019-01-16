@@ -236,6 +236,9 @@ echo "Loading subroutines in .."
 # SETTING THE BLACKLIST GENOME LIST PARAMETERS
 . ${CapturePipePath}/blacklistSetters.sh
 
+# SORTING HELPER SUBROUTINES
+. ${CapturePipePath}/sort_helpers.sh
+
 # PRINTING HELP AND VERSION MESSAGES
 # . ${CapturePipePath}/usageAndVersion.sh
 # (loaded already above - where the help user case is done)

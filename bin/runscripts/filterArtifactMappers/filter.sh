@@ -343,6 +343,9 @@ CapturePipePath="${CaptureTopPath}/bin/subroutines"
 # SETTING THE BLACKLIST GENOME LIST PARAMETERS
 . ${CapturePipePath}/blacklistSetters.sh
 
+# SORTING HELPER SUBROUTINES
+. ${CapturePipePath}/sort_helpers.sh
+
 #------------------------------------------
 
 # From where to call the main scripts operating from the runscripts folder..
