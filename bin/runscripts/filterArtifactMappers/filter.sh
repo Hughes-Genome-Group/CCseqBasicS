@@ -325,7 +325,7 @@ fi
     rm -f intoSorting.txt
     
     # Adding to existing file..
-    cat TEMPsortedMerged.txt >> TEMP_${dataprefix}_combined.sam
+    cat TEMPsortedMerged.txt | cut -f 1 --complement >> TEMP_${dataprefix}_combined.sam
     ls -lht | grep TEMP | grep -v blat_blat_filter_excluded.list >> "/dev/stderr"
     rm -f TEMPsortedMerged.txt
 
