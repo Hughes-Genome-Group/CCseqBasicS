@@ -45,6 +45,8 @@ ploidyfilter=1
 outputToRunfolder=0
 outputfolder="UNDEFINED"
 
+BOWTIEMEMORY="256"
+
 extend=20000
 onlyCis=0
 
@@ -300,15 +302,30 @@ fi
     # Sorting the files..
 
     cut -f 1 TEMP.sam | sed 's/:PE[12]:[0123456789][0123456789]*$//' > TEMP_sortcolumn.txt
+    ls -lht TEMP_sortcolumn.txt >> "/dev/stderr"
     
-    paste TEMP_sortcolumn.txt TEMP.sam | sort -k1,1 -T $(pwd) | cut -f 1 --complement > TEMP_sorted.sam
-    ls -lht | grep TEMP | grep -v blat_blat_filter_excluded.list >> "/dev/stderr"
+    # paste TEMP_sortcolumn.txt TEMP.sam | sort -k1,1 -T $(pwd) | cut -f 1 --complement > TEMP_sorted.sam
+    paste TEMP_sortcolumn.txt TEMP.sam  > intoSorting.txt
+    ls -lht intoSorting.txt >> "/dev/stderr"
     rm -f TEMP.sam TEMP_sortcolumn.txt
     
+    sortParams='-k1,1'
+    thisIsWhereIam=$(pwd)
+    sortIn1E6bunches
+    # needs these to be set :
+    # thisIsWhereIam=$( pwd )
+    # sortParams="-k1,1 -k2,2n"  or sortParams="-n" etc
+    # input in intoSorting.txt
+    # outputs TEMPsortedMerged.txt
+    
+    # If all went well, we delete original file. If not, we complain here (but will not die).
+    sortResultInfo
+    rm -f intoSorting.txt
+    
     # Adding to existing file..
-    cat TEMP_sorted.sam >> TEMP_${dataprefix}_combined.sam
+    cat TEMPsortedMerged.txt >> TEMP_${dataprefix}_combined.sam
     ls -lht | grep TEMP | grep -v blat_blat_filter_excluded.list >> "/dev/stderr"
-    rm -f TEMP_sorted.sam
+    rm -f TEMPsortedMerged.txt
 
 # We list them in any case ..
 ls -lht | grep combined >> "/dev/stderr"
@@ -411,7 +428,7 @@ echo
 echo 
 
 
-OPTS=`getopt -o p: --long parameterfile:,noploidyfilter,pipelinecall,extend:,stepSize:,tileSize:,minScore:,maxIntron:,minIdentity:,minMatch:,oneOff:,reuseBLAT:,onlyCis:,onlyBlat: -- "$@"`
+OPTS=`getopt -o p: --long parameterfile:,noploidyfilter,pipelinecall,extend:,stepSize:,tileSize:,minScore:,maxIntron:,minIdentity:,minMatch:,oneOff:,reuseBLAT:,onlyCis:,onlyBlat:,bowtieMemory: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -436,6 +453,7 @@ while true ; do
         --reuseBLAT) reuseBLATpath=$2 ; shift 2;;
         --onlyCis) onlyCis=$2; shift 2;;
         --onlyBlat) ONLY_BLAT_FILES=$2; shift 2;;
+        --bowtieMemory) BOWTIEMEMORY=$2; shift 2;;
         
         --) shift; break;;
     esac

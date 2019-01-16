@@ -670,7 +670,7 @@ if [[ "${ONLY_BLAT}" -eq "1" ]]; then
   
   # --------------------------
 
-  ${CaptureFilterPath}/filter.sh --onlyBlat ${ONLY_BLAT} --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --minIdentity=${minIdentity} --minMatch=${minMatch} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log
+  ${CaptureFilterPath}/filter.sh --onlyBlat ${ONLY_BLAT} --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --minIdentity=${minIdentity} --minMatch=${minMatch} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} --bowtieMemory ${BOWTIEMEMORY} > filtering.log
   # cat filtering.log
 
   if [ "$?" -ne 0 ]; then {
