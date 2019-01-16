@@ -283,6 +283,8 @@ ls ${helperScriptFolder}/hubbers.sh
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${helperScriptFolder}/cleaners.sh 
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${helperScriptFolder}/sort_helpers.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 ls ${mainScriptFolder}/intersectappend.pl
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
@@ -360,7 +362,7 @@ echo '     |   |    `-- filter.sh 1_blat.sh 2_psl_parser.pl '
 echo '     |   `-- drawFigure'
 echo '     |        `-- countsFromCCanalyserOutput.sh drawFigure.py generatePercentages.py '
 echo '     |-- subroutines'
-echo '     |   |-- hubbers.sh runtools.sh '
+echo '     |   |-- hubbers.sh runtools.sh sort_helpers.sh'
 echo '     |   |-- blacklistSetters.sh genomeSetters.sh cleaners.sh '
 echo '     |   |-- testers_and_loggers.sh parameterSetters.sh usageAndVersion.sh'
 echo '     |   `-- validateSetup'
