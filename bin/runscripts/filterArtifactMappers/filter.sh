@@ -122,6 +122,13 @@ didWeHaveProblemsInFindingSams=$?
 
 
 if [ "${didWeHaveProblemsInFindingSams}" -eq 0 ]; then
+# first the heading.
+rm -f TEMPheading_${dataprefix}.sam
+samtools view -H -o TEMPheading_${dataprefix}.sam $(find ${datafolder} -name ${dataprefix}'_capture*.sam' | head -n 1)
+# ls -lht TEMPheading_${dataprefix}.sam
+# cat TEMPheading_${dataprefix}.sam
+cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' > ${outputfolder}/${dataprefix}_filtered_combined.sam
+
 
 for file in ${datafolder}/${dataprefix}_capture*.sam
 do
@@ -175,7 +182,8 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
     samtools index TEMP.bam
     
     # Generating the heading (this could be under if clause - as now it is overwritten every round of the loop)
-    samtools view -H -o TEMPheading_${dataprefix}.sam TEMP.bam
+    # samtools view -H -o TEMPheading_${dataprefix}.sam TEMP.bam
+    # doing this outside the loop instead.
     
     # We check PLOIDY filter sam region count, and filter for ploidy..
     echo "${basename} ${dataprefix} - checking the need of filtering for PLOIDY regions.."
@@ -187,6 +195,8 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
         
         # Making bed file on the fly, from the gff file
         cut -f 1,4,5 "${outputfolder}/${dataprefix}_${basename}_forPloidyFiltering.gff" | awk '{print $1"\t"$2-1"\t"$3}' > TEMP.bed
+        head -n 3 ${outputfolder}/${dataprefix}_${basename}_forPloidyFiltering.gff
+        head -n 3 TEMP.bed
         
         # Counting overlaps..
         overlaps=$( samtools view -c -L TEMP.bed TEMP.bam )
@@ -209,6 +219,8 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
         
         # Making bed file on the fly, from the gff file
         cut -f 1,4,5 "${outputfolder}/${dataprefix}_${basename}_forBlatFiltering.gff" | awk '{print $1"\t"$2-1"\t"$3}' > TEMP.bed
+        head -n 3 ${outputfolder}/${dataprefix}_${basename}_forPloidyFiltering.gff
+        head -n 3 TEMP.bed
         
         # Counting overlaps..
         overlaps=$( samtools view -c -L TEMP.bed TEMP.bam )
@@ -325,18 +337,18 @@ fi
     rm -f intoSorting.txt
     
     # Adding to existing file..
-    cat TEMPsortedMerged.txt | cut -f 1 --complement >> TEMP_${dataprefix}_combined.sam
-    ls -lht | grep TEMP | grep -v blat_blat_filter_excluded.list >> "/dev/stderr"
+    cat TEMPsortedMerged.txt | cut -f 1 --complement >> ${outputfolder}/${dataprefix}_filtered_combined.sam
+    ls -lht ${outputfolder}/${dataprefix}_filtered_combined.sam >> "/dev/stderr"
+    ls -lht ${outputfolder}/${dataprefix}_filtered_combined.sam
     rm -f TEMPsortedMerged.txt
-
-# We list them in any case ..
-ls -lht | grep combined >> "/dev/stderr"
 
 done
 
-# If we didn't have a file (we just skip all ! )..
+rm -f TEMPheading_${dataprefix}.sam
+
+# If we didn't have any files (we just skip all ! )..
 else
-    printThis="Filtering was not done for reporter ${basename} SAM file \n - SAM file ${reporterfile} was not there (no reads to filter)."
+    printThis="Filtering was not done - no SAM files found (no reads to filter)."
     printToLogFile    
 fi
     
@@ -877,20 +889,20 @@ do
     if [ "${doWeHaveanyPloidyREfragments}" -ne 0 ]; then
         cat "${file}" | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
     else
-        echo "" > ${outputfolder}/${newname}_forPloidyFiltering.gff
+        echo -n "" > ${outputfolder}/${newname}_forPloidyFiltering.gff
     fi
         
     if [ "${doWeHaveanyBlatREfragments}" -ne 0 ]; then
         cat "${file}" | grep 'BlatFilteredRegion=TRUE' > ${outputfolder}/${newname}_forBlatFiltering.gff
     else
-        echo "" > ${outputfolder}/${newname}_forBlatFiltering.gff
+        echo -n "" > ${outputfolder}/${newname}_forBlatFiltering.gff
     fi
     
     # And if we have one or the other, we can also combine and sort them ..
     if [ "${doWeHaveanyREfragments}" -ne 0 ]; then
         cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -T $(pwd) -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
     else
-        echo "" > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+        echo -n "" > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
     fi   
     
 done
@@ -907,9 +919,7 @@ printToLogFile
 printThis="Flashed sam filtering.."
 printToLogFile
 
-dataprefix="${dataprefixFLASHED}" 
-rm -f TEMPheading_${dataprefix}.sam
-rm -f TEMP_${dataprefix}_combined.sam   
+dataprefix="${dataprefixFLASHED}"   
 filterSams
 
 printThis="-------------------------------------"
@@ -918,8 +928,6 @@ printThis="Nonflashed sam filtering.."
 printToLogFile
 
 dataprefix="${dataprefixNONFLASHED}" 
-rm -f TEMPheading_${dataprefix}.sam
-rm -f TEMP_${dataprefix}_combined.sam   
 filterSams
 
 # Make bed file of all blat-filter-marked DPNII regions..
@@ -928,30 +936,8 @@ filterSams
 if [ -s "${outputfolder}/${newname}_forBlatFiltering.gff" ] ; then
 
     cat ${outputfolder}/*.gff | grep BlatFilteredRegion=TRUE | cut -f 1,3,4,5 | awk '{ print $1"\t"$3"\t"$4"\t"$2 }' > ${outputfolder}/blatFilterMarkedREfragments.bed
-    
-    printThis="Combined filtered SAM file - final touches.."
-    printToLogFile 
-    
-    ls -lht TEMP*.sam
-    ls -lht TEMP*.sam >> "/dev/stderr"
-    
-    dataprefix="${dataprefixFLASHED}"
-    ls -lht TEMPheading_${dataprefix}.sam
-    cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
-    rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
-    
-    dataprefix="${dataprefixNONFLASHED}"
-    ls -lht TEMPheading_${dataprefix}.sam
-    cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
-    rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
 
-else
-    dataprefix="${dataprefixFLASHED}"
-    mv -f TEMP_${dataprefix}_combined.sam ${outputfolder}/${dataprefix}_filtered_combined.sam
-    dataprefix="${dataprefixNONFLASHED}"
-    mv -f TEMP_${dataprefix}_combined.sam ${outputfolder}/${dataprefix}_filtered_combined.sam
 fi
-
 
 ls -lht ${outputfolder}/*filtered_combined.sam
 ls -lht ${outputfolder}/*filtered_combined.sam >> "/dev/stderr"
