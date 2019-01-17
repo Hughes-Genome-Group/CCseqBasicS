@@ -219,8 +219,8 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
         
         # Making bed file on the fly, from the gff file
         cut -f 1,4,5 "${outputfolder}/${dataprefix}_${basename}_forBlatFiltering.gff" | awk '{print $1"\t"$2-1"\t"$3}' > TEMP.bed
-        head -n 3 ${outputfolder}/${dataprefix}_${basename}_forPloidyFiltering.gff
-        head -n 3 TEMP.bed
+        # head -n 3 ${outputfolder}/${dataprefix}_${basename}_forPloidyFiltering.gff
+        # head -n 3 TEMP.bed
         
         # Counting overlaps..
         overlaps=$( samtools view -c -L TEMP.bed TEMP.bam )
