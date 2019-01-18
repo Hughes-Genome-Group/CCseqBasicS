@@ -208,7 +208,7 @@ updateHub_part3(){
     else
     echo "Generated a data hub in : ${ServerAndPath}/${sampleForCCanalyser}_${CCversion}_hub.txt"
     fi
-    echo 'How to load this hub to UCSC : http://sara.molbiol.ox.ac.uk/public/telenius/DataHubs/ReadMe/HowToUseA_DataHUB_160813.pdf'    
+    echo 'How to load this hub to UCSC : http://userweb.molbiol.ox.ac.uk/public/telenius/CaptureCompendium/CCseqBasic/DOCS/HUBtutorial_AllGroups_160813.pdf'    
 
 }
 
@@ -220,7 +220,7 @@ updateHub_part3final(){
     echo "Generated a data hub for FILTERED flashed+nonflashed combined data in : ${ServerAndPath}/COMBINED/COMBINED_${Sample}_${CCversion}_hub.txt"
     echo
     echo "Generated a COMBINED data hub (of all the above) in : ${ServerAndPath}/${Sample}_${CCversion}_hub.txt"
-    echo 'How to load this hub to UCSC : http://sara.molbiol.ox.ac.uk/public/telenius/DataHubs/ReadMe/HowToUseA_DataHUB_160813.pdf'    
+    echo 'How to load this hub to UCSC : http://userweb.molbiol.ox.ac.uk/public/telenius/CaptureCompendium/CCseqBasic/DOCS/HUBtutorial_AllGroups_160813.pdf'    
 
 }
 

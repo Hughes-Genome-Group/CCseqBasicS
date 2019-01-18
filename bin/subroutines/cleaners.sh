@@ -19,22 +19,29 @@
 # along with CCseqBasic5.  If not, see <http://www.gnu.org/licenses/>.   #
 ##########################################################################
 
-
 cleanCCfolder(){
 rm -f *_coordstring_${CCversion}.txt
 for file in *.sam
 do
+    TEMPreturnvalue=0
     bamname=$( echo $file | sed 's/.sam/.bam/' )
     if [ -s ${file} ]
     then
     samtools view -bh ${file} > ${bamname}
+    TEMPreturnvalue=$?
         if [ ! -s ${bamname} ]
         then
             rm -f ${bamname}
         fi    
     fi
     
-    rm -f $file
+    if [ "${TEMPreturnvalue}" -eq 0 ] ; then
+        rm -f $file
+    else
+        printThis="Couldn't sam-->bam transform file $file . Leaving it as SAM file."
+        printToLogFile
+        ls -lht ${file}
+    fi
     ls -lht ${bamname}
 done  
 }
@@ -92,6 +99,11 @@ echo F3_orangeGraphs_${Sample}_${CCversion}
 echo "orangeGraphs folder is a CCanalyser run where duplicate filter is switched ON" > a_CCanalyser_run_with_duplicate_filter_switched_ON
 cleanCCfolder
 cd ..
+
+thisIsWhereIam=$(pwd)
+cd F4_blatPloidyFilteringLog_${Sample}_${CCversion}/BlatPloidyFilterRun/BLAT_PLOIDY_FILTERED_OUTPUT
+cleanCCfolder
+cd ${thisIsWhereIam}
 
 cd F5_greenGraphs_separate_${Sample}_${CCversion}
 echo F5_greenGraphs_separate_${Sample}_${CCversion}
