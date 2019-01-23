@@ -154,7 +154,7 @@ doRegularTrack(){
         echo "TRACK DESCRIPTION NOT CREATED - track ${trackName} does not have size in ${publicPathForCCanalyser}/${fileName}" >> "/dev/stderr"
     fi
     else
-        echo
+        echo -n ""
         # echo "TRACK DESCRIPTION NOT CREATED - track ${trackName} already exists in ${publicPathForCCanalyser}/${sampleForCCanalyser}_${CCversion}_tracks.txt" >> "/dev/stderr"
     fi
     
@@ -194,7 +194,7 @@ updateHub_part2c(){
     echo "sed -i 's/alwaysZero on/alwaysZero on\nhtml http\:\/\/${seddedUrl}\/${Sample}_description/' ${publicPathForCCanalyser}/${sampleForCCanalyser}_${CCversion}_tracks.txt " > temp.command
 
     chmod u=rwx temp.command
-    cat temp.command
+    # cat temp.command
     ./temp.command
     rm -f temp.command
     
@@ -351,7 +351,7 @@ done
 
 if [ -s ${runDir}/${sampleForCCanalyser}_${CCversion}/FLASHED_REdig_report_${CCversion}.txt ]
 then
-    
+
 echo "##############################################"
 echo "Report of FLASHED reads CCanalyser results :"
 echo
@@ -392,6 +392,25 @@ generateCombinedDataHub(){
     
 printThis="Generating summary figure for the data.."
 printToLogFile
+
+
+# Setting track colors : normal or redgreen blindness ?
+
+# PINK GREEN (default)
+redcolor="255,74,179"
+orangecolor="255,140,0"
+greencolor="62,176,145"
+
+# RED GREEN (old default - very redgreen blindness-unfriendly colors)
+
+if [ "${REDGREEN}" -eq 1 ];then
+    
+redcolor="255,0,0"
+orangecolor="255,140,0"
+greencolor="0,200,0"
+
+fi
+
 
 runDir=$( pwd )
 mkdir F7_summaryFigure_${Sample}_${CCversion}
@@ -519,7 +538,7 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     trackName="${trackname}_raw"
     fileName="${filename}"
     bigWigSubfolder="RAW"
-    trackColor="255,0,0"
+    trackColor="${redcolor}"
     trackPriority="100"
     doMultiWigChild
     
@@ -550,7 +569,7 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     trackName="${trackname}_PREfiltered"
     fileName="${filename}"
     bigWigSubfolder="PREfiltered"
-    trackColor=" 255,140,0"
+    trackColor="${orangecolor}"
     trackPriority="110"
     doMultiWigChild
     
@@ -580,7 +599,7 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     trackName="${trackname}_filtered"
     fileName="${filename}"
     bigWigSubfolder="FILTERED"
-    trackColor="0,200,0"
+    trackColor="${greencolor}"
     trackPriority="120"
     doMultiWigChild
     
@@ -592,9 +611,10 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     
     # Here used to be also sed 's/visibility hide/visibility full/' : to set only the COMBINED tracks visible.
     # As multi-capture samples grep more frequent, this was taken out of the commands below.
-    cat ${PublicPath}/COMBINED/COMBINED_${tracksTxt} | sed 's/color 0,0,0/color 0,200,0/' | sed 's/priority 200/priority 10/' | sed 's/bigDataUrl .*COMBINED\//bigDataUrl COMBINED\//' | grep -v "^html" > TEMP3_tracks.txt
-    
-    cat ${PublicPath}/COMBINED/COMBINED_${tracksTxt} | sed 's/color 0,0,0/color 0,200,0/' | sed 's/priority 200/priority 10/' | sed 's/bigDataUrl .*COMBINED\//bigDataUrl COMBINED\//' | grep -v "^html"
+    cat ${PublicPath}/COMBINED/COMBINED_${tracksTxt} | sed 's/color 0,0,0/color '"${greencolor}"'/' \
+    | sed 's/priority 200/windowingFunction maximum\npriority 10/' \
+    | sed 's/bigDataUrl .*COMBINED\//bigDataUrl COMBINED\//' | grep -v "^html" \
+    > TEMP3_tracks.txt
    
     cp ${PublicPath}/COMBINED/*.bb ${PublicPath}/.
    

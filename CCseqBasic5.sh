@@ -146,6 +146,8 @@ flashErrorTolerance=0.25
 saveDpnGenome=0
 
 ucscBuild=""
+REDGREEN=0
+
 otherBowtie1Parameters=""
 otherBowtie2Parameters=""
 bowtie1MismatchBehavior=""
@@ -346,7 +348,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,onlyCis,onlyBlat,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,minIdentity:,minMatch:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,redGreen,onlyCis,onlyBlat,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,minIdentity:,minMatch:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -404,6 +406,7 @@ while true ; do
         --limit) otherParameters="$otherParameters --limit $2" ; shift 2;;
         --stringent) otherParameters="$otherParameters --stringent" ; shift 1;;
         --pf) PublicPath="$2" ; shift 2;;
+        --redGreen) REDGREEN=1 ; shift;;
         --qmin) QMIN="$2" ; shift 2;;
         --BLATforREUSEfolderPath) reuseBLATpath="$2" ; shift 2;;
         --flashBases) flashOverlap="$2" ; shift 2;;
@@ -619,7 +622,6 @@ echo "------------------------------" >> parameters_capc.log
 echo "GenomeFasta ${GenomeFasta}" >> parameters_capc.log
 echo "BowtieGenome ${BowtieGenome}" >> parameters_capc.log
 echo "ucscBuild ${ucscBuild}" >> parameters_capc.log
-
 
 cat parameters_capc.log
 echo
