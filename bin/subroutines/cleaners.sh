@@ -21,6 +21,9 @@
 
 cleanCCfolder(){
 rm -f *_coordstring_${CCversion}.txt
+
+TEMPweHaveSams=$(($(ls -1 *.sam | grep -c "")))
+if [ "${TEMPweHaveSams}" -ne 0 ]; then
 for file in *.sam
 do
     TEMPreturnvalue=0
@@ -43,7 +46,8 @@ do
         ls -lht ${file}
     fi
     ls -lht ${bamname}
-done  
+done
+fi
 }
 
 cleanUpRunFolder(){
