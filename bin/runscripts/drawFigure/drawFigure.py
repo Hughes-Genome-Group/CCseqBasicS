@@ -204,6 +204,18 @@ myFlashedPercentages=[0,1,2,3,4,5,6,7,8]
 myNonFlashedPercentages=[0,1,2,3,4,5,6,7,8]
 myColors=['0',['1','1'],['2','2'],['3','3'],['4','4'],['5','5','5'],['6','6'],['7','7'],['8','8']]
 
+# Default colors (for color blindness support)
+#
+# PINK GREEN (default)
+#         RGB          HEX  
+# red     255,74,179   #FF4ABE
+# orange  255,140,0    #FF8C00
+# green    62,176,145  #3EB091
+#
+red='#FF4ABE'
+orange='#FF8C00'
+green='#3EB091'
+
 # Setting the values.. (most of them have four values - those are set here.)
 for x in range(2, 9):
     if (x != 3 and x !=5 ):
@@ -216,42 +228,42 @@ myPercentages[0]=valuesAsFloats[0][0]
 myColors[0]='blue'
 
 myLabel[1]='Flashed / nonflashed'
-myComment[1]='Flash-combined(gray), non-combined(violet)'
+myComment[1]='Flash-combined (light blue), non-combined (yellow)'
 myPercentages[1]=[valuesAsFloats[1][0],valuesAsFloats[1][1]]
-myColors[1]=['gray','darkviolet']
+myColors[1]=['dodgerblue','gold']
 
 myLabel[2]='Do/don\'t have RE site'
 myComment[2]='With RE site(green), no RE site(red)'
-myColors[2]=['green','red']
+myColors[2]=[green,red]
 
 myLabel[3]='Continue to mapping'
 myComment[3]='Continues to mapping :'
 myFlashedPercentages[3]=valuesAsFloats[3][0]
 myNonFlashedPercentages[3]=valuesAsFloats[3][1]
-myColors[3]='green'
+myColors[3]=green
 
 myLabel[4]='Contains capture'
 myComment[4]='cap(green), nocap(red)'
-myColors[4]=['green','red']
+myColors[4]=[green,red]
 
 myLabel[5]='Capture and/or reporter'
 # myComment[5]='cap+rep(green), cap+excl(orange), only cap(red)'
 myComment[5]='cap+rep(green),only cap(red) - cap+excl also red'
 myFlashedPercentages[5]=[valuesAsFloats[5][0],valuesAsFloats[5][1],valuesAsFloats[5][2]]
 myNonFlashedPercentages[5]=[valuesAsFloats[5][3],valuesAsFloats[5][4],valuesAsFloats[5][5]]
-myColors[5]=['green','orange','red']
+myColors[5]=[green,orange,red]
 
 myLabel[6]='Multiple (different) captures'
-myComment[6]='single cap(green), multicap(red)'
-myColors[6]=['green','red']
+myComment[6]='single cap (green), multicap (red)'
+myColors[6]=[green,red]
 
 myLabel[7]='Duplicate filtered'
-myComment[7]='non-duplicate(green), duplicate(red)'
-myColors[7]=['green','red']
+myComment[7]='non-duplicate (green), duplicate (red)'
+myColors[7]=[green,red]
 
 myLabel[8]='Blat/ploidy filtered'
-myComment[8]='no-blat-no-ploidy(green), blat and/or ploidy(red)'
-myColors[8]=['green','red']
+myComment[8]='no-blat-no-ploidy (green), blat and/or ploidy (red)'
+myColors[8]=[green,red]
 
 # print >> sys.stderr,"----------------------------------------" 
 # print >> sys.stderr,""
@@ -330,7 +342,7 @@ myFlashedPercentages[1]=myPercentages[1]
 layer1.broken_barh(
                [(0, myFlashedPercentages[1][0]), (myFlashedPercentages[1][0], myFlashedPercentages[1][1])], # X (start, width)
                (0, 75),             # Y (start, height) 
-               facecolors=['lightgray','plum'], edgecolor = "none"
+               facecolors=['lightcyan','lemonchiffon'], edgecolor = "none"
 )
 
 # Total reads (input fastq)
