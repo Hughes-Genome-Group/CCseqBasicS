@@ -932,12 +932,7 @@ filterSams
 
 # Make bed file of all blat-filter-marked DPNII regions..
 
-# Only if we actually needed to filter something !
-if [ -s "${outputfolder}/${newname}_forBlatFiltering.gff" ] ; then
-
-    cat ${outputfolder}/*.gff | grep BlatFilteredRegion=TRUE | cut -f 1,3,4,5 | awk '{ print $1"\t"$3"\t"$4"\t"$2 }' > ${outputfolder}/blatFilterMarkedREfragments.bed
-
-fi
+cat ${outputfolder}/*.gff | grep BlatFilteredRegion=TRUE | cut -f 1,3,4,5 | awk '{ print $1"\t"$3"\t"$4"\t"$2 }' > ${outputfolder}/blatFilterMarkedREfragments.bed
 
 ls -lht ${outputfolder}/*filtered_combined.sam
 ls -lht ${outputfolder}/*filtered_combined.sam >> "/dev/stderr"
