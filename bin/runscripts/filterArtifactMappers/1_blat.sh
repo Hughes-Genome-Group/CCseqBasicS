@@ -161,12 +161,14 @@ basename=$( echo $file | sed 's/_coordinate.bed.fa//' )
 #   - we don't want to SKIP blat filter for all capture-site (REfragment)s BECAUSE OF FILE ADDRESS TYPO here.. )
 
 weRunBLAT=1
+blatFileIsEmpty=1
 if [ -e ${PathForReuseBlatResults}/${basename}_blat.psl ]
 then
-if [ -s ${PathForReuseBlatResults}/${basename}_blat.psl ]
-then   
 weRunBLAT=0
 fi
+if [ -s ${PathForReuseBlatResults}/${basename}_blat.psl ]
+then   
+blatFileIsEmpty=0
 fi
 
 if [ "${weRunBLAT}" -eq "1" ]
@@ -194,6 +196,12 @@ else
 
 echo "Found file ${PathForReuseBlatResults}/${basename}_blat.psl - skipping blat for that capture-site (REfragment), using the found file instead !"
 echo "Found file ${PathForReuseBlatResults}/${basename}_blat.psl - skipping blat and that capture-site (REfragment), using the found file instead !" >> "/dev/stderr"
+
+if [ "${blatFileIsEmpty}" -eq "1" ]
+then
+echo "WARNING ! Found file ${PathForReuseBlatResults}/${basename}_blat.psl - is EMPTY FILE. This means NO BLAT FILTERING will be done to this oligo (as no homology regions are listed) !"
+echo "WARNING ! Found file ${PathForReuseBlatResults}/${basename}_blat.psl - is EMPTY FILE. This means NO BLAT FILTERING will be done to this oligo (as no homology regions are listed) !" >> "/dev/stderr"    
+fi
 
 cp ${PathForReuseBlatResults}/${basename}_blat.psl .
 
