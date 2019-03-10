@@ -315,6 +315,14 @@ ls ${mainScriptFolder}/drawFigure/drawFigure.py
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 echo
 sleep 3
+echo "Tri-C analysis scripts :"
+echo
+ls ${mainScriptFolder}/TriC_MO.pl
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${mainScriptFolder}/TriC_matrix_MO.py
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+echo
+sleep 3
 echo "Configuration setters :"
 echo
 ls ${confFolder}/genomeBuildSetup.sh

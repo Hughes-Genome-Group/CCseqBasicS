@@ -185,6 +185,28 @@ REenzyme="dpnII"
 ONLY_CC_ANALYSER=0
 # Rerun public folder generation and filling. Will not delete existing folder, but will overwrite all files (and start tracks.txt from scratch).
 ONLY_HUB=0
+# Only run 3-way interaction map generation (on existing CS5 run)
+ONLY_TRIC=0
+
+# Run tri-c also in binned mode (run the alternative script which runs both binned and normal in one go)
+# This is FOR FUTURE PURPOSES ONLY : - the underlying perl script got never finished.
+# also : the below 1 flag (BINNED_TRIC) never worked, as the portability fixes to the underlying perl script were never debugged fully.
+# The binned tric user case needs also TRIC_BIN parameter, which is currently used ONLY in the python matrix plotting script.
+BINNED_TRIC=0
+
+
+# Bin size
+TRIC_BIN=1000
+# Max signal
+TRIC_MAX=20
+
+
+# If we have TRI-C run (no exclusion zones - auto-edit capture coordinate file)
+TRIC=0
+# If we have TRI-C run (no editing capture coordinate file - using exclusion zones as they are given)
+TRICEXC=0
+
+otherTricParameters=""
 
 strandSpecificDuplicates=0
 
@@ -348,7 +370,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,redGreen,onlyCis,onlyBlat,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,minIdentity:,minMatch:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize: -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,redGreen,onlyCis,onlyBlat,onlyTriC,triC,triCwithExcl,binnedTriC,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,minIdentity:,minMatch:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize:,triCbin:,triCmax: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -369,13 +391,17 @@ while true ; do
         -v) LOWERCASE_V=$2; shift 2;;
         --help) usage ; shift;;
         --UMI) printThis="UMI flag temporarily broken 01Nov2018\nEXITING";printToLogFile;exit 1;otherParameters="$otherParameters --umi" ; shift;;
-        --useSymbolicLinks) otherParameters="$otherParameters --symlinks" ; shift;;
+        --useSymbolicLinks) otherParameters="${otherParameters} --symlinks" ; otherTricParameters="${otherTricParameters} --symlinks"; shift;;
         --CCversion) CCversion="$2"; shift 2;;       
         --dpn) REenzyme="dpnII" ; shift;;
         --nla) REenzyme="nlaIII" ; shift;;
         --hind) REenzyme="hindIII" ; shift;;
+        --triC) TRIC=1 ; shift;;
+        --triCwithExcl) TRIC_EXCL=1 ; shift;;
+        --binnedTriC) TRIC_BINNED=1 ; shift;;
         --onlyCCanalyser) ONLY_CC_ANALYSER=1 ; shift;;
         --onlyHub) ONLY_HUB=1 ; shift;;
+        --onlyTriC) ONLY_TRIC=1 ; shift;;
         --onlyCis) onlyCis=1;otherParameters="$otherParameters --onlycis"; shift;;
         --onlyBlat) ONLY_BLAT=1 ; shift;;
         --R1) Read1=$2 ; shift 2;;
@@ -391,6 +417,8 @@ while true ; do
         --trim) TRIM=1 ; shift;;
         --noTrim) TRIM=0 ; shift;;
         --window) WINDOW=$2 ; shift 2;;
+        --triCbin) TRIC_BIN=$2 ; shift 2;;
+        --triCmax) TRIC_MAX=$2 ; shift 2;;
         --increment) INCREMENT=$2 ; shift 2;;
         --genome) GENOME=$2 ; shift 2;;
         --ada3read1) ADA31=$2 ; shift 2;;
@@ -575,6 +603,16 @@ echo "REenzyme ${REenzyme}" >> parameters_capc.log
 echo "ONLY_CC_ANALYSER ${ONLY_CC_ANALYSER}" >> parameters_capc.log
 
 echo "------------------------------" >> parameters_capc.log
+
+echo "ONLY_TRIC ${ONLY_TRIC}" >> parameters_capc.log
+echo "TRIC ${TRIC}" >> parameters_capc.log
+echo "TRIC_EXCL ${TRIC_EXCL}" >> parameters_capc.log
+# echo "BINNED_TRIC ${BINNED_TRIC}" >> parameters_capc.log
+echo "TRIC_BIN ${TRIC_BIN}" >> parameters_capc.log
+echo "TRIC_MAX ${TRIC_MAX}" >> parameters_capc.log
+
+echo "------------------------------" >> parameters_capc.log
+
 echo "TRIM ${TRIM}  (TRUE=1, FALSE=0)" >> parameters_capc.log
 echo "QMIN ${QMIN}  (default 20)" >> parameters_capc.log
 
@@ -636,9 +674,37 @@ doInputFileTesting
 
 #---------------------------------------------------------
 
+# Tri-c long run default user case (if we are not asking TRIC_EXCL) needs mods for the capture coordinate file ..
+
+if [ "${TRIC}" -eq "1" ]; then
+
+  printThis="Running as tri-C run : omitting exclusion zones (generating file capturesitesNoExclusions.txt )"
+  printToLogFile
+
+  # Supporting 7-column format, so :
+  
+  cat ${CapturesiteFile} | sed 's/\s\s*/\t/g' > TEMP_captureSites.txt
+  cut -f 1 TEMP_captureSites.txt > TEMP_1
+  cut -f 2-4 TEMP_captureSites.txt > TEMP_2to4
+  cut -f 1-7 --complement > TEMP_rest
+  paste TEMP_1 TEMP_2to4 TEMP_2to4 TEMP_rest > capturesitesNoExclusions.txt
+  
+  rm -f TEMP_captureSites.txt TEMP_1 TEMP_2to4 TEMP_2to4 TEMP_rest
+  
+  CapturesiteFile=$(pwd)"/capturesitesNoExclusions.txt"
+  
+  testedFile="${CapturesiteFile}"
+  doTempFileTesting
+  
+  ls -lht ${CapturesiteFile}
+
+fi
+
+#---------------------------------------------------------
+
 # Doing the ONLY_BLAT  user case first - they doesn't need existing input files (except the capture-site (REfragment) file) - so we shouldn't enter any testing of parameters here.
 
-if [[ "${ONLY_BLAT}" -eq "1" ]]; then
+if [ "${ONLY_BLAT}" -eq "1" ]; then
 {
 
   paramGenerationRunFineOK=0
@@ -733,8 +799,9 @@ fi
 # ---------------------------------------
 
 # Making output folder.. (and crashing run if found it existing from a previous crashed run)
-if [[ ${ONLY_HUB} -eq "0" ]]; then
-if [[ ${ONLY_CC_ANALYSER} -eq "0" ]]; then
+if [ "${ONLY_TRIC}" -eq "0" ]; then
+if [ "${ONLY_HUB}" -eq "0" ]; then
+if [ "${ONLY_CC_ANALYSER}" -eq "0" ]; then
 
 if [ -d F1_beforeCCanalyser_${Sample}_${CCversion} ] ; then
   # Crashing here !
@@ -747,10 +814,11 @@ fi
 mkdir F1_beforeCCanalyser_${Sample}_${CCversion}   
 fi
 fi
+fi
 
 # Here crashing if public folder exists (and this is not --onlyCCanalyser run ..
 
-if [ -d ${PublicPath} ] && [ ${ONLY_CC_ANALYSER} -eq "0" ] ; then
+if [ -d ${PublicPath} ] && [ "${ONLY_CC_ANALYSER}" -eq "0" ] && [ ${ONLY_TRIC} -eq "0" ]; then
     # Allows to remove if it is empty..
     rmdir ${PublicPath}
 
@@ -765,9 +833,11 @@ fi
 
 fi
 
+# The whole CCanalyser part is skipped, if we are tric-only
+if [ "${ONLY_TRIC}" -eq "0" ]; then
 
-if [[ ${ONLY_HUB} -eq "0" ]]; then
-if [[ ${ONLY_CC_ANALYSER} -eq "0" ]]; then
+if [ "${ONLY_HUB}" -eq "0" ]; then
+if [ "${ONLY_CC_ANALYSER}" -eq "0" ]; then
 
 #--------Test if fastq paths given correctly ------------------------------------------------------
 
@@ -904,8 +974,9 @@ fi
 # Go into output folder..
 cd F1_beforeCCanalyser_${Sample}_${CCversion}
 
-if [[ ${ONLY_HUB} -eq "0" ]]; then
-if [[ ${ONLY_CC_ANALYSER} -eq "0" ]]; then
+
+if [ "${ONLY_HUB}" -eq "0" ]; then
+if [ "${ONLY_CC_ANALYSER}" -eq "0" ]; then
     
 #---------------------------------------
 
@@ -1001,7 +1072,7 @@ fi
 ################################################################
 # Trimgalore for the reads..
 
-if [[ ${TRIM} -eq "1" ]]; then
+if [ "${TRIM}" -eq "1" ]; then
 
 printThis="Running trim_galore for the reads.."
 printToLogFile
@@ -1765,11 +1836,6 @@ mv -f COMBINED_${Sample}_${CCversion} F6_greenGraphs_combined_${Sample}_${CCvers
 
 ################################################################
 
-
-if [[ ${saveDpnGenome} -eq "0" ]] ; then
-  rm -f "genome_${REenzyme}_coordinates.txt"  
-fi
-
 # Generating combined data hub
 
 sampleForCCanalyser="${Sample}"
@@ -1782,9 +1848,75 @@ generateCombinedDataHub
 
 cleanUpRunFolder
 # makeSymbolicLinks
+   
+# End if for "only-tric" user case (skipped everything up to here)
+fi
+################################################################
+# Here the tri-c user cases.
+
+if [ "${ONLY_TRIC}" -eq "1" ] || [ "${TRIC}" -eq "1" ] || [ "${TRIC_EXCL}" -eq "1" ]; then
+    
+printThis="##################################"
+printToLogFile
+printThis="Generating the 3-way interaction matrix with tri-c codes .."
+printToLogFile
+printThis="##################################"
+printToLogFile
+    
+# Preparing (only-tric)
+if [ "${ONLY_TRIC}" -eq "1" ]; then
+    
+  # RE enzyme digestion (if needed .. )
+  dpnGenomeName=""
+  fullPathDpnGenome=""
+  generateReDigest
+  
+  # SAM file generation ..
+  
+  printThis="Bam to sam transform .."
+  printToLogFile
+  samtools view -h -o F6_greenGraphs_combined_${Sample}_${CCversion}/COMBINED_reported_capture_reads_${CCversion}.sam F6_greenGraphs_combined_${Sample}_${CCversion}/COMBINED_reported_capture_reads_${CCversion}.bam 
+  testedFile="F6_greenGraphs_combined_${Sample}_${CCversion}/COMBINED_reported_capture_reads_${CCversion}.sam"
+  doTempFileTesting
+
+  doQuotaTesting
+
+fi
+
+# Actual analysis run ..
+
+runTric
+
+# Cleaning up after ourselves ..
+    
+cleanUpAfterTric
+
+fi
+
+
+
+################################################################
+
+
+if [ "${saveDpnGenome}" -eq "0" ] ; then
+  rm -f "genome_${REenzyme}_coordinates.txt"  
+fi
 
 # Data hub address (print to stdout) ..
 updateHub_part3final
+
+if [ "${ONLY_TRIC}" -eq "1" ] || [ "${TRIC}" -eq "1" ] || [ "${TRIC_EXCL}" -eq "1" ]; then
+updateHub_part3finalTric
+fi
+if [ "${BINNED_TRIC}" -eq "1" ] ; then
+updateHub_part3finalTricBinned
+fi
+if [ "${ONLY_TRIC}" -eq "1" ] || [ "${TRIC}" -eq "1" ] || [ "${TRIC_EXCL}" -eq "1" ]; then
+updateHub_part3finalTricDescription
+fi
+
+# Data hub load instructions (print to stdout) ..
+updateHub_part3final2
 
 echo
 echo "All done !"

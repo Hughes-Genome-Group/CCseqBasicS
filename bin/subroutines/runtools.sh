@@ -264,3 +264,110 @@ cat parameters_for_filtering.log
    
 }
 
+
+runTric(){
+
+################################################################
+# Running tri-c script
+
+if [ "${BINNED_TRIC}" -eq "1" ]; then
+
+printThis="Running 3-way contact matrix table generation (tri-C) in RE-fragment based AND binned modes .."
+printToLogFile
+
+printThis="perl ${RunScriptsPath}/TriC_MO_bin.pl -b ${TRIC_BIN} -sam F6_greenGraphs_combined_${Sample}_${CCversion}/COMBINED_reported_capture_reads_${CCversion}.sam -o ${CapturesiteFile} -r ${fullPathDpnGenome} --genome ${GENOME} --ucscsizes ${ucscBuild} --server ${SERVERTYPE}://${SERVERADDRESS} -pf ${diskFolder} -sf ${serverFolder} --name ${Sample} ${otherTricParameters}"
+printToLogFile
+
+perl ${RunScriptsPath}/TriC_MO_bin.pl -b ${TRIC_BIN} -sam "F6_greenGraphs_combined_${Sample}_${CCversion}/COMBINED_reported_capture_reads_${CCversion}.sam" -o ${CapturesiteFile} -r ${fullPathDpnGenome} --genome ${GENOME} --ucscsizes ${ucscBuild} --server "${SERVERTYPE}"'://'"${SERVERADDRESS}" -pf ${diskFolder} -sf ${serverFolder} --name ${Sample} ${otherTricParameters}
+
+else
+
+printThis="Running 3-way contact matrix table generation (tri-C) in RE-fragment based mode .."
+printToLogFile
+
+printThis="perl ${RunScriptsPath}/TriC_MO.pl -sam F6_greenGraphs_combined_${Sample}_${CCversion}/COMBINED_reported_capture_reads_${CCversion}.sam -o ${CapturesiteFile} -r ${fullPathDpnGenome} --genome ${GENOME} --ucscsizes ${ucscBuild} --server ${SERVERTYPE}://${SERVERADDRESS} -pf ${diskFolder} -sf ${serverFolder} --name ${Sample} ${otherTricParameters}"
+printToLogFile
+
+perl ${RunScriptsPath}/TriC_MO.pl -sam "F6_greenGraphs_combined_${Sample}_${CCversion}/COMBINED_reported_capture_reads_${CCversion}.sam" -o ${CapturesiteFile} -r ${fullPathDpnGenome} --genome ${GENOME} --ucscsizes ${ucscBuild} --server "${SERVERTYPE}"'://'"${SERVERADDRESS}" -pf ${diskFolder} -sf ${serverFolder} --name ${Sample} ${otherTricParameters}
+
+    
+fi
+
+printThis="Running 3-way contact matrix visualisation (tri-C) .."
+printToLogFile
+
+TEMP_subfolder="F6_greenGraphs_combined_${Sample}_${CCversion}/${Sample}_TriC"
+TEMP_tricParams1="-b ${TRIC_BIN} -o ${TEMP_subfolder} -t ${TRIC_MAX}"
+
+rm -f USED_TriC_plottingParameters.txt
+
+if [ ! -s "PIPE_TriC_plottingParameters.txt" ]; then
+
+printThis="Generating plotting parameters on the fly (no PIPE_TriC_plottingParameters.txt file in run directory)"
+printToLogFile
+printThis="Finetuning Tri-C plotting can be done by re-naming the generated USED_TriC_plottingParameters.txt to PIPE_TriC_plottingParameters.txt \n and editing the plotting window (columns 2-3) for each capture site,\n and restarting the run with --onlyTriC to only repeat TriC analysis."
+printToLogFile
+
+else
+    
+printThis="Reading plotting parameters from PIPE_TriC_plottingParameters.txt file (given in the run directory)"
+printToLogFile    
+
+fi
+
+for file in ${TEMP_subfolder}/${Sample}_*_TriC_interactions.txt
+do
+
+TEMP_tricParams2=""
+TEMPcaptureSite=""
+
+
+if [ ! -s "PIPE_TriC_plottingParameters.txt" ]; then
+
+    TEMPcaptureSite=$(basename $file | sed 's/^'${Sample}'_//' | sed 's/_TriC_interactions.txt//')
+    TEMPchr=$(cat ${CapturesiteFile} | grep '^'${TEMPcaptureSite}'\s' | cut -f 2)
+    
+    TEMPmiddle=$(cat ${CapturesiteFile} | grep '^'${TEMPcaptureSite}'\s' | cut -f 3,4 | awk '{ print int(($1+$2)/20000)*10000}')
+    
+    TEMPstr=$(echo ${TEMPmiddle} | awk '{if($1<100000)print 1; else print $1-100000}')
+    TEMPstp=$(echo ${TEMPmiddle} | awk '{ print $1+100000}')
+    TEMPchrSize=$(cat ${ucscBuild} | grep '^[Cc]hr'${TEMPchr}'\s' | sed 's/.*\s//')
+    
+    TEMPstpClip=$(echo -e "${TEMPstp}\t${TEMPchrSize}" | awk '{if($1>$2)print $2; else print $1}')
+    
+    echo -e "${TEMPcaptureSite}\t${TEMPchr}\t${TEMPstr}\t${TEMPstpClip}" >> USED_TriC_plottingParameters.txt
+    
+    TEMP_tricParams2="-c chr${TEMPchr} --str ${TEMPstr} --stp ${TEMPstpClip}"
+
+
+else
+    
+    TEMPcaptureSite=$(basename $file | sed 's/^'${Sample}'_//' | sed 's/_TriC_interactions.txt//')
+    TEMPchr=$(cat PIPE_TriC_plottingParameters.txt | grep '^'${TEMPcaptureSite}'\s' | cut -f 2)
+    TEMPstr=$(cat PIPE_TriC_plottingParameters.txt | grep '^'${TEMPcaptureSite}'\s' | cut -f 3)
+    TEMPstp=$(cat PIPE_TriC_plottingParameters.txt | grep '^'${TEMPcaptureSite}'\s' | cut -f 4)
+    
+    echo -e "${TEMPcaptureSite}\t${TEMPchr}\t${TEMPstr}\t${TEMPstp}" >> USED_TriC_plottingParameters.txt
+    
+    TEMP_tricParams2="-c chr${TEMPchr} --str ${TEMPstr} --stp ${TEMPstp}"
+    
+fi
+
+printThis="Visualising capture site ${TEMPcaptureSite}"
+printToLogFile
+printThis="python ${RunScriptsPath}/TriC_matrix_MO.py -f ${file} ${TEMP_tricParams1} ${TEMP_tricParams2} > ${TEMP_subfolder}/${Sample}_${TEMPcaptureSite}_TriC_visualisationRun.log"
+printToLogFile
+
+python ${RunScriptsPath}/TriC_matrix_MO.py -f ${file} ${TEMP_tricParams1} ${TEMP_tricParams2} > ${TEMP_subfolder}/${Sample}_${TEMPcaptureSite}_TriC_visualisationRun.log
+
+copyTricPdfToPublic
+
+done
+
+ls -lht F6_greenGraphs_combined_${Sample}_${CCversion}/${Sample}_TriC
+
+# public html update for pdfs ..
+
+updateTricHub
+
+}

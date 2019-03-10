@@ -193,11 +193,24 @@ echo "   To turn wobbly ends off, set this to 1 ( --wobblyEndBinWidth 1 ) - this
 echo "   If using --UMI , --wobblyEndBinWidth 20 is recommended."
 echo "   For example : --wobblyEndBinWidth 20 means : bin of 20 bases for duplicate filter :"
 echo "   if all fragment coordinates are the same +/- 10 bases, ( and if --UMI is used : UMI is the same), reads are duplicates."
-echo
+echo 
+echo "TRI-C 3-WAY INTERACTION ANALYSER"
+echo "--triC : run CCseqBasic in tri-C mode (omit exclusion zones in F2-F7 parts of analysis, end the run with 3-way interaction analysis)"
+echo "--triCwithExcl : run CCseqBasic in tri-C mode (end the run with 3-way interaction analysis - read exclusion zones normally from parameter file in F2-F7 parts of analysis)"
+echo "--onlyTriC : run the 3-way interaction analysis only (assuming completed full CCseqBasic run in the starting folder)"
+echo "             - use whichever exclusion zones were used in the F2-F7 run part in the existing folders."
+# BINNED TRI-C (for potential future purposes only) - the underlying perl script got never finished.
+# also : the below 1 flag (BINNED_TRIC) never worked, as the portability fixes to the underlying perl script were never debugged fully.
+# The binned tric user case needs also TRIC_BIN parameter, which is currently used ONLY in the python matrix plotting script.
+# echo "--binnedTriC : run TriC also in binned mode (default bin size 1000)"
+
+echo "--triCbin 1000 : TriC bin size (default 1000 bases)"
+echo "--triCmax 20 : TriC max signal to be plotted (default 20 RPM/bin). Signal higher than this is capped to [triCmax]."
+echo 
 echo "ACCESSIBILITY SETTINGS"
 echo "--redGreen   (use the OLD redGreen colors - very colorblind unfriendly, i.e. the default colors of runs before 2019)"
 echo "Default : not use the above (use pink-green colors, which are colorblind friendly)"
-echo ""
+echo 
 echo "CAPTURE-C ANALYSER DEVELOPER OPTIONS"
 echo "--dump : Print file of unaligned reads (sam format)"
 echo "--limit n  : only analyse the first 'n' reads - for testing purposes "

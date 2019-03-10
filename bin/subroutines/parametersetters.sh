@@ -32,6 +32,16 @@ fi
 }
 
 setParameters(){
+    
+#----------------------------------------------
+# Listing current limitations, exiting if needed :
+
+if [ "${TRIC}" -ne 0 ] && [ "${TRIC_EXCL}" -ne 0 ];
+then
+    printThis="Both --triC and --triCwithExcl parameters cannot be set at the same time\nEXITING"
+    printToLogFile
+  exit 1
+fi
 
 #----------------------------------------------
 # Listing current limitations, exiting if needed :

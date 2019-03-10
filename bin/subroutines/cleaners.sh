@@ -115,12 +115,17 @@ echo "greenGraphs_separate is a CCanalyser re-run for blat+ploidy filtered data"
 cleanCCfolder
 cd ..
 
+# Don't clean F6 if doing tri-c right after ..
+
+if [ "${TRIC}" -eq "0" ] && [ "${TRIC_EXCL}" -eq "0" ]; then
+    
 cd F6_greenGraphs_combined_${Sample}_${CCversion}
 echo F6_greenGraphs_combined_${Sample}_${CCversion}
 echo "greenGraphs_combined is a CCanalyser run to combine flashed and nonflashed data" > a_CCanalyser_run_to_generate_final_results
 cleanCCfolder
 cd ..
 
+fi
 
 echo
 echo "Output folders generated :"
@@ -128,6 +133,25 @@ echo "Output folders generated :"
 ls -lht
     
 }
+
+cleanUpAfterTric(){
+
+printThis="Cleaning up after tri-c : packing files.."
+printToLogFile
+   
+cd F6_greenGraphs_combined_${Sample}_${CCversion}
+echo F6_greenGraphs_combined_${Sample}_${CCversion}
+
+if [ "${ONLY_TRIC}" -eq "0" ]; then
+   cleanCCfolder
+else
+   rm -f COMBINED_reported_capture_reads_${CCversion}.sam
+fi
+
+cd ..
+    
+}
+
 
 oneFolderSymLinks(){
 

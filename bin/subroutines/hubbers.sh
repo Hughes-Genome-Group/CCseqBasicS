@@ -187,6 +187,38 @@ cp -f ./FLASHED_${REenzyme}digestion.log "${PublicPath}/${Sample}_logFiles/${Sam
 
 }
 
+copyTricPdfToPublic(){
+printThis="Copying pdf to public folder"
+printToLogFile
+rm -f ${diskFolder}/${Sample}_TriC/${Sample}_${TEMPcaptureSite}_TriC_interactions_${TRIC_BIN}_${TRIC_MAX}.pdf
+cp ${TEMP_subfolder}/${Sample}_${TEMPcaptureSite}_TriC_interactions_${TRIC_BIN}_${TRIC_MAX}.pdf ${diskFolder}/${Sample}_TriC/.
+
+}
+
+updateTricHub(){
+    
+    printThis="Updating TriC html file"
+    printToLogFile
+    
+    echo $(date) > temp_description.html
+    echo "<h4>TriC visualisation files here : </h4>" >> temp_description.html
+    
+    for publicPdf in ${diskFolder}/${Sample}_TriC/${Sample}_*_TriC_interactions_${TRIC_BIN}_${TRIC_MAX}.pdf
+    do
+        TEMPbasename=$(basename ${publicPdf})
+        TEMPcapture=$(echo ${TEMPbasename}| sed 's/^'${Sample}'_//' | sed 's/_TriC_interactions_'${TRIC_BIN}_${TRIC_MAX}'.pdf//')
+        echo "<li><a target="_blank" href=\"${ServerAndPath}/${Sample}_TriC/${TEMPbasename}\" >${TEMPbasename}</a>  </li>" >> temp_description.html
+    done
+
+    echo "<hr />" >> temp_description.html
+    
+    echo "<h4>TriC run counters (before visualisation)  : </h4>" >> temp_description.html
+    
+    cat ${diskFolder}/${Sample}_TriC/description.html >> temp_description.html    
+    mv -f temp_description.html ${diskFolder}/${Sample}_TriC/description.html
+    
+}
+
 updateHub_part2c(){
     
     # Link the file to each of the existing tracks..
@@ -220,8 +252,27 @@ updateHub_part3final(){
     echo "Generated a data hub for FILTERED flashed+nonflashed combined data in : ${ServerAndPath}/COMBINED/COMBINED_${Sample}_${CCversion}_hub.txt"
     echo
     echo "Generated a COMBINED data hub (of all the above) in : ${ServerAndPath}/${Sample}_${CCversion}_hub.txt"
-    echo 'How to load this hub to UCSC : http://userweb.molbiol.ox.ac.uk/public/telenius/CaptureCompendium/CCseqBasic/DOCS/HUBtutorial_AllGroups_160813.pdf'    
 
+}
+
+updateHub_part3finalTric(){
+    echo
+    echo "Generated a tri-C data hub in : ${ServerAndPath}/${Sample}_TriC/hub.txt"
+
+}
+
+updateHub_part3finalTricBinned(){
+    echo "Generated a     BINNED tri-C data hub in : ${ServerAndPath}/${Sample}_TriC/hub_bin.txt"
+    
+}
+
+updateHub_part3finalTricDescription(){
+    echo "And Tri-C visualisation html page in : ${ServerAndPath}/${Sample}_TriC/description.html"
+
+}
+
+updateHub_part3final2(){
+    echo 'How to load this hub to UCSC : http://userweb.molbiol.ox.ac.uk/public/telenius/CaptureCompendium/CCseqBasic/DOCS/HUBtutorial_AllGroups_160813.pdf'    
 }
 
 updateCCanalyserDataHub(){
