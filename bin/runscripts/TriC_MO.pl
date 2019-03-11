@@ -23,25 +23,26 @@ use strict;
 use Data::Dumper;
 use Getopt::Long;
 
-######################################################################################################################################################
+##########################################################################
 
-# This script performs the analysis of a Tri-C experiment. It depends on the combined bam file outputted by the CCseqBasic pipeline "COMBINED_reported_capture_reads_CS5.bam" (F6 folder), ran using an oligo file without proximity exclusion (see instructions here: http://userweb.molbiol.ox.ac.uk/public/telenius/captureManual/PipeSite.html), and converted to sam format. This files contains all mapped reads containing 1 capture fragment post PCR duplicate, blat and ploidy filtering. The scripts also requires the oligo file and a file with the coordinates of the restriction fragments (of correspondong enzyme) in the genome. 
+# This script performs the analysis of a Tri-C experiment. It depends on the bam file output of the CCseqBasic pipeline "COMBINED_reported_capture_reads_CS5.bam" (F6 folder), ran using an oligo file without proximity exclusion (see instructions here: http://userweb.molbiol.ox.ac.uk/public/telenius/CCseqBasicManual/), and converted to sam format. This files contains all mapped reads containing 1 capture fragment post PCR duplicate, blat and ploidy filtering. The scripts also requires the oligo file and a file with the coordinates of the restriction fragments (of correspondong enzyme) in the genome. 
 
-# The script selects the reporter reads in cis, performs a proximity exclusion, maps the reads to the restriction fragments and counts multi-way interactions. These are outputted in a text file with suffix "_TriC_interactions.txt". This file can be used as input for the TriC_matric.py script to generate a basic interaction matrix.
+# The script selects the reporter reads in cis, performs a proximity exclusion, maps the reads to the restriction fragments and counts multi-way interactions. These are outputted in a text file with suffix "_TriC_interactions.txt". This file can be used as input for the TriC_matrix.py script to generate a basic interaction matrix.
 
 # Output:
 # 1. Report with read and interaction counts
 # 2. Text file containing reported multi-way interactions per viewpoint in format: RF1 \t RF2 \t count \n
-# 3. Wig file containing all reported interactions in cis per viewpoint (Capture-C like track) 
+# 3. Wig file containing all reported interactions in cis per viewpoint (Capture-C like track; optional)
 
-# Example of run command:
-# module load ucsctools
-# nohup perl /t1-data/user/hugheslab/oudelaar/scripts/TriC/TriC_MO.pl -sam /t1-data/user/hugheslab/oudelaar/Tri-C/samfiles_pipe/ES_combined_Tri_Org_CS5.sam -o /t1-data/user/hugheslab/oudelaar/Tri-C/pipe/tri-c_oligo_file_noprex.txt -r /t1-data1/WTSA_Dev/oudelaar/scripts/mm9_nlaIII_coordinates.txt -name ES_all -pf /public/oudelaar &
+# Example of a minimal run command:
+# nohup perl TriC_MO.pl -sam COMBINED_reported_capture_reads_CS5.sam -o /my_path/tri-c_oligo_file_noprex.txt -r /my_path/mm9_nlaIII_coordinates.txt -name X &
 
-######################################################################################################################################################
+# For more instructions, see http://userweb.molbiol.ox.ac.uk/public/telenius/CCseqBasicManual/
+
+##########################################################################
 
 # Hardcoded parameters :
-my $email = 'marieke.oudelaar@univ.ox.ac.uk';
+my $email = 'marieke.oudelaar@imm.ox.ac.uk';
 my $version = "1.0.0";
 
 # Obligatory parameters :
@@ -416,7 +417,8 @@ unless (open(TRACKHUBC, ">$public_folder/tracks.txt")){die "Cannot open file $pu
 frag_to_wig(\%data_hash,"");
 close TRACKHUBC;
 
-#########################################################################################################################################################################
+##########################################################################
+
 # Creates a track hub
 unless (open(TRACKHUBA, ">$public_folder/hub.txt")){die "Cannot open file $public_folder/hub.txt, stopped ";}
 unless (open(TRACKHUBB, ">$public_folder/genomes.txt")){die "Cannot open file $public_folder/genomes.txt, stopped ";}
@@ -460,7 +462,7 @@ print STDOUT "\nThe track hub can be found at:
 $server/$server_folder/hub.txt
 This URL just needs to be pasted into the UCSC genome browser\n\n";
 
-######################################################################################################################################################
+##########################################################################
 
 sub binary_search {
     my ($chr_array, $start, $stop, $counter_hash) = @_;
@@ -529,7 +531,7 @@ sub frag_to_wig {
     system ("wigToBigWig -clip $dir/$tracks_out.wig $ucscsizes $dir/$tracks_out.bw") == 0 or die "couldn't bigwig files\n";
     system ("mv $dir/$tracks_out.bw $store_bigwigs_here_folder") == 0 or die "couldn't move files\n";		
     system ("chmod 755 $store_bigwigs_here_folder/$tracks_out.bw") == 0 or die "couldn't chmod files\n";   
-    print REP "track type=bigWig name=\"$tracks_out\" description=\"$tracks_out\" bigDataUrl=$server/$server_folder/$tracks_out.bw\n";
+    print REP "track type=bigWig name=\"$tracks_out\" description=\"c-trap $tracks_out\" bigDataUrl=$server/$server_folder/$tracks_out.bw\n";
     
     print TRACKHUBC
 "track $tracks_out

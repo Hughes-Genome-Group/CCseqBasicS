@@ -109,10 +109,12 @@ def print_help(exitcode):
     print ("\nUsage :\n")
     
     print(os.path.basename(sys.argv[0]) + "\n")
-          
+    
     print ("-f --file \t OBLIGATORY \t Input file (relative or absolute path) ")
-    print ("\t\t\t\t This is the   *_TriC_interactions-*.tab   output file of TriC_MO.pl script. \n")
-           
+    print ("\t\t\t\t This is the   *_TriC_interactions-*.tab   output file of TriC_MO.pl script.")
+    print ("\t\t\t\t This file can contain ONLY intra-chromosomal (i.e. cis) fragments (as is the default behavior of TriC_MO.pl).")
+    print ("\t\t\t\t Any inter-chromosomal (i.e trans) fragments in the file will cause the output matrix to be wrongly counted.\n")
+
     print ("-c --chr \t optional \t Chromosome (only for printing out the name in plot title)")
     print ("-l --str \t OBLIGATORY \t Start position (left)  of the visualisation plot")
     print ("-r --stp \t OBLIGATORY \t Stop  position (right) of the visualisation plot\n")
