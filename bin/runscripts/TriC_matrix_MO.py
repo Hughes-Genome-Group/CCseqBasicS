@@ -68,7 +68,7 @@ def do_plot(ax, Z, transform):
                    extent=[-0, 2*sqrt(2), -0, 2*sqrt(2)], clip_on=True)
     
     # Set title
-    title_text = "Tri-C matrix plot  \n(C) Marieke Oudelaar 2019\n\n" + my_sample + "\nplot printed " + date_and_time + "\n"
+    title_text = "Tri-C interactions \nInput file : " + my_sample + "\nPlot printed :" + date_and_time + "\n"
     heading = plt.title(title_text, loc='left')
 
     # Set x label
@@ -101,8 +101,13 @@ def do_plot(ax, Z, transform):
     cax = divider.append_axes("right", size="5%", pad=0.15)
     plt.colorbar(im, cax=cax)
     
+    # Print the comment under the figure
+    ax.text(0.0,-0.3, "https://github.com/oudelaar/TriC \nhttps://github.com/Hughes-Genome-Group/CCseqBasicS", size=9, ha="left", 
+    transform=ax.transAxes)
+    
     # Adjust marigins to look balanced
-    plt.subplots_adjust(left=0.05, right=0.90, top=0.85, bottom=0.05)
+    # plt.subplots_adjust(left=0.05, right=0.90, top=0.95, bottom=0.00)
+    plt.subplots_adjust(left=0.05, right=0.90)
     
 def print_help(exitcode):
     
@@ -114,7 +119,7 @@ def print_help(exitcode):
     print ("\t\t\t\t This is the   *_TriC_interactions-*.tab   output file of TriC_MO.pl script.")
     print ("\t\t\t\t This file can contain ONLY intra-chromosomal (i.e. cis) fragments (as is the default behavior of TriC_MO.pl).")
     print ("\t\t\t\t Any inter-chromosomal (i.e trans) fragments in the file will cause the output matrix to be wrongly counted.\n")
-
+    
     print ("-c --chr \t optional \t Chromosome (only for printing out the name in plot title)")
     print ("-l --str \t OBLIGATORY \t Start position (left)  of the visualisation plot")
     print ("-r --stp \t OBLIGATORY \t Stop  position (right) of the visualisation plot\n")
@@ -430,7 +435,5 @@ np.savetxt(full_file_name_out_ery + "_" + str(bin_size) + "_" + str(threshold) +
 # Print that we finished ..
 date_and_time = wallclock.strftime("%Y-%m-%d %H:%M")
 print ( "\n\nRun completed at " +  date_and_time + "\n\n" )
-
-
 
 
