@@ -160,6 +160,7 @@ my $use_parp = 0; # whether this is parp run or not (parp artificial chromosome 
 my $use_umi = 0; # whether this is UMI run or not, if yes, filter based on UMI indices : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this
 my $wobble_bin_width = 1 ; # wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
 my $only_cis = 0 ; # analysing only cis-reads (easing up the computational load for many-capturesite samples which continue straight to PeakC which is essentially a cis program)
+my $max_frags = 4 ;
 
 # If only generating blat filter parameter file :
 my $only_filtering_params = 0;
@@ -222,6 +223,7 @@ print STDOUT "\n" ;
 	"umi"=>\ $use_umi,				# -umi		Run contains UMI indices - alter the duplicate filter accordingly : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this
 	"onlycis"=>\ $only_cis, 			# -onlycis 	analysing only cis-reads (easing up the computational load for many-capturesite samples which continue straight to PeakC which is essentially a cis program)
 	"wobble=i"=>\ $wobble_bin_width,		# -wobble	This is the wobble bin width. UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
+	"maxfrags=i"=>\ $max_frags,			# -maxfrags	how many frags "at most" we loop over per (flashed) read or nonflashed read. defaults to 4.
 	"limit=i"=>\ $use_limit,			# -limit	Limit the analysis to the first n reads of the file
 	"stranded"=>\ $use_stranded,			# -stranded	To replicate the strand-specific (i.e. wrong) duplicate filter of CB3a/CC3 and CB4a/CC4
 	"genome=s"=>\ $genome,				# -genome	Specify the genome (mm9 / hg18)
@@ -1352,7 +1354,7 @@ sub readAnalysisLoop
       
       for (my $pe=1;$pe<=2;$pe++)  # loops through PE1 and PE2 
       {
-	for (my $readno=0; $readno<4; $readno++) # loops through up to 4 fragments in each paired end read
+	for (my $readno=0; $readno<$max_frags; $readno++) # loops through up to 4 fragments in each paired end read
         {
 	  if (defined $data{$analysis_read}{$pe}{$readno}{"type"})
 	  {
@@ -1376,7 +1378,7 @@ sub readAnalysisLoop
       
       for (my $pe=1;$pe<=2;$pe++)  # loops through PE1 and PE2 
       {
-	for (my $readno=0; $readno<4; $readno++) # loops through up to 4 fragments in each paired end read
+	for (my $readno=0; $readno<$max_frags; $readno++) # loops through up to 4 fragments in each paired end read
         {
 	  if (defined $data{$analysis_read}{$pe}{$readno}{"type"})
 	  {
@@ -1393,7 +1395,7 @@ sub readAnalysisLoop
       
       for (my $pe=1;$pe<=2;$pe++)  # loops through PE1 and PE2 
       {
-	for (my $readno=0; $readno<4; $readno++) # loops through up to 4 fragments in each paired end read
+	for (my $readno=0; $readno<$max_frags; $readno++) # loops through up to 4 fragments in each paired end read
         {
 	  if (defined $data{$analysis_read}{$pe}{$readno}{"type"})
 	  {
@@ -1578,7 +1580,7 @@ sub readAnalysisLoop
 	  # Counters for capture and exclusion fragments after duplicate-removal
 	  for (my $pe=1;$pe<=2;$pe++)  # loops through PE1 and PE2 
                     {
-		      for (my $readno=0; $readno<4; $readno++) # loops through up to 4 fragments in each paired end read
+		      for (my $readno=0; $readno<$max_frags; $readno++) # loops through up to 4 fragments in each paired end read
 		      {
 			
 			
@@ -1604,7 +1606,7 @@ sub readAnalysisLoop
 		  for (my $pe=1;$pe<=2;$pe++)  # loops through PE1 and PE2 
                     {
 		      
-                        for (my $readno=0; $readno<4; $readno++) # loops through up to 4 fragments in each paired end read
+                        for (my $readno=0; $readno<$max_frags; $readno++) # loops through up to 4 fragments in each paired end read
                             {
 				# if (defined $data{$analysis_read}{$pe}{$readno}{"whole line"}){print ALLSAMFH $data{$analysis_read}{$pe}{$readno}{"whole line"}."\n";}
 				if (defined $data{$analysis_read}{$pe}{$readno}{"type"}) # checks that the fragment is not CIGAR parse error or unmapped read

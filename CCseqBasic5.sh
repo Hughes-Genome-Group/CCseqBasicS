@@ -212,6 +212,9 @@ strandSpecificDuplicates=0
 
 srrFastq=0
 
+# Before setting the default ..
+fragsPerRead=-1
+
 #------------------------------------------
 
 echo "${CCseqBasicVersion}.sh - by Jelena Telenius, 05/01/2016"
@@ -370,7 +373,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,redGreen,onlyCis,onlyBlat,onlyTriC,triC,triCwithExcl,binnedTriC,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,minIdentity:,minMatch:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize:,triCbin:,triCmax: -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,redGreen,onlyCis,onlyBlat,onlyTriC,triC,triCwithExcl,binnedTriC,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,minIdentity:,minMatch:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize:,triCbin:,triCmax:,fourFragmentsPerRead,fiveFragmentsPerRead,sixFragmentsPerRead,sevenFragmentsPerRead -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -404,6 +407,11 @@ while true ; do
         --onlyTriC) ONLY_TRIC=1 ; shift;;
         --onlyCis) onlyCis=1;otherParameters="$otherParameters --onlycis"; shift;;
         --onlyBlat) ONLY_BLAT=1 ; shift;;
+        --onlyBlat) ONLY_BLAT=1 ; shift;;
+        --fourFragmentsPerRead) fragsPerRead=4 ; shift;;
+        --fiveFragmentsPerRead) fragsPerRead=5 ; shift;;
+        --sixFragmentsPerRead) fragsPerRead=6 ; shift;;
+        --sevenFragmentsPerRead) fragsPerRead=7 ; shift;;
         --R1) Read1=$2 ; shift 2;;
         --R2) Read2=$2 ; shift 2;;
         --lanes) LANES=$2 ; shift 2;;
@@ -655,6 +663,7 @@ echo "PublicPath ${PublicPath}" >> parameters_capc.log
 echo "ServerUrl ${SERVERADDRESS}" >> parameters_capc.log
 echo "JamesUrl ${JamesUrl}" >> parameters_capc.log
 echo "ServerAndPath ${ServerAndPath}" >> parameters_capc.log
+echo "fragsPerRead ${fragsPerRead}"
 echo "otherParameters ${otherParameters}" >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
 echo "GenomeFasta ${GenomeFasta}" >> parameters_capc.log
@@ -1482,6 +1491,7 @@ rm -f parameters_for_filtering.log
 
 FLASHED=1
 DUPLFILTER=0
+FRAGSPERREAD=${fragsPerRead}
 runCCanalyser
 doQuotaTesting
 
@@ -1504,6 +1514,7 @@ rm -f parameters_for_filtering.log
 
 FLASHED=0
 DUPLFILTER=0
+FRAGSPERREAD=4
 runCCanalyser
 doQuotaTesting
 
@@ -1569,6 +1580,7 @@ rm -f parameters_for_filtering.log
 
 FLASHED=1
 DUPLFILTER=1
+FRAGSPERREAD=${fragsPerRead}
 runCCanalyser
 doQuotaTesting
 
@@ -1598,6 +1610,7 @@ rm -f parameters_for_filtering.log
 
 FLASHED=0
 DUPLFILTER=1
+FRAGSPERREAD=4
 runCCanalyser
 doQuotaTesting
 
@@ -1735,6 +1748,7 @@ sampleForCCanalyser="FILTERED_${Sample}"
 
 FLASHED=1
 DUPLFILTER=0
+FRAGSPERREAD=${fragsPerRead}
 runCCanalyser
 doQuotaTesting
 
@@ -1762,6 +1776,7 @@ sampleForCCanalyser="FILTERED_${Sample}"
 
 FLASHED=0
 DUPLFILTER=0
+FRAGSPERREAD=4
 runCCanalyser
 doQuotaTesting
 
@@ -1818,6 +1833,7 @@ sampleForCCanalyser="COMBINED_${Sample}"
 # This means : flashing is "NOT IN USE" - and marks the output tracks with name "" instead of "FLASHED" or "NONFLASHED"
 FLASHED=-1
 DUPLFILTER=0
+FRAGSPERREAD=${fragsPerRead}
 runCCanalyser
 doQuotaTesting
 

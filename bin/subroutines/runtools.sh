@@ -146,7 +146,7 @@ doTempFileTesting
 
 mkdir -p "${publicPathForCCanalyser}"
 
-printThis="perl ${RunScriptsPath}/${CCscriptname} -f ${samDirForCCanalyser}/${samForCCanalyser} -o ${CapturesiteFile} -r ${fullPathDpnGenome} --pf ${publicPathForCCanalyser} --pu ${JamesUrlForCCanalyser} -s ${sampleForCCanalyser} --genome ${GENOME} --ucscsizes ${ucscBuild} -w ${WINDOW} -i ${INCREMENT} --flashed ${FLASHED} --duplfilter ${DUPLFILTER} ${otherParameters}"
+printThis="perl ${RunScriptsPath}/${CCscriptname} -f ${samDirForCCanalyser}/${samForCCanalyser} -o ${CapturesiteFile} -r ${fullPathDpnGenome} --pf ${publicPathForCCanalyser} --pu ${JamesUrlForCCanalyser} -s ${sampleForCCanalyser} --genome ${GENOME} --ucscsizes ${ucscBuild} -w ${WINDOW} -i ${INCREMENT} --flashed ${FLASHED} --duplfilter ${DUPLFILTER} --maxfrags ${FRAGSPERREAD} ${otherParameters} "
 printToLogFile
 
 echo "-f Input filename "
@@ -164,6 +164,7 @@ echo "--limit Limit the analysis to the first n reads of the file"
 echo "--genome Specify the genome (mm9 / hg18)"
 echo "--ucscsizes Chromosome sizes file path"
 echo "--globin Combines the two captures from the gene duplicates (HbA1 and HbA2)"
+echo "--maxfrags : report at most this many fragments per read"
 echo "--flashed	1 or 0 (are the reads in input sam combined via flash or not ? - run out.extended with 1 and out.not_combined with 0)"
 echo "--duplfilter 1 or 0 (will the reads be duplicate filtered)\n"
 echo "--parp Filter artificial chromosome chrPARP out before visualisation"

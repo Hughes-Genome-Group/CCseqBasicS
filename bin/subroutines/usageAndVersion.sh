@@ -203,9 +203,19 @@ echo "             - use whichever exclusion zones were used in the F2-F7 run pa
 # also : the below 1 flag (BINNED_TRIC) never worked, as the portability fixes to the underlying perl script were never debugged fully.
 # The binned tric user case needs also TRIC_BIN parameter, which is currently used ONLY in the python matrix plotting script.
 # echo "--binnedTriC : run TriC also in binned mode (default bin size 1000)"
-
 echo "--triCbin 1000 : TriC bin size (default 1000 bases)"
 echo "--triCmax 20 : TriC max signal to be plotted (default 20 RPM/bin). Signal higher than this is capped to [triCmax]."
+echo 
+echo "MAX REPORTED FRAGMENTS PER READ"
+echo "--fourFragmentsPerRead (default for normal CS5 runs)"
+echo "    each read pair gets up to 4 fragments reported (if more than 4, the first 4 in chromosomal order)"
+echo "    for non-overlapping R1/R2 read pairs, both the R1 and R2 report up to 4 fragments (if more than 4, the first 4 in chromosomal order)"
+echo "--fiveFragmentsPerRead (default if either of the TriC run flags --triC --triCwithExcl are on)"
+echo "    each read pair gets up to 5 fragments reported (if more than 5, the first 5 in chromosomal order)"
+echo "	  the non-overlapping R1/R2 reads are not affected by this parameter,"
+echo "	  both the R1 and R2 report up to 4 fragments (if more than 4, the first 4 in chromosomal order)"
+echo "--sixFragmentsPerRead and --sevenFragmentsPerRead (for increasing sensitivity in TriC runs - comes with the potential risk of making duplicate filtering worse)"
+echo "	  use like --fiveFragmentsPeRead above."
 echo 
 echo "ACCESSIBILITY SETTINGS"
 echo "--redGreen   (use the OLD redGreen colors - very colorblind unfriendly, i.e. the default colors of runs before 2019)"

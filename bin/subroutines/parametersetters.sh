@@ -100,5 +100,17 @@ if [ "${ADA31}" != "no"  ] || [ "${ADA32}" != "no" ] || [ "${ADA51}" != "no" ] |
     CUSTOMAD=1
 fi
 
+#------------------------------------------------
+# Fragments per read
+
+# If not set, then setting the defaults ..
+if [ "${fragsPerRead}" -eq -1 ]; then
+    if [ "${TRIC}" -ne 0 ] || [ "${TRIC_EXCL}" -ne 0 ];then
+       fragsPerRead=5
+    else
+       fragsPerRead=4
+    fi
+fi
+
 }
 
