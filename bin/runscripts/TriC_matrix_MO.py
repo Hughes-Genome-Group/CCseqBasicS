@@ -74,24 +74,32 @@ def do_plot(ax, Z):
         print ("\nUsing 'traditional' color scheme afmhot_r")
         colorscale=plt.cm.afmhot_r
         
+    if newpython:
         
-    # Plot the matrix, using 'viridis' color scale, and dimensions of sqrt(2) to allow nice transformation of 45 degrees
-    im = ax.imshow(Z, interpolation='nearest', extent=[0, 2.0*sqrt(2), 0, 2.0*sqrt(2)],
-                   origin='upper',vmin = 0.001, vmax = threshold, cmap=colorscale, clip_on=True)
+        # Plot the matrix, using 'viridis' color scale, and dimensions of sqrt(2) to allow nice transformation of 45 degrees
+        im = ax.imshow(Z, interpolation='nearest', extent=[0, 2.0*sqrt(2), 0, 2.0*sqrt(2)],
+                       origin='upper',vmin = 0.001, vmax = threshold, cmap=colorscale, clip_on=True)
+        
+        # Turn the figure according to the 'transform' given as parameter
+        trans_data = mtransforms.Affine2D().rotate_deg(45) + ax.transData
+        im.set_transform(trans_data)
     
-    # Turn the figure according to the 'transform' given as parameter
-    trans_data = mtransforms.Affine2D().rotate_deg(45) + ax.transData
-    im.set_transform(trans_data)
-
-    # display intended extent of the image
-    x1, x2, y1, y2 = im.get_extent()
-    ax.plot([x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1], "y  ",
-            transform=trans_data)
+        # display intended extent of the image
+        x1, x2, y1, y2 = im.get_extent()
+        ax.plot([x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1], "y  ",
+                transform=trans_data)
+        
+        # Put the plot to match the area - we have diagonal lenght of 4 units, and
+        # that makes our x-axis 4 units wide and y-axis 2 units wide (we want to hide the bottom half of the triangle)
+        ax.set_xlim(-2,2)
+        ax.set_ylim(2,4)
     
-    # Put the plot to match the area - we have diagonal lenght of 4 units, and
-    # that makes our x-axis 4 units wide and y-axis 2 units wide (we want to hide the bottom half of the triangle)
-    ax.set_xlim(-2,2)
-    ax.set_ylim(2,4)
+    else:
+        
+        # Plot the matrix simply - no transformations or fancy things
+        im = ax.imshow(Z, interpolation='nearest', extent=[0, 4, 0, 4],
+                       origin='upper',vmin = 0.001, vmax = threshold, cmap=colorscale, clip_on=True)
+        
 
     # Set x label
     label_for_plot = str(chrom) + ":" + str(start) + "-" + str(stop) + "\nBin size " + str(bin_size) + "b  :  Max value " + str(threshold) + " RPM/bin"   
@@ -120,10 +128,10 @@ def do_plot(ax, Z):
     cax = divider.append_axes("right", size="5%", pad=0.15)
     plt.colorbar(im, cax=cax)
 
-    
-    # Adjust marigins to look balanced
-    # plt.subplots_adjust(left=0.05, right=0.90, top=0.95, bottom=0.00)
-    plt.subplots_adjust(right=0.90)
+    if newpython:    
+        # Adjust marigins to look balanced
+        # plt.subplots_adjust(left=0.05, right=0.90, top=0.95, bottom=0.00)
+        plt.subplots_adjust(right=0.90)
     
     
 def print_help(exitcode):
@@ -195,20 +203,21 @@ temp_versionline2 = np.version.version
 temp_versionline2=temp_versionline2.replace('\n', ' ').replace('\r', '')
 print("Matplotlib " + temp_versionline + " Numpy " + temp_versionline2)
 
-if int(sys.version_info[0]) < 3 and int(sys.version_info[1]) <7:
-    sys.stderr.write("ERROR : Too old python version for this fancy script ( has to be 2.6.* or newer ) !\nUse the simplified script TriC_matrix_simple_MO.pl instead (that supports all Python versions)\nEXITING!\n")
-    exit(1)
-
-
-if int(matplotlib.__version__[0]) < 2:
-    sys.stderr.write("ERROR : Too old matplotlib version for this fancy script ( has to be 2.* or newer ) !\nUse the simplified script TriC_matrix_simple_MO.pl instead (that supports all Matplotlib versions)\nEXITING!\n")
-    exit(1)
-
 # The setup it was tested in
-print ("\n( the script was developed and tested in 2 setups :")
-print (" Python 3.5.3 [GCC 4.4.7 20120313 (Red Hat 4.4.7-17)] Matplotlib 2.0.2 Numpy 1.15.4\n and ")
+print ("\n( the script was developed and tested in 3 setups :")
+print (" Python 2.6.8 [GCC 4.4.7 20120313 (Red Hat 4.4.7-3) ] Matplotlib 1.3.1 Numpy 1.9.0.dev-a3e8c12")
+print (" Python 3.5.3 [GCC 4.4.7 20120313 (Red Hat 4.4.7-17)] Matplotlib 2.0.2 Numpy 1.15.4 and ")
 print (" Python 2.7.5 [GCC 4.4.7 20120313 (Red Hat 4.4.7-4) ] Matplotlib 2.2.2 Numpy 1.14.2 )\n\n")
 
+newpython=True
+
+if int(sys.version_info[0]) < 3 and int(sys.version_info[1]) <7:
+    print("Python version older than 2.6 , simplifying plotting (no rotation of output plot) !\n")
+    newpython=False
+
+if int(matplotlib.__version__[0]) < 2:
+    print("Matplotlib version older than 2.0 , simplifying plotting (no rotation of output plot) !\n")
+    newpython=False
     
 ###############################################################################################################################################################
 
