@@ -428,7 +428,7 @@ while true ; do
         --window) WINDOW=$2 ; shift 2;;
         --triCbin) TRIC_BIN=$2 ; shift 2;;
         --triCmax) TRIC_MAX=$2 ; shift 2;;
-        --triCyellowBlack) TRIC_OTHER_VISUAL_PARAMS="${TRIC_OTHER_VISUAL_PARAMS} --afmhot" ; shift 2;;
+        --triCyellowBlack) TRIC_OTHER_VISUAL_PARAMS="${TRIC_OTHER_VISUAL_PARAMS} --afmhot" ; shift ;;
         --increment) INCREMENT=$2 ; shift 2;;
         --genome) GENOME=$2 ; shift 2;;
         --ada3read1) ADA31=$2 ; shift 2;;
@@ -620,6 +620,7 @@ echo "TRIC_EXCL ${TRIC_EXCL}" >> parameters_capc.log
 # echo "BINNED_TRIC ${BINNED_TRIC}" >> parameters_capc.log
 echo "TRIC_BIN ${TRIC_BIN}" >> parameters_capc.log
 echo "TRIC_MAX ${TRIC_MAX}" >> parameters_capc.log
+echo "TRIC_OTHER_VISUAL_PARAMS ${TRIC_OTHER_VISUAL_PARAMS}" >> parameters_capc.log
 
 echo "------------------------------" >> parameters_capc.log
 
