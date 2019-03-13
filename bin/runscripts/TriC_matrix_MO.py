@@ -20,7 +20,6 @@
 # along with CCseqBasic5.  
 ##########################################################################
 
-
 import numpy as np
 import matplotlib
 
@@ -59,24 +58,29 @@ import sys
 # The rotation and masking subroutine fetched 7March2019 from :
 # https://matplotlib.org/gallery/images_contours_and_fields/affine_image.html#sphx-glr-gallery-images-contours-and-fields-affine-image-py
 # And modified to the below form by Jelena Telenius
-def do_plot(ax, Z, transform):
+def do_plot(ax, Z):
+    
     # Select the subplot in the main figure (we do have only one -  but I tested with several, that's why)
     plt.sca(ax)
-    # Plot the matrix, using 'viridis' color scale, and dimensions of sqrt(2) to allow nice transformation of 45 degrees
-    im = ax.imshow(Z, interpolation='nearest',
-                   origin='upper',vmin = 0.001, vmax = threshold, cmap=plt.cm.viridis,
-                   extent=[-0, 2*sqrt(2), -0, 2*sqrt(2)], clip_on=True)
     
-    # Set title
-    title_text = "Tri-C interactions \nInput file : " + my_sample + "\nPlot printed :" + date_and_time + "\n"
-    heading = plt.title(title_text, loc='left')
-
-    # Set x label
-    label_for_plot = str(chrom) + ":" + str(start) + "-" + str(stop) + "\nBin size " + str(bin_size) + "b  :  Max value " + str(threshold) + " RPM/bin"   
-    plt.xlabel(label_for_plot)
-
+    colorscale=""
+    if useviridis:
+        if hasattr(plt.cm, 'viridis'):
+            colorscale=plt.cm.viridis
+        else:
+            print ("\nUsing 'old' Matplotlib - doesn't support new fancy color scheme 'viridis' \nReverting to older color scheme afmhot_r")
+            colorscale=plt.cm.afmhot_r
+    else:
+        print ("\nUsing 'traditional' color scheme afmhot_r")
+        colorscale=plt.cm.afmhot_r
+        
+        
+    # Plot the matrix, using 'viridis' color scale, and dimensions of sqrt(2) to allow nice transformation of 45 degrees
+    im = ax.imshow(Z, interpolation='nearest', extent=[0, 2.0*sqrt(2), 0, 2.0*sqrt(2)],
+                   origin='upper',vmin = 0.001, vmax = threshold, cmap=colorscale, clip_on=True)
+    
     # Turn the figure according to the 'transform' given as parameter
-    trans_data = transform + ax.transData
+    trans_data = mtransforms.Affine2D().rotate_deg(45) + ax.transData
     im.set_transform(trans_data)
 
     # display intended extent of the image
@@ -88,6 +92,20 @@ def do_plot(ax, Z, transform):
     # that makes our x-axis 4 units wide and y-axis 2 units wide (we want to hide the bottom half of the triangle)
     ax.set_xlim(-2,2)
     ax.set_ylim(2,4)
+
+    # Set x label
+    label_for_plot = str(chrom) + ":" + str(start) + "-" + str(stop) + "\nBin size " + str(bin_size) + "b  :  Max value " + str(threshold) + " RPM/bin"   
+    plt.xlabel(label_for_plot)
+    
+    # Set y label
+    credits_for_plot = "https://github.com/oudelaar/TriC \nhttps://github.com/Hughes-Genome-Group/CCseqBasicS"   
+    plt.ylabel(credits_for_plot, size=7)
+
+    # Set title
+    title_text = "Tri-C interactions \nInput file : " + my_sample + "\nPlot printed :" + date_and_time + "\n"
+    heading = plt.title(title_text, loc='left')
+    
+    plt.tight_layout()
     
     # Turn off ticks, tick labels, figure frame
     ax.set_yticklabels([])
@@ -96,18 +114,17 @@ def do_plot(ax, Z, transform):
     ax.set_yticks([])
     ax.set_xticks([])
     
+    
     # Make color bar to scale with the plot, not with the whole page
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.15)
     plt.colorbar(im, cax=cax)
-    
-    # Print the comment under the figure
-    ax.text(0.0,-0.3, "https://github.com/oudelaar/TriC \nhttps://github.com/Hughes-Genome-Group/CCseqBasicS", size=9, ha="left", 
-    transform=ax.transAxes)
+
     
     # Adjust marigins to look balanced
     # plt.subplots_adjust(left=0.05, right=0.90, top=0.95, bottom=0.00)
-    plt.subplots_adjust(left=0.05, right=0.90)
+    plt.subplots_adjust(right=0.90)
+    
     
 def print_help(exitcode):
     
@@ -128,6 +145,9 @@ def print_help(exitcode):
     print ("-t --threshold \t optional \t Max value of normalised interactions for a bin - values above this will be capped to value [threshold] (default 20 RPM/bin)")
     print ("\t\t\t\t The RPM bin-wise normalisation follows formula (for interactions between bins i,j) :")
     print ("\t\t\t\t (10^6/all_interactions_of_whole_matrix)*(sum_of_interactions_for_bin_ij/(REfragments_in_i+REfragments_in_j)\n")
+    
+    print ("-v --viridis \t optional \t Plot in the 'fancy' purple-yellow color scheme viridis (if possible).")
+    print ("-a --afmhot \t optional \t Plot in the 'traditional' white-yellow-black color scheme afmhot_r\n")
     
     print ("-s --sample \t optional \t Sample name (defaults to basename of input file)")
     print ("-o --outdir \t optional \t Output folder (defaults to run folder)\n")
@@ -175,10 +195,20 @@ temp_versionline2 = np.version.version
 temp_versionline2=temp_versionline2.replace('\n', ' ').replace('\r', '')
 print("Matplotlib " + temp_versionline + " Numpy " + temp_versionline2)
 
+if int(sys.version_info[0]) < 3 and int(sys.version_info[1]) <7:
+    sys.stderr.write("ERROR : Too old python version for this fancy script ( has to be 2.6.* or newer ) !\nUse the simplified script TriC_matrix_simple_MO.pl instead (that supports all Python versions)\nEXITING!\n")
+    exit(1)
+
+
+if int(matplotlib.__version__[0]) < 2:
+    sys.stderr.write("ERROR : Too old matplotlib version for this fancy script ( has to be 2.* or newer ) !\nUse the simplified script TriC_matrix_simple_MO.pl instead (that supports all Matplotlib versions)\nEXITING!\n")
+    exit(1)
+
 # The setup it was tested in
 print ("\n( the script was developed and tested in 2 setups :")
 print (" Python 3.5.3 [GCC 4.4.7 20120313 (Red Hat 4.4.7-17)] Matplotlib 2.0.2 Numpy 1.15.4\n and ")
 print (" Python 2.7.5 [GCC 4.4.7 20120313 (Red Hat 4.4.7-4) ] Matplotlib 2.2.2 Numpy 1.14.2 )\n\n")
+
     
 ###############################################################################################################################################################
 
@@ -203,6 +233,7 @@ start = -1
 stop = -1
 bin_size = 1000
 threshold = 20
+useviridis = True
 
 ############################################
 
@@ -222,8 +253,8 @@ if not argumentsList:
     print_help(1)
 
 # List valid parameters
-unixOptions = "hc:vl:vr:vb:vs:vo:vf:vt:v"
-gnuOptions = ["help", "chr=", "str=", "stp=", "bin=", "sample=", "outdir=", "file=", "threshold="]  
+unixOptions = "hvac:vl:vr:vb:vs:vo:vf:vt:v"
+gnuOptions = ["help", "afmhot", "viridis", "chr=", "str=", "stp=", "bin=", "sample=", "outdir=", "file=", "threshold="]  
 
 # Start parsing from command line ..
 try:  
@@ -268,6 +299,10 @@ for currentArgument, currentValue in arguments:
     elif currentArgument in ('-t', '--threshold'):
         if currentValue:
             threshold = int(currentValue)
+    elif currentArgument in ('-v --viridis'):
+        useviridis = True
+    elif currentArgument in ('-a', '--afmhot'):
+        useviridis = False
 
 # Checking that obligatory ones were given ..
 
@@ -403,18 +438,19 @@ for key in int_dic:
         matrix[int(bin1 - bin_start), int(bin2 - bin_start)] +=  1.0*int_dic[key] / corr * 1000000 / matrix_interaction_count
         
 
+# Start parsing from command line ..
+
 print ("Generate plot ..")
 
 # make the subplot object(s) and fig object to call later
 fig, ax = plt.subplots(1,1)
 # fig, axs = plt.subplots(2,1)
 
-# Ask for the transform and plotting - 45 degrees rotation as parameter
-do_plot(ax, matrix, mtransforms.Affine2D().rotate_deg(45))
+# Ask for plotting 
+do_plot(ax, matrix)
 
 # For testing purposes - just show the plot, don't print it to a file
 # plt.show()
-
 
 print ("Save figure ..")
 
@@ -434,6 +470,8 @@ np.savetxt(full_file_name_out_ery + "_" + str(bin_size) + "_" + str(threshold) +
 
 # Print that we finished ..
 date_and_time = wallclock.strftime("%Y-%m-%d %H:%M")
-print ( "\n\nRun completed at " +  date_and_time + "\n\n" )
+print ( "\n\nTri-C plotting completed at " +  date_and_time + "\n\n" )
+
+
 
 

@@ -298,7 +298,7 @@ printThis="Running 3-way contact matrix visualisation (tri-C) .."
 printToLogFile
 
 TEMP_subfolder="F6_greenGraphs_combined_${Sample}_${CCversion}/${Sample}_TriC"
-TEMP_tricParams1="-b ${TRIC_BIN} -o ${TEMP_subfolder} -t ${TRIC_MAX}"
+TEMP_tricParams1="-b ${TRIC_BIN} -o ${TEMP_subfolder} -t ${TRIC_MAX} ${TRIC_OTHER_VISUAL_PARAMS}"
 
 rm -f USED_TriC_plottingParameters.txt
 

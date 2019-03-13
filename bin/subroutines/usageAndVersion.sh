@@ -205,6 +205,7 @@ echo "             - use whichever exclusion zones were used in the F2-F7 run pa
 # echo "--binnedTriC : run TriC also in binned mode (default bin size 1000)"
 echo "--triCbin 1000 : TriC bin size (default 1000 bases)"
 echo "--triCmax 20 : TriC max signal to be plotted (default 20 RPM/bin). Signal higher than this is capped to [triCmax]."
+echo "--triCyellowBlack : TriC plot with white-yellow-black 'afmhot' color scheme instead of the default yellow-violet 'viridis' color scheme."
 echo 
 echo "MAX REPORTED FRAGMENTS PER READ"
 echo "--fourFragmentsPerRead (default for normal CS5 runs)"

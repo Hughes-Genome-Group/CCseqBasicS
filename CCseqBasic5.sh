@@ -199,7 +199,8 @@ BINNED_TRIC=0
 TRIC_BIN=1000
 # Max signal
 TRIC_MAX=20
-
+# Other params (currently only the color scale, if not the default one)
+TRIC_OTHER_VISUAL_PARAMS=""
 
 # If we have TRI-C run (no exclusion zones - auto-edit capture coordinate file)
 TRIC=0
@@ -373,7 +374,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,redGreen,onlyCis,onlyBlat,onlyTriC,triC,triCwithExcl,binnedTriC,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,minIdentity:,minMatch:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize:,triCbin:,triCmax:,fourFragmentsPerRead,fiveFragmentsPerRead,sixFragmentsPerRead,sevenFragmentsPerRead -- "$@"`
+OPTS=`getopt -o h,m:,M:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,gz,strandSpecificDuplicates,redGreen,triCyellowBlack,onlyCis,onlyBlat,onlyTriC,triC,triCwithExcl,binnedTriC,UMI,useSymbolicLinks,SRR,CCversion:,BLATforREUSEfolderPath:,globin:,outfile:,errfile:,lanes:,limit:,pf:,genome:,R1:,R2:,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,chunkmb:,bowtie1,bowtie2,window:,increment:,ada3read1:,ada3read2:,extend:,onlyCCanalyser,onlyHub,noPloidyFilter:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,minIdentity:,minMatch:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize:,triCbin:,triCmax:,fourFragmentsPerRead,fiveFragmentsPerRead,sixFragmentsPerRead,sevenFragmentsPerRead -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -427,6 +428,7 @@ while true ; do
         --window) WINDOW=$2 ; shift 2;;
         --triCbin) TRIC_BIN=$2 ; shift 2;;
         --triCmax) TRIC_MAX=$2 ; shift 2;;
+        --triCyellowBlack) TRIC_OTHER_VISUAL_PARAMS="${TRIC_OTHER_VISUAL_PARAMS} --afmhot" ; shift 2;;
         --increment) INCREMENT=$2 ; shift 2;;
         --genome) GENOME=$2 ; shift 2;;
         --ada3read1) ADA31=$2 ; shift 2;;
