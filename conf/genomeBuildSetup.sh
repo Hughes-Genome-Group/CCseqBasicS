@@ -285,7 +285,7 @@ BLACKLIST[2]="${confFolder}/BLACKLIST/hg18.bed"
 BLACKLIST[3]="${confFolder}/BLACKLIST/hg19.bed"
 BLACKLIST[4]="${confFolder}/BLACKLIST/mm10.bed"
 BLACKLIST[5]="${confFolder}/BLACKLIST/mm9.bed"
-BLACKLIST[6]="${confFolder}/BLACKLIST/mm9.bed"
+BLACKLIST[6]="${confFolder}/BLACKLIST/mm9_12LP1R2.bed"
 
 # The indices in the BLACKLIST array refer to genome names in genomesWhichHaveBlacklist array.
 
