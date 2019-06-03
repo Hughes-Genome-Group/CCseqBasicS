@@ -224,7 +224,7 @@ echo "Master script and its tester script :"
 echo
 ls ${PipeTopPath}/CCseqBasic5.sh
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${PipeTopPath}/testEnvironment.sh 
+ls ${PipeTopPath}/testEnvironment_CCseqBasic.sh 
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 echo
 sleep 3
@@ -503,14 +503,14 @@ fi
 
 if [ "${genomeSetupMade}" -eq 1 ]; then 
 
-setGenomeLocations 1>/dev/null
-
 supportedGenomes=()
 BOWTIE1=()
 BOWTIE2=()
 UCSC=()
 genomesWhichHaveBlacklist=()
 BLACKLIST=()
+
+setGenomeLocations 1>/dev/null
 
 echo
 sleep 4
