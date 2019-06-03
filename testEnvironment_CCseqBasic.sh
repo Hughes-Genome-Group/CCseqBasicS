@@ -193,13 +193,13 @@ echo
 
 sleep 2
 
-PipeTopPath="$( dirname $0 )"
+PipeTopPath="$(dirname $0)"
 dirname $0 >> /dev/null
 exitCode=$(( ${exitCode} + $? ))
 
 # From where to call the CONFIGURATION script..
 
-confFolder="${PipeTopPath}/conf"
+confFolder="$(cd ${PipeTopPath}; pwd)/conf"
 mainScriptFolder="${PipeTopPath}/bin/runscripts"
 helperScriptFolder="${PipeTopPath}/bin/subroutines"
 
@@ -253,6 +253,7 @@ scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 # ls ${mainScriptFolder}/hindIIIcutReads4.pl
 # scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
+echo
 echo "UCSC downloaded tools for visualisation (downloaded 06May2014 from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/ ) :"
 echo
 ls ${confFolder}/ucsctools/bedToBigBed
@@ -483,11 +484,6 @@ sleep 4
 
 exitCode=1
 
-fi
-
-if [ "${exitCode}" -gt 0 ]
-then
-exit 1
 fi
 
 ##########################################################################

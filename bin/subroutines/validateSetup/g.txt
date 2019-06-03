@@ -52,6 +52,7 @@ supportedGenomes[8]="dm3"
 supportedGenomes[9]="dm6"
 supportedGenomes[10]="mm10balb"
 supportedGenomes[11]="mm9PARP"
+supportedGenomes[12]="mm9_12LP1R2"
 
 # The above genomes should have :
 # 1) bowtie1 indices
@@ -98,6 +99,7 @@ BOWTIE1[8]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm3/Sequence/BowtieI
 BOWTIE1[9]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm6/Sequence/BowtieIndex/genome"
 BOWTIE1[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly/bowtie1-indexes/mm10_BALB-cJ"
 BOWTIE1[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP"
+BOWTIE1[12]"/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/bowtie1_indices/mm9_12LP1R2"
 
 # The indices in the BOWTIE1 array refer to genome names in supportedGenomes array (top of page).
 
@@ -141,6 +143,7 @@ BOWTIE2[8]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm3/Sequence/Bowtie2
 BOWTIE2[9]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm6/Sequence/Bowtie2Index/genome"
 BOWTIE2[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly/bowtie2-indexes/mm10_BALB-cJ"
 BOWTIE2[11]="NOT_SUPPORTED_needsToBeAddedToConfigFile"
+BOWTIE2[12]="NOT_SUPPORTED_needsToBeAddedToConfigFile"
 
 # The indices in the BOWTIE2 array refer to genome names in supportedGenomes array (top of page).
 
@@ -174,6 +177,7 @@ WholeGenomeFASTA[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly
 # and the subsequent scripts assume file called genome_dpnII_coordinates.txt instead.
 # WholeGenomeFASTA[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP.fa"
 WholeGenomeFASTA[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9/genome.fa"
+WholeGenomeFASTA[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/custom_reference_genome/ALL_combined_edited_chrX_50bp.fa"
 
 # The indices in the WholeGenomeFASTA array refer to genome names in supportedGenomes array (top of page).
 
@@ -209,6 +213,7 @@ UCSC[9]="${confFolder}/UCSCgenomeSizes/dm6.chrom.sizes"
 UCSC[10]="${confFolder}/UCSCgenomeSizes/mm10.chrom.sizes"
 # UCSC[11]="${confFolder}/UCSCgenomeSizes/mm9.chrom.sizes"
 UCSC[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP_sizes.txt"
+UCSC[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/mm9.chrom.12LP1R2.sizes"
 
 # The indices in the UCSC array refer to genome names in supportedGenomes array (top of page).
 
@@ -267,6 +272,7 @@ genomesWhichHaveBlacklist[2]="hg18"
 genomesWhichHaveBlacklist[3]="hg19"
 genomesWhichHaveBlacklist[4]="mm10balb"
 genomesWhichHaveBlacklist[5]="mm9PARP"
+genomesWhichHaveBlacklist[6]="mm9_12LP1R2"
 # - i.e. : not all genomes have to have a blacklist.
 # If the genome is not listed here, blacklist filtering is NOT conducted within the pipeline (turned off automatically).
 
@@ -279,6 +285,7 @@ BLACKLIST[2]="${confFolder}/BLACKLIST/hg18.bed"
 BLACKLIST[3]="${confFolder}/BLACKLIST/hg19.bed"
 BLACKLIST[4]="${confFolder}/BLACKLIST/mm10.bed"
 BLACKLIST[5]="${confFolder}/BLACKLIST/mm9.bed"
+BLACKLIST[6]="${confFolder}/BLACKLIST/mm9_12LP1R2.bed"
 
 # The indices in the BLACKLIST array refer to genome names in genomesWhichHaveBlacklist array.
 
