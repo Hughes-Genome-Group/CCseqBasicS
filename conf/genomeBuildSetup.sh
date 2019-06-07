@@ -99,7 +99,7 @@ BOWTIE1[8]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm3/Sequence/BowtieI
 BOWTIE1[9]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm6/Sequence/BowtieIndex/genome"
 BOWTIE1[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly/bowtie1-indexes/mm10_BALB-cJ"
 BOWTIE1[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP"
-BOWTIE1[12]"/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/bowtie1_indices/mm9_12LP1R2"
+BOWTIE1[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/bowtie1/genome"
 
 # The indices in the BOWTIE1 array refer to genome names in supportedGenomes array (top of page).
 
@@ -177,7 +177,7 @@ WholeGenomeFASTA[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly
 # and the subsequent scripts assume file called genome_dpnII_coordinates.txt instead.
 # WholeGenomeFASTA[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP.fa"
 WholeGenomeFASTA[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9/genome.fa"
-WholeGenomeFASTA[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/custom_reference_genome/ALL_combined_edited_chrX_50bp.fa"
+WholeGenomeFASTA[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/genome.fa"
 
 # The indices in the WholeGenomeFASTA array refer to genome names in supportedGenomes array (top of page).
 
@@ -213,7 +213,7 @@ UCSC[9]="${confFolder}/UCSCgenomeSizes/dm6.chrom.sizes"
 UCSC[10]="${confFolder}/UCSCgenomeSizes/mm10.chrom.sizes"
 # UCSC[11]="${confFolder}/UCSCgenomeSizes/mm9.chrom.sizes"
 UCSC[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP_sizes.txt"
-UCSC[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/mm9.chrom.12LP1R2.sizes"
+UCSC[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/mm9_12LP1R2.chrom.sizes"
 
 # The indices in the UCSC array refer to genome names in supportedGenomes array (top of page).
 
