@@ -40,6 +40,8 @@ setGenomeLocations(){
 # Add and remove genomes via this list.
 # If user tries to use another genome (not listed here), the run is aborted with "genome not supported" message.
 
+# GENOME NAME (can be custom name - for custom genomes)
+
 supportedGenomes[0]="mm9"
 supportedGenomes[1]="mm10"
 supportedGenomes[2]="hg18"
@@ -53,6 +55,26 @@ supportedGenomes[9]="dm6"
 supportedGenomes[10]="mm10balb"
 supportedGenomes[11]="mm9PARP"
 supportedGenomes[12]="mm9_12LP1R2"
+
+# UCSC BUILD NAME (where this is to be visualised in UCSC browser)
+
+# i.e. custom genome where the COORDINATES are the same but some are masked or mutated, will have regular UCSC name here.
+# This will ONLY affect the genomes.txt file (in the data hubs) - all the rest of the analysis is done normally using the genomes listed ABOVE, not below.
+
+ucscGenomeNames[0]="mm9"
+ucscGenomeNames[1]="mm10"
+ucscGenomeNames[2]="hg18"
+ucscGenomeNames[3]="hg19"
+ucscGenomeNames[4]="hg38"
+ucscGenomeNames[5]="danRer7"
+ucscGenomeNames[6]="danRer10"
+ucscGenomeNames[7]="galGal4"
+ucscGenomeNames[8]="dm3"
+ucscGenomeNames[9]="dm6"
+ucscGenomeNames[10]="mm10"
+ucscGenomeNames[11]="mm9"
+ucscGenomeNames[12]="mm9"
+
 
 # The above genomes should have :
 # 1) bowtie1 indices

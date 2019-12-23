@@ -40,6 +40,8 @@ setGenomeLocations(){
 # Add and remove genomes via this list.
 # If user tries to use another genome (not listed here), the run is aborted with "genome not supported" message.
 
+# GENOME NAME (can be custom name - for custom genomes)
+
 supportedGenomes[0]="mm9"
 supportedGenomes[1]="mm10"
 supportedGenomes[2]="hg18"
@@ -53,6 +55,26 @@ supportedGenomes[9]="dm6"
 supportedGenomes[10]="mm10balb"
 supportedGenomes[11]="mm9PARP"
 supportedGenomes[12]="mm9_12LP1R2"
+
+# UCSC BUILD NAME (where this is to be visualised in UCSC browser)
+
+# i.e. custom genome where the COORDINATES are the same but some are masked or mutated, will have regular UCSC name here.
+# This will ONLY affect the genomes.txt file (in the data hubs) - all the rest of the analysis is done normally using the genomes listed ABOVE, not below.
+
+ucscGenomeNames[0]="mm9"
+ucscGenomeNames[1]="mm10"
+ucscGenomeNames[2]="hg18"
+ucscGenomeNames[3]="hg19"
+ucscGenomeNames[4]="hg38"
+ucscGenomeNames[5]="danRer7"
+ucscGenomeNames[6]="danRer10"
+ucscGenomeNames[7]="galGal4"
+ucscGenomeNames[8]="dm3"
+ucscGenomeNames[9]="dm6"
+ucscGenomeNames[10]="mm10"
+ucscGenomeNames[11]="mm9"
+ucscGenomeNames[12]="mm9"
+
 
 # The above genomes should have :
 # 1) bowtie1 indices
@@ -99,7 +121,7 @@ BOWTIE1[8]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm3/Sequence/BowtieI
 BOWTIE1[9]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm6/Sequence/BowtieIndex/genome"
 BOWTIE1[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly/bowtie1-indexes/mm10_BALB-cJ"
 BOWTIE1[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP"
-BOWTIE1[12]"/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/bowtie1_indices/mm9_12LP1R2"
+BOWTIE1[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/bowtie1/genome"
 
 # The indices in the BOWTIE1 array refer to genome names in supportedGenomes array (top of page).
 
@@ -177,7 +199,7 @@ WholeGenomeFASTA[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly
 # and the subsequent scripts assume file called genome_dpnII_coordinates.txt instead.
 # WholeGenomeFASTA[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP.fa"
 WholeGenomeFASTA[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9/genome.fa"
-WholeGenomeFASTA[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/custom_reference_genome/ALL_combined_edited_chrX_50bp.fa"
+WholeGenomeFASTA[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/genome.fa"
 
 # The indices in the WholeGenomeFASTA array refer to genome names in supportedGenomes array (top of page).
 
@@ -213,7 +235,7 @@ UCSC[9]="${confFolder}/UCSCgenomeSizes/dm6.chrom.sizes"
 UCSC[10]="${confFolder}/UCSCgenomeSizes/mm10.chrom.sizes"
 # UCSC[11]="${confFolder}/UCSCgenomeSizes/mm9.chrom.sizes"
 UCSC[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP_sizes.txt"
-UCSC[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/mm9.chrom.12LP1R2.sizes"
+UCSC[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/mm9_12LP1R2.chrom.sizes"
 
 # The indices in the UCSC array refer to genome names in supportedGenomes array (top of page).
 

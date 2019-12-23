@@ -439,6 +439,22 @@ fi
     
 }
 
+alterCustomGenomeNames(){
+    
+printThis="Changing the genome names (custom genome ${GENOME} was used - changing the visualising genome to be ${ucscBuildName} ) .."
+printToLogFile
+
+# genomes.txt name : common part
+genomesTxt="${Sample}_${CCversion}_genomes.txt"
+
+sed -i 's/^genome\s.*/genome'${ucscBuildName}'/' ${PublicPath}/${genomesTxt}
+sed -i 's/^genome\s.*/genome'${ucscBuildName}'/' ${PublicPath}/RAW/RAW_${genomesTxt}
+sed -i 's/^genome\s.*/genome'${ucscBuildName}'/' ${PublicPath}/PREfiltered/PREfiltered_${genomesTxt}
+sed -i 's/^genome\s.*/genome'${ucscBuildName}'/' ${PublicPath}/FILTERED/FILTERED_${genomesTxt}
+
+
+}
+
 generateCombinedDataHub(){
     
 printThis="Generating summary figure for the data.."

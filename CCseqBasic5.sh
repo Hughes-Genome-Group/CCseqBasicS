@@ -146,6 +146,7 @@ flashErrorTolerance=0.25
 saveDpnGenome=0
 
 ucscBuild=""
+ucscBuildName=""
 REDGREEN=0
 
 otherBowtie1Parameters=""
@@ -322,6 +323,7 @@ echo "Calling in the conf/config.sh script and its default setup .."
 
 CaptureDigestPath="NOT_IN_USE"
 supportedGenomes=()
+ucscGenomeNames=()
 BOWTIE1=()
 BOWTIE2=()
 UCSC=()
@@ -540,6 +542,12 @@ echo "BowtieGenome ${BowtieGenome}" >> parameters_capc.log
 setUCSCgenomeSizes
 
 echo "ucscBuild ${ucscBuild}" >> parameters_capc.log
+
+setUCSCgenomeName
+# For custom genomes this is different than the above
+# (will be hubbed in a "standard UCSC build")
+
+echo "ucscBuildName ${ucscBuildName}" >> parameters_capc.log
 
 #------------------------------------------
 
@@ -1862,6 +1870,13 @@ publicPathForCCanalyser="${PublicPath}"
 JamesUrlForCCanalyser="${JamesUrl}"
 
 generateCombinedDataHub
+
+# Changing hub genome name - if custom genome was used
+# (to be visualised in an "existing UCSC build" )
+
+if [ "${GENOME}" != "${ucscBuildName}" ]; then
+    alterCustomGenomeNames
+fi
 
 # Cleaning up after ourselves ..
 
