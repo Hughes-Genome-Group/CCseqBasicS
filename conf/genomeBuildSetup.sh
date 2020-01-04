@@ -252,7 +252,7 @@ UCSC[12]="/t1-data/user/hugheslab/telenius/GENOMES/cazEDITED_12LP1_R2/mm9_12LP1R
 # To turn this off, set :
 # CaptureDigestPath="NOT_IN_USE"
 
-CaptureDigestPath="/home/molhaem2/telenius/CCseqBasic/digests"
+CaptureDigestPath="/t1-data/data/hugheslab/jelenatools/CCseqBasic/digests"
 
 # #############################################################################
 # BLACKLISTED REGIONS FILES
