@@ -786,6 +786,8 @@ echo
 echo "6) Testing that the user-defined public server exists"
 echo
 
+setPublicLocations 1>/dev/null
+
 echo
 echo "Public area settings : "
 echo
