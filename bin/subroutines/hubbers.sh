@@ -447,10 +447,10 @@ printToLogFile
 # genomes.txt name : common part
 genomesTxt="${Sample}_${CCversion}_genomes.txt"
 
-sed -i 's/^genome\s.*/genome'${ucscBuildName}'/' ${PublicPath}/${genomesTxt}
-sed -i 's/^genome\s.*/genome'${ucscBuildName}'/' ${PublicPath}/RAW/RAW_${genomesTxt}
-sed -i 's/^genome\s.*/genome'${ucscBuildName}'/' ${PublicPath}/PREfiltered/PREfiltered_${genomesTxt}
-sed -i 's/^genome\s.*/genome'${ucscBuildName}'/' ${PublicPath}/FILTERED/FILTERED_${genomesTxt}
+sed -i 's/^genome\s.*/genome '${ucscBuildName}'/' ${PublicPath}/${genomesTxt}
+sed -i 's/^genome\s.*/genome '${ucscBuildName}'/' ${PublicPath}/RAW/RAW_${genomesTxt}
+sed -i 's/^genome\s.*/genome '${ucscBuildName}'/' ${PublicPath}/PREfiltered/PREfiltered_${genomesTxt}
+sed -i 's/^genome\s.*/genome '${ucscBuildName}'/' ${PublicPath}/FILTERED/FILTERED_${genomesTxt}
 
 
 }
