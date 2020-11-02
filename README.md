@@ -9,3 +9,9 @@ External users : http://userweb.molbiol.ox.ac.uk/public/telenius/CCseqBasicManua
 Intra-WIMM users : http://userweb.molbiol.ox.ac.uk/public/telenius/captureManual/PipeSite.html
 
 For massive designes please refer to the multithreaded pipeline version: https://github.com/Hughes-Genome-Group/CCseqBasicM
+
+
+
+
+<a href="https://doi.org/10.5281/zenodo.4196777"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4196777.svg" alt="DOI"></a>
+
