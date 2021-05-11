@@ -43,8 +43,8 @@ Installation instructions :
     CCseqBasic4.sh --help
 
 7) Below web site provides a test data set, hands-on tutorials, full manual, and other documentation !
-   http://userweb.molbiol.ox.ac.uk/public/telenius/CCseqBasicManual/
+   http://datashare.molbiol.ox.ac.uk/public/rschwess/ccseq/CCseqBasicManual/
    
 8) Direct link to the test data set :
-   http://userweb.molbiol.ox.ac.uk/public/telenius/captureManual/testdata/exampledata.html
+   http://datashare.molbiol.ox.ac.uk/public/rschwess/ccseq/captureManual/testdata/exampledata.html
    
